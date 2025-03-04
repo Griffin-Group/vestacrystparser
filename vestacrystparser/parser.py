@@ -46,18 +46,10 @@ class VestaSection:
         tokens = stripped.split(maxsplit=1)
         self.header = tokens[0]  # e.g., TITLE, CELL, TRANM, etc.
         
-        # Determine special behavior.
-        self.is_title = (self.header == "TITLE")
-        
         inline_text = tokens[1] if len(tokens) > 1 else ""
-        if self.is_title:
-            # For TITLE, store inline text in data (as a string) and leave inline empty.
-            self.inline = []
-            self.data = [inline_text] if inline_text else []
-        else:
-            # For non-TITLE sections, tokenize inline data.
-            self.inline = parse_line(inline_text) if inline_text else []
-            self.data = []  # Extra lines will be stored here.
+        # Tokenize inline data.
+        self.inline = parse_line(inline_text) if inline_text else []
+        self.data = []  # Extra lines will be stored here.
 
     def add_line(self, line):
         """
@@ -66,8 +58,8 @@ class VestaSection:
         For TITLE, store the entire line as a string.
         For other sections, split the line into tokens and convert them.
         """
-        if self.is_title:
-            self.data.append(line)
+        if self.header == "TITLE":
+            self.data.append([line])
         else:
             self.data.append(parse_line(line))
 
@@ -75,28 +67,17 @@ class VestaSection:
         """
         Convert the section back to text.
         
-        For TITLE:
-          - The header is written alone.
-          - Each line of data (stored as strings) is written on its own line.
-        For non-TITLE sections:
           - If inline data exists, it is written on the header line.
           - Then, any extra lines are written one per line.
         """
-        if self.is_title:
-            # For TITLE, output header on its own then each data line as-is.
-            text = f"{self.header}\n"
-            for line in self.data:
-                text += f"{line}\n"
-            return text
+        if self.inline:
+            inline_text = " ".join(str(x) for x in self.inline)
+            text = f"{self.header} {inline_text}\n"
         else:
-            if self.inline:
-                inline_text = " ".join(str(x) for x in self.inline)
-                text = f"{self.header} {inline_text}\n"
-            else:
-                text = f"{self.header}\n"
-            for line in self.data:
-                text += " ".join(str(x) for x in line) + "\n"
-            return text
+            text = f"{self.header}\n"
+        for line in self.data:
+            text += " ".join(str(x) for x in line) + "\n"
+        return text
 
 class VestaFile:
     def __init__(self, filename=None):
@@ -141,6 +122,7 @@ class VestaFile:
             else:
                 # Continuation of the current section.
                 if current_section is None:
+                    logger.warning("Data without section found! Line:\n"+line)
                     # Create a default section if none exists.
                     current_section = "GLOBAL"
                     section = VestaSection("GLOBAL")
@@ -160,8 +142,8 @@ class VestaFile:
         """
         return self.sections.get(section_name)
     
-    def __getitem__(self, name) -> VestaSection|None:
-        return self.get_section(name)
+    def __getitem__(self, name) -> VestaSection:
+        return self.sections[name]
 
     def __len__(self) -> int:
         """Number of sections"""
@@ -191,12 +173,8 @@ class VestaFile:
         summary = "VESTA file sections:\n"
         for sec_name in self.order:
             sec = self.sections[sec_name]
-            if sec.is_title:
-                typ = "TITLE (multi-line)"
-                nlines = len(sec.data)
-            else:
-                typ = "Inline preserved" if sec.inline else "No inline"
-                nlines = len(sec.data)
+            typ = "Inline preserved" if sec.inline else "No inline"
+            nlines = len(sec.data)
             summary += f"  {sec_name}: {nlines} additional line(s) ({typ})\n"
         return summary
 
