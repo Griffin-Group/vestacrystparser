@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vestacrystparser"
+version = "0.0.1a"
+dependencies = [
+]
+requires-python = ">= 3"
+authors = [
+    {name = "Bernard Field", email = "bfield@lbl.gov"},
+    {name = "Musa Hussein", email = "mhussein@lbl.gov"}
+]
+maintainers = [
+    {name = "Bernard Field", email = "bfield@lbl.gov"}
+]
+description = "Parser for VESTA crystal structure visualisation files."
+readme = "README.md"
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Intended Audience :: Science/Research",
+    "Natural Language :: English",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Topic :: File Formats",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Visualization",
+]
+
+[project.urls]
+Repository = "https://github.com/Griffin-Group/vestacrystparser"
