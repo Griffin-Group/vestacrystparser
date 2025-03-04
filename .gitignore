@@ -1,5 +1,6 @@
 .DS_Store
 *.swp
+tests/cu_modified.vesta
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -41,6 +41,24 @@ New structure
 
 ```
 
+## IMPORT_DENSITY
+
+**Optional section.**
+
+Where to import volumetric density data from.
+
+Has a flag `1` after the title (units??).
+Each line is a file path (2nd item, string) and how to add it to the existing data (signed float, 1st item).
+
+Has an empty line after it.
+
+e.g.
+```
+IMPORT_DENSITY 1
++1.000000 CHGCAR
+
+```
+
 ## GROUP
 
 Space group; the symmetry group imposed on the crystal.
@@ -219,6 +237,17 @@ SHAPE
 
 ## BOUND
 
+Boundary.
+
+- 1st item: x min
+- 2nd item: x max
+- 3rd item: y min
+- 4th item: y max
+- 5th item: z min
+- 6th item: z max
+
+Block ends with five `0`'s.
+
 e.g.
 ```
 BOUND
@@ -317,9 +346,22 @@ VECTT
 
 ## SPLAN
 
+Section planes of volumetric data.
+
+Edit Data > Lattice Planes > Add lattice planes
+
+For each row,
+- 1st item: Number/index?
+- 2-4th items: hkl Miller indices
+- 5th item: Distance from origin (Angstrom)
+- 6-9th items: Color (RGBA).
+
+Section ends with four `0`'s.
+
 e.g.
 ```
 SPLAN
+  1 1.509013E+00 -1.000000E+00 1.014961E+02 5.35356 255   0 255 192
   0   0   0   0
 ```
 
@@ -425,6 +467,11 @@ No data is directly connected to the STYLE header. However, it appears to serve 
 STYLE
 ```
 ### DISPF
+
+Miscellaneous display flags, as binary bits.
+
++8192: Isosurface render from front-to-back (Properties > Isosurfaces).
+
 e.g.
 ```
 DISPF 37753794
@@ -440,6 +487,12 @@ e.g.
 SURFS   0  1  1
 ```
 ### SECTS
+
+Something about Sections.
+
+- 1st item: Some kind of binary flag. Default `32`. Has some kind of dependence on section colour scheme (SECCL). +8 if Y-M-C or C-M-Y. +16 if gray scale or rainbow+ or cyclic.
+-2nd item: ? Default `1`.
+
 e.g.
 ```
 SECTS  32  1
@@ -497,9 +550,24 @@ POLYP
  204 1  1.000 180 180 180
 ```
 ### ISURF
+
+Isosurfaces.
+
+From Properties > Isosurfaces > Isosurfaces, the table there.
+
+Each row is an isosurface.
+
+- 1st item: index/number?
+- 2nd item: mode flag?
+- 3rd item: isosurface level.
+- 4-6th item: RGB colour of isosurface.
+- 7th item: Opacity 1 (0-255)
+- 8th item: Opacity 2 (0-255)
+
 e.g.
 ```
 ISURF
+1   1    0.55903 255 255   0 127 255
   0   0   0   0
 ```
 ### TEX3P
@@ -509,6 +577,21 @@ TEX3P
   1  0.00000E+00  1.00000E+00
 ```
 ### SECTP
+
+Section planes, properties.
+
+Objects > Properties > Sections
+
+- 1st item: Whether colour scale is forwards (`1`) or inverted (`-1`) (depends on SECCL).
+- 2nd item: Saturation levels minimum
+- 3rd item: Saturation levels maximum
+- 4th item: Cutoff level, for section planes, minimum
+- 5th item: Cutoff level, for section planes, maximum
+- 6th item: ??
+- 7th item: ??
+
+Reversed colour scales are: R-G-B, Y-M-C, cyclic R-G-B-R, and scales labelled as inverted.
+
 e.g.
 ```
 SECTP
@@ -532,6 +615,16 @@ HKLPP
  192 1  1.000 255   0 255
 ```
 ### UCOLP
+
+Unit cell line properties.
+
+Properties > General > Unit cell
+
+- 1st item: Line style flag. `0` if solid lines (default). `1` if dotted lines. `2` if dashed lines.
+- 2nd item: Line visibility flag. `0` if do not show. `1` single unit cell (default). `2` if do not show.
+- 3rd item: Line width (float), default 1.000.
+- 4-6th item: RGB line colour.
+
 e.g.
 ```
 UCOLP
@@ -620,6 +713,27 @@ LIGHT3
    0   0   0   0
 ```
 ### SECCL
+
+Section colour scheme.
+
+Objects > Properties > Sections > Sections and slices.
+
+Integer flag indicating option.
+- 0 : B-G-R
+- 1 : R-G-B
+- 2 : C-M-Y
+- 3 : Y-M-C
+- 4 : Gray scale
+- 5 : Inverted gray scale
+- 6 : Rainbow+
+- 7 : Inverted Rainbow+
+- 8 : Cyclic: B-G-R-B
+- 9 : Cyclic: R-G-B-R
+- 10 : Cyclic: Ostwald
+- 11 : Cyclic: Inverted Ostwald
+- 12 : Cyclic: W-R-K-B-W
+- 13 : Cyclic: K-R-W-B-K
+
 e.g.
 ```
 SECCL 0
