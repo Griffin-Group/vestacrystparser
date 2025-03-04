@@ -210,4 +210,40 @@ class VestaFile:
         # which can happen if you specify invalid indices.
         if not changed:
             logger.warning(f"No sites with indices {index} found.")
+    
+    def add_lattice_plane(self, h:float,k:float,l:float,distance:float,
+                          r:int=255,g:int=0,b:int=255,a:int=192):
+        """
+        Adds a lattice plane, sectioning the volumetric data.
+
+        Sets SPLAN.
+        Mimics Edit Data > Lattice Planes > Add lattice planes.
+        
+        Args:
+            h,k,l - Miller indices of the plane.
+            distance - distance from origin (Angstrom)
+            r,g,b,a - colour (0-255) of section. Default is magenta.
+        """
+        section = self["SPLAN"]
+        new_plane = [len(section.data), h,k,l,distance,r,g,b,a]
+        section.data.insert(-1, new_plane)
+
+    def delete_section_plane(self, index:int):
+        """
+        Index (1-based)
+        """
+        if index == 0:
+            raise ValueError("VESTA indices are 1-based; 0 is invalid index.")
+        section = self["SPLAN"]
+        # Process the index.
+        if index < 0:
+            index = len(section.data) + 1 + index
+        if index <= 0 or index > len(section.data):
+            raise IndexError("Index is out of range.")
+        # Delete the wanted row.
+        del section.data[index-1]
+        # Re-index remaining entries.
+        for i, line in enumerate(section.data):
+            if line[0] > 0:
+                line[0] = i + 1
 
