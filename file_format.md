@@ -244,6 +244,8 @@ Each row:
 - 3rd item: Atomic radius (Objects > Properties > Atoms > Radius and color)
 - 4-6th item: RGB of atom colour (Objects > Properties > Atoms > Radius and color)
 - 7-9th item: Default atom colour (RGB)?
+- 10th item: ?
+- 11th item: ?
 
 Ends with a row of 6 zero's.
 
@@ -372,6 +374,7 @@ Each row:
 - 3rd item: Atomic radius (Objects > Properties > Atoms > Radius and color)
 - 4-6th item: RGB of atom colour (Objects > Properties > Atoms > Radius and color)
 - 7-9th item: RGB of something else? Default atom colour?
+- 10th item: ?
 
 Ends with a row of 6 zero's.
 

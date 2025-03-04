@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.Logger()
+
 def parse_token(token):
     """
     Convert a token to int or float if possible; otherwise, return it as a string.
@@ -184,32 +188,36 @@ class VestaFile:
             summary += f"  {sec_name}: {nlines} additional line(s) ({typ})\n"
         return summary
 
-    def set_atom_color(self, r, g, b):
+    def set_site_color(self, index:int|list[int], r:int, g:int, b:int):
         """
-        Set the RGB atom color for all atoms in the ATOM section.
-        
-        Assumes that each line in the ATOMT section has its tokens as:
-          [flag, element, number, R, G, B, R, G, B, A?]
-        and that the RGB values are at positions 5, 6, and 7.
+        Set the RGB site colour for sites with index (1-based).
         
         Args:
+            index : indices or list of indices
             r (int): Red value (0-255).
             g (int): Green value (0-255).
             b (int): Blue value (0-255).
         """
+        changed = False
+        # Convert single-index to list.
+        if isinstance(index, int):
+            index = [index]
         atom_section = self.get_section("SITET")
         if atom_section is None:
-            print("No ATOMT section found.")
-            return
+            raise TypeError("No SITET section found!")
         for i, line in enumerate(atom_section.data):
-            if isinstance(line, list) and len(line) >= 8:
-                # Update the color tokens.
-                line[3] = r
-                line[4] = g
-                line[5] = b
-                line[6] = r
-                line[7] = g
-                line[8] = b
+            if isinstance(line, list) and len(line) >= 6:
+                # Check for matching index:
+                if line[0] in index:
+                    changed = True
+                    # Update the color tokens.
+                    line[3] = r
+                    line[4] = g
+                    line[5] = b
             else:
-                print(f"Warning: Unexpected format in ATOMT line {i}: {line}")
+                raise TypeError(f"Unexpected format in SITET line {i}: {line}")
+        # Issue a warning to the user if no atoms were changed,
+        # which can happen if you specify invalid indices.
+        if not changed:
+            logger.warning(f"No sites with indices {index} found.")
 

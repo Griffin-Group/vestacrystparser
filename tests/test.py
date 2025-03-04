@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 
+import os
+
 from vestacrystparser.parser import VestaFile
+
+testdir = os.path.dirname(os.path.abspath(__file__))
 
 # Example usage:
 if __name__ == "__main__":
-    vesta_path = 'Cu_primitive_plain.vesta'  # input file
-    output_path = 'cu_modified.vesta'         # output file
+    vesta_path = os.path.join(testdir,'Cu_primitive_plain.vesta')  # input file
+    output_path = os.path.join(testdir,'cu_modified.vesta')         # output file
     try:
         vfile = VestaFile(vesta_path)
         print(vfile)
@@ -20,7 +24,7 @@ if __name__ == "__main__":
             print("TRANM extra data:", tranm_sec.data)
         
         # Update the atom colors to a new RGB value, e.g., 255 0 0 (red).
-        vfile.set_atom_color(255, 0, 0)
+        vfile.set_site_color(1, 255, 0, 0)
         
         vfile.save(output_path)
         print(f"Modified VESTA file saved to '{output_path}'")
