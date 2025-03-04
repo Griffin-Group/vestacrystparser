@@ -631,6 +631,17 @@ UCOLP
    0   1  1.000   0   0   0
 ```
 ### COMPS
+
+Compass settings.
+
+Properties > General > Axes.
+
+Single integer flag.
+
+- 0 : Do not show compass.
+- 1 : Show compass and show axes. (Default)
+- 2 : Show compass, do not show axes.
+
 e.g.
 ```
 COMPS 1
