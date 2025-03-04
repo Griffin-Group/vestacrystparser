@@ -148,7 +148,7 @@ class VestaFile:
                     self.order.append("GLOBAL")
                 self.sections[current_section].add_line(line)
     
-    def get_section(self, section_name):
+    def get_section(self, section_name) -> VestaSection|None:
         """
         Retrieve a VestaSection by its header.
         
@@ -160,6 +160,13 @@ class VestaFile:
         """
         return self.sections.get(section_name)
     
+    def __getitem__(self, name) -> VestaSection|None:
+        return self.get_section(name)
+
+    def __len__(self) -> int:
+        """Number of sections"""
+        return len(self.sections)
+
     def save(self, filename):
         """
         Write the current VESTA data to disk.

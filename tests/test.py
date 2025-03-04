@@ -15,7 +15,7 @@ if __name__ == "__main__":
         print(vfile.summary())
         
         # Example: inspect TITLE and TRANM sections.
-        title_sec = vfile.get_section("TITLE")
+        title_sec = vfile["TITLE"]
         if title_sec:
             print("TITLE data:", title_sec.data)
         tranm_sec = vfile.get_section("TRANM")
@@ -23,6 +23,8 @@ if __name__ == "__main__":
             print("TRANM inline data:", tranm_sec.inline)
             print("TRANM extra data:", tranm_sec.data)
         
+        print("Number of sections: ", len(vfile))
+
         # Update the atom colors to a new RGB value, e.g., 255 0 0 (red).
         vfile.set_site_color(1, 255, 0, 0)
         
