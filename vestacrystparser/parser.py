@@ -1,6 +1,6 @@
 import logging
 
-logger = logging.Logger()
+logger = logging.getLogger(__name__)
 
 def parse_token(token):
     """
@@ -168,13 +168,18 @@ class VestaFile:
             filename (str): Output file path.
         """
         with open(filename, 'w') as f:
-            for sec_name in self.order:
-                section = self.sections[sec_name]
-                f.write(section.to_text())
+            f.write(str(self))
     
-    def __str__(self):
+    def __str__(self) -> str:
+        mystr = ""
+        for sec_name in self.order:
+            mystr += self.sections[sec_name].to_text()
+        return mystr
+
+    def summary(self) -> str:
         """
         Return a summary of the sections.
+        What sections exist and how many lines they have.
         """
         summary = "VESTA file sections:\n"
         for sec_name in self.order:

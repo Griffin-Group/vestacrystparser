@@ -12,7 +12,7 @@ if __name__ == "__main__":
     output_path = os.path.join(testdir,'cu_modified.vesta')         # output file
     try:
         vfile = VestaFile(vesta_path)
-        print(vfile)
+        print(vfile.summary())
         
         # Example: inspect TITLE and TRANM sections.
         title_sec = vfile.get_section("TITLE")
