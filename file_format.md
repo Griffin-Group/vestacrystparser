@@ -171,7 +171,60 @@ SITET
 
 ## VECTR
 
+Vectors to draw on the atoms.
+
+Each vector has a block of entries. The first row is the vector.
+It has an index, which is the vector's index (because multiple atoms can
+share a vector, so VESTA indexes vectors separately), followed by the
+Cartesian coordinates of the vector, followed by a 0 for axial vectors or
+1 for polar vectors.
+After the vector entry is the atoms entry. It starts with the atomic index,
+followed by some 4 integers (which should be 0 in our cases, but may be
+non-zero if you are selecting an individual atom instead of a
+crystallographic site).
+There may be multiple atoms entries; each entry receives the same vector.
+Each entry is terminated by a row of 5 zeroes.
+The block is terminated by 5 more zeroes.
+
+Files lacking vectors have an empty VECTR block with just ` 0 0 0 0 0`.
+
+e.g.
+```
+VECTR
+    1    0.40825    0.40825    0.40825 0
+    1   0    0    0    0
+    0 0 0 0 0
+    2    0.40825    0.40825   -1.22474 0
+    2   0    0    0    0
+    0 0 0 0 0
+    3   -0.40825    1.22474   -0.40825 0
+    3   0    0    0    0
+    0 0 0 0 0
+    4    1.22474   -0.40825   -0.40825 0
+    4   0    0    0    0
+    0 0 0 0 0
+    0 0 0 0 0
+```
+
 ## VECTT
+
+Vector formatting.
+
+- 1st item: vector index (see VECTR).
+- 2nd item: Radius (0.5 is default)
+- 3-5 items: RGB (0-255). (255 0 0 is default)
+- 6th item: +1 if vector penetrates atom (end goes out both sides); +2 if we add
+    atom radius to vector length. 1 is default.
+
+e.g.
+```
+VECTT
+   1  0.350 255   0   0 1
+   2  0.350 255   0   0 1
+   3  0.350 255   0   0 1
+   4  0.350 255   0   0 1
+ 0 0 0 0 0
+```
 
 ## SPLAN
 
@@ -299,6 +352,9 @@ e.g.
 POLYS   1
 ```
 ### VECTS
+
+Global scaling factor for vectors.
+
 e.g.
 ```
 VECTS 1.000000
