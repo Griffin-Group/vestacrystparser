@@ -1,11 +1,12 @@
 # The .vesta file format
 
 Herein I have manually reverse-engineered the key features of VESTA's file format.
+The specification here is UNOFFICIAL, likely INCOMPLETE, and may contain INACCURACIES. Use with caution. Contributions welcome.
+
 VESTA is a plain-text file.
 The amount of whitespace between entries on the same line does not seem to matter, neither does the number of decimal places in floating-point values.
 
 The file has sections marked in all-caps, followed by a series of space- and newline-separated values.
-The sections appear to be the same between all files, even when nominally unused.
 
 ## #VESTA_FORMAT_VERSION
 
@@ -118,6 +119,25 @@ CELLP
 
 ## STRUC
 
+Structure parameters.
+
+Editable via Edit > Edit Data > Structure Parameters.
+
+Has an entry for each (symmetrically-distinct) atom.
+Each atom gets two lines.
+
+- Row 1, item 1: No. / index (integer). Increments from 1. Not manually set.
+- Row 1, item 2: Elemental symbol (string)
+- Row 1, item 3: Site label (string)
+- Row 1, item 4: Occupation (default `1.0000`).
+- Row 1, items 5-7: x,y,z coordinates (fractional)
+- Row 1, item 8: Wyckoff position/site? (default `1a`)
+- Row 1, item 9: ? (default `1`)
+- Row 2, items 1-3 (beneath row 1 items 5-7): x,y,z standard uncertainties (s.u.)
+- Row 2, item 4 (beneath row 1 item 8): Charge (default `0.00`)
+
+Block ends with seven `0`'s.
+
 e.g.
 ```
 STRUC
@@ -128,11 +148,65 @@ STRUC
 
 ## THERI
 
+Isotropic U/B in Structure Parameters. (Isotropic thermal?)
+
+In-line with the header is an integer flag defining whether we are using units of U or B.
+`0` if B, `1` if U. Default `1`.
+
+One row for each site in STRUC.
+
+- Item 1: Site number/index.
+- Item 2: Site label.
+- Item 3: U or B value (float).
+
+Block ends with three `0`'s.
+
+N.B. if THERM is non-zero, it changes the value here.
+
 e.g.
 ```
 THERI 1
   1         Cu  0.050000
   0 0 0
+```
+
+## THERT
+
+**Optional section.**
+
+Anisotropic thermal type.
+
+Appears when Structure Parameters > Anisotropic is not None.
+
+Single integer flag. `0` if units of U, `1` if units of beta.
+
+e.g.
+```
+THERT 0
+```
+
+## THERM
+
+**Optional section.**
+
+Appears when Structure Parameters > Anisotropic is not None.
+
+One row for each site.
+
+- Item 1: Site index.
+- Item 2: Site label.
+- Items 3-8: U11, U22, U33, U12, U13, U23.
+
+Ends in eight `0`'s.
+
+Overwrites THERI if non-zero.
+
+e.g.
+```
+THERM
+  1        Cu1    0.11000    0.22000    0.33000    0.12000    0.13000    0.23000
+  2         Cu    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
+  0 0 0 0 0 0 0 0
 ```
 
 ## SHAPE
@@ -161,6 +235,19 @@ SBOND
 ```
 
 ## SITET
+
+Site-specific appearances.
+
+Each row:
+- 1st item: Site index (see STRUC)
+- 2nd item: Site label (see STRUC).
+- 3rd item: Atomic radius (Objects > Properties > Atoms > Radius and color)
+- 4-6th item: RGB of atom colour (Objects > Properties > Atoms > Radius and color)
+- 7-9th item: Default atom colour (RGB)?
+
+Ends with a row of 6 zero's.
+
+See ATOMT for global atomic properties. SITET overrides appearances set by ATOMT. New sites inherit from ATOMT.
 
 e.g.
 ```
@@ -277,6 +364,19 @@ PLN2D
 
 ## ATOMT
 
+Atomic/elemental appearance information.
+
+Each row:
+- 1st item: ?
+- 2nd item: Element symbol (see STRUC).
+- 3rd item: Atomic radius (Objects > Properties > Atoms > Radius and color)
+- 4-6th item: RGB of atom colour (Objects > Properties > Atoms > Radius and color)
+- 7-9th item: RGB of something else? Default atom colour?
+
+Ends with a row of 6 zero's.
+
+See SITET. New sites inherit from ATOMT, although SITET overrides the appearance of individual sites.
+
 e.g.
 ```
 ATOMT
@@ -285,6 +385,16 @@ ATOMT
 ```
 
 ## SCENE
+
+View of the structure.
+
+This parameter is modified by the view control bar at the top of the GUI window.
+
+- First 4 lines: affine matrix describing the camera angle. Only the first 3x3 elements seem to be used; no translation component appears to be added here via the GUI.
+- 5th line: Horizontal and vertical displacement, in units of half the screen width. Default `0.000 0.000`.
+- 6th line: Zero. `0.000`.
+- 7th line: Zoom, as a multiplier (default `1.000`).
+
 e.g.
 ```
 SCENE
