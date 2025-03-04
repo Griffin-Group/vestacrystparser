@@ -22,6 +22,19 @@ def parse_line(line):
     tokens = line.split()
     return [parse_token(tok) for tok in tokens]
 
+# Sections that have a blank line after them.
+# (So far, I've only found this to be important for IMPORT_DENSITY,
+# but if I'm doing it for one I may as well do it for all.)
+sections_with_blank_line = [
+    "#VESTA_FORMAT_VERSION",
+    "CRYSTAL",
+    "TITLE",
+    "IMPORT_DENSITY",
+    "HBOND",
+    "SECCL",
+    "TEXCL",
+]
+
 class VestaSection:
     def __init__(self, header_line):
         """
@@ -76,7 +89,14 @@ class VestaSection:
         else:
             text = f"{self.header}\n"
         for line in self.data:
-            text += " ".join(str(x) for x in line) + "\n"
+            if self.header == "IMPORT_DENSITY":
+                # IMPORT_DENSITY requires a *signed* float.
+                text += "{:+.6f} {}\n".format(*line)
+            else:
+                text += " ".join(str(x) for x in line) + "\n"
+        # Add a blank line if required.
+        if self.header in sections_with_blank_line:
+            text += "\n"
         return text
 
 class VestaFile:
