@@ -488,10 +488,17 @@ SURFS   0  1  1
 ```
 ### SECTS
 
-Something about Sections.
+Flags for display of sections.
 
-- 1st item: Some kind of binary flag. Default `32`. Has some kind of dependence on section colour scheme (SECCL). +8 if Y-M-C or C-M-Y. +16 if gray scale or rainbow+ or cyclic.
--2nd item: ? Default `1`.
+Properties > Sections.
+
+- 1st item: Binary flag of properties. Default `32`.
+  - +1 if using "Absolute values" in Sections and slices.
+  - +2 if using "Assign colors recursively" in Sections and slices.
+  - +8 if SECCL is Y-M-C or C-M-Y.
+  - +16 if SECCL is gray scale or rainbow+ or cyclic.
+  - +128 if isosurfaces' sections is set to Manual instead of Auto.
+- 2nd item: ? Default `1`.
 
 e.g.
 ```
@@ -585,10 +592,10 @@ Objects > Properties > Sections
 - 1st item: Whether colour scale is forwards (`1`) or inverted (`-1`) (depends on SECCL).
 - 2nd item: Saturation levels minimum
 - 3rd item: Saturation levels maximum
-- 4th item: Cutoff level, for section planes, minimum
-- 5th item: Cutoff level, for section planes, maximum
-- 6th item: ??
-- 7th item: ??
+- 4th item: Cutoff level, for lattice planes, minimum
+- 5th item: Cutoff level, for lattice planes, maximum
+- 6th item: Cutoff level, for isosurfaces's sections, minimum
+- 7th item: Cutoff level, for isosurfaces's sections, maximum
 
 Reversed colour scales are: R-G-B, Y-M-C, cyclic R-G-B-R, and scales labelled as inverted.
 
@@ -621,7 +628,7 @@ Unit cell line properties.
 Properties > General > Unit cell
 
 - 1st item: Line style flag. `0` if solid lines (default). `1` if dotted lines. `2` if dashed lines.
-- 2nd item: Line visibility flag. `0` if do not show. `1` single unit cell (default). `2` if do not show.
+- 2nd item: Line visibility flag. `0` if do not show. `1` single unit cell (default). `2` if show all.
 - 3rd item: Line width (float), default 1.000.
 - 4-6th item: RGB line colour.
 
