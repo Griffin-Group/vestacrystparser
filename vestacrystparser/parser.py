@@ -1,4 +1,5 @@
 import logging
+import math
 
 logger = logging.getLogger(__name__)
 
@@ -402,6 +403,8 @@ class VestaFile:
         """
         Sets whether to show the unit cell or whether to show all cells (vs just single)
 
+        Returns the value of the flag that was set.
+
         UCOLP
         """
         # Validate input
@@ -423,6 +426,8 @@ class VestaFile:
         """
         Set compass and axes label visibility.
 
+        Returns the value of the flag that was set.
+
         COMPS
         """
         section = self["COMPS"]
@@ -434,3 +439,70 @@ class VestaFile:
             else:
                 section.inline[0] = 1
         return section.inline[0]
+    
+    def set_scene_view_matrix(self, matrix):
+        """
+        Set the 3x3 rotation matrix describing viewing angle.
+
+        SCENE
+        """
+        if len(matrix) != 3 or len(matrix[0]) != 3:
+            raise ValueError("matrix must be 3x3")
+        section = self["SCENE"]
+        for i in range(3):
+            for j in range(3):
+                section.data[i][j] = matrix[i][j]
+    
+    def set_scene_view_direction(self, view:str):
+        """
+        Set view direction to a preset viewing direction.
+
+        Valid presets: "c"
+
+        Returns the matrix that was set.
+
+        SCENE
+        """
+        # Get the unit cell parameters
+        section = self["CELLP"]
+        a,b,c,alpha,beta,gamma = section.data[0]
+        alpha = math.radians(alpha)
+        beta = math.radians(beta)
+        gamma = math.radians(gamma)
+        # Get the viewing angle matrix
+        if view == "a":
+            raise NotImplementedError
+        elif view == "b":
+            raise NotImplementedError
+        elif view == "c":
+            #  c_x = c cos β,
+            #  c_y = c (cos α – cos β cos γ)/ sin γ,
+            #  c_z = c V   with V = √[1 – cos²β – ((cos α – cos β cos γ)/ sin γ)²].
+            # cos θ = c_z/|c|   and  φ = arctan2(c_y, cₓ).
+            # We rotate by Rz(-phi), then Ry(-theta) (which gets c to (0,0,1)),
+            # then Rz(asin(sin(phi)/sqrt(1-sin(theta)**2*cos(phi)**2))) to bring a_y to 0.
+            cx = math.cos(beta)
+            cy = (math.cos(alpha) - math.cos(beta)*math.cos(gamma))/math.sin(gamma)
+            ct = math.sqrt(1 - cx**2 - cy**2) # cos theta, also cz.
+            theta = math.acos(ct)
+            phi = math.atan2(cy, cx)
+            cp = math.cos(phi) # cos phi
+            st = math.sin(theta) # sin theta
+            sp = math.sin(phi) # sin phi
+            ca = ct * cp / math.sqrt(1 - st**2 * cp**2) # cosine of angle needed for a
+            sa = sp / math.sqrt(1 - st**2 * cp**2) # sine of angle needed for a
+            matrix = [[ct*cp*ca + sp*sa, ct*sp*ca - cp*sa, -st*ca],
+                      [ct*cp*sa - sp*ca, ct*sp*sa + cp*ca, -st*sa],
+                      [st*cp, st*sp, ct]]
+        elif view == "a*":
+            raise NotImplementedError
+        elif view == "b*":
+            raise NotImplementedError
+        elif view == "c*":
+            raise NotImplementedError
+        elif view == "1":
+            matrix = [[1,0,0],[0,1,0],[0,0,1]]
+        else:
+            raise ValueError("Do not recognise view: "+str(view))
+        self.set_scene_view_matrix(matrix)
+        return matrix
