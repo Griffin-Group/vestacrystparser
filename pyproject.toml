@@ -29,5 +29,8 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Visualization",
 ]
 
+[project.optional-dependencies]
+pymatgen = ["pymatgen"]
+
 [project.urls]
 Repository = "https://github.com/Griffin-Group/vestacrystparser"
