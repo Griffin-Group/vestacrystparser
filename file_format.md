@@ -411,7 +411,7 @@ PLN2D
 Atomic/elemental appearance information.
 
 Each row:
-- 1st item: ?
+- 1st item: Index/number of element.
 - 2nd item: Element symbol (see STRUC).
 - 3rd item: Atomic radius (Objects > Properties > Atoms > Radius and color)
 - 4-6th item: RGB of atom colour (Objects > Properties > Atoms > Radius and color)

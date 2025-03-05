@@ -237,6 +237,44 @@ class VestaFile:
         if not changed:
             logger.warning(f"No sites with indices {index} found.")
     
+    def set_atom_color(self, element:str|int, r:int, g:int, b:int,
+                       overwrite_site_colors:bool=True):
+        """
+        Sets the colour of all atoms of an element.
+
+        ATOMT, SITET
+        """
+        section = self["ATOMT"]
+        # Are we matching by index or symbol?
+        if isinstance(element, str):
+            col = 1
+        elif isinstance(element, int):
+            col = 0
+        else:
+            raise TypeError("Expected element to be int or str, got " + str(type(element)))
+        # Find the row with the matching element
+        found = False
+        for row in section.data:
+            if row[col] == element:
+                found = True
+                break
+        if not found:
+            logger.warning(f"No elements of type {element} found!")
+            return
+        # Set the colour
+        row[3:6] = r,g,b
+        # If required, find the sites with this element and edit them too.
+        if overwrite_site_colors:
+            # Grab the element symbol
+            element = row[1]
+            # Search through the structure
+            section = self["STRUC"]
+            # Grab the site indices of entries with a matching element symbol.
+            for row in section.data:
+                if row[1] == element:
+                    # Found a matching element. Edit the site colour
+                    self.set_site_color(row[0], r,g,b)
+
     def add_lattice_plane(self, h:float,k:float,l:float,distance:float,
                           r:int=255,g:int=0,b:int=255,a:int=192):
         """
