@@ -1,5 +1,6 @@
 import logging
 import math
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -117,6 +118,11 @@ class VestaFile:
         self.sections = {}
         self.order = []
         if filename:
+            self.load(filename)
+        else:
+            # Initialise the empty VESTA file.
+            # There's got to be a more rigorous way to store data files in a Python package...
+            filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), "default.vesta")
             self.load(filename)
     
     def load(self, filename):
@@ -544,3 +550,54 @@ class VestaFile:
             raise ValueError("Do not recognise view: "+str(view))
         self.set_scene_view_matrix(matrix)
         return matrix
+    
+    def set_cell(self, a=None,b=None,c=None,alpha=None,beta=None,gamma=None):
+        """
+        Set unit cell parameters
+
+        Unset values left unchanged.
+
+        CELLP
+        """
+        section = self["CELLP"]
+        for i,x in enumerate([a,b,c,alpha,beta,gamma]):
+            if x is not None:
+                section.data[0][i] = x
+    
+    def add_site(self, symbol:str, label:str, x:float, y:float, z:float,
+                 dx=0.0, dy=0.0, dz=0.0, occupation=1.0, charge=0.0, U=0.0):
+        """
+        Adds a new site.
+
+        STRUC, THERI, THERM, ATOMT, SITET
+        """
+        # Add to structure parameters.
+        section = self["STRUC"]
+        new_idx = (len(section.data) - 1) // 2 + 1
+        section.data.insert(-1, [new_idx, symbol, label, occupation, x, y, z, '1a', 1])
+        section.data.insert(-1, [dx,dy,dz, charge])
+        # Add the uncertainty entry
+        section = self["THERI"]
+        section.data.insert(-1, [new_idx, label, U])
+        # If applicable, add anisotropic uncertainty entry
+        if "THERM" in self.order:
+            section = self["THERM"]
+            section.data.insert(-1, [new_idx, label] + [0.0]*6)
+        # Add new element if applicable.
+        # Otherwise find defaults
+        section = self["ATOMT"]
+        found = False
+        for element in section.data:
+            if element[1] == symbol:
+                found = True
+                break
+        if not found:
+            # Create a new element
+            # TODO: Load data from elements.ini
+            element = [len(section.data), symbol, 1.28, 128,128,128,128,128,128]
+            section.data.insert(-1, element)
+        # Use found data to set-up a new site
+        params = element[2:10] # Radius, RGB, RGB
+        section = self["SITET"]
+        section.data.insert(-1, [new_idx, label] + params + [204, 0])
+        # TODO: Set up SBOND from style.ini
