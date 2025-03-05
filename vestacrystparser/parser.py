@@ -213,6 +213,7 @@ class VestaFile:
     def set_site_color(self, index:int|list[int], r:int, g:int, b:int):
         """
         Set the RGB site colour for sites with index (1-based).
+        Supports setting multiple sites at once.
         
         Args:
             index : indices or list of indices
@@ -298,7 +299,7 @@ class VestaFile:
         new_plane = [len(section.data), h,k,l,distance,r,g,b,a]
         section.data.insert(-1, new_plane)
 
-    def delete_section_plane(self, index:int):
+    def delete_lattice_plane(self, index:int):
         """
         SPLAN
 
@@ -310,7 +311,7 @@ class VestaFile:
         # Process the index.
         if index < 0:
             index = len(section) + 1 + index
-        if index <= 0 or index > len(section):
+        if index <= 0 or index >= len(section):
             raise IndexError("Index is out of range.")
         # Delete the wanted row.
         del section.data[index-1]
@@ -551,6 +552,15 @@ class VestaFile:
         self.set_scene_view_matrix(matrix)
         return matrix
     
+    def set_scene_zoom(self, zoom:float):
+        """
+        Set zoom of the view. (1 is VESTA default)
+
+        SCENE
+        """
+        section = self["SCENE"]
+        section.data[6] = [zoom]
+
     def set_cell(self, a=None,b=None,c=None,alpha=None,beta=None,gamma=None):
         """
         Set unit cell parameters
@@ -601,3 +611,25 @@ class VestaFile:
         section = self["SITET"]
         section.data.insert(-1, [new_idx, label] + params + [204, 0])
         # TODO: Set up SBOND from style.ini
+    
+    def get_structure(self) -> list[list]:
+        """
+        Gets a list of the key site structure parameters (index, element, label, x, y, z)
+
+        Returned data is a copy.
+        """
+        section = self["STRUC"]
+        my_list = []
+        for row in section.data:
+            if len(row) == 9:
+                my_list.append((row[0:3] + row[4:7]).copy())
+        return my_list
+    
+    def get_cell(self) -> list[float,float,float,float,float,float]:
+        """
+        Gets the cell parameters: a,b,c,alpha,beta,gamma
+
+        Is a copy.
+        """
+        section = self["CELLP"]
+        return section.data[0].copy()
