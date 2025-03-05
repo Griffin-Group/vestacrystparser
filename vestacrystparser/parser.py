@@ -332,7 +332,7 @@ class VestaFile:
         # Process the index.
         if index < 0:
             index = len(section) + 1 + index
-        if index <= 0 or index > len(section):
+        if index <= 0 or index >= len(section):
             raise IndexError("Index is out of range.")
         # Delete the wanted row.
         del section.data[index-1]
