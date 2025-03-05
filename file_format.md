@@ -429,6 +429,15 @@ ATOMT
   0 0 0 0 0 0
 ```
 
+Default values are derived from `elements.ini`.
+- Column 1: atomic number
+- Column 2: Elemental symbol
+- Column 3: Atomic radius
+- Column 4: van der Waals radius
+- Column 5: Ionic radius
+- Columns 6-8: RGB colour (0-1)
+Which radius is used is based on the atomic radii type within ATOMS. Changing this setting through the UI overwrites all existing radii with the appropriate default values.
+
 ## SCENE
 
 View of the structure.
@@ -470,13 +479,30 @@ STYLE
 
 Miscellaneous display flags, as binary bits.
 
-+8192: Isosurface render from front-to-back (Properties > Isosurfaces).
+- +2: "Show models" is true.
+- +2048: "Hide non-bonding atoms" is true (Properties > Atoms > Atom style)
+- +8192: Isosurface render from front-to-back (Properties > Isosurfaces).
+- +66536: "Show dot surface" is true.
+- +131072: "Show as displacement ellispoids" instead of "Show as balls" (Properties > Atoms > Atom style)
+- +33554432: "Scale isotropic atoms by Uiso" (Properties > Atoms > Atom style)
 
 e.g.
 ```
 DISPF 37753794
 ```
 ### MODEL
+
+Structural model settings.
+
+- 1st item: Style (integer flag)
+  - 0: Ball-and-stick
+  - 1: Space-filling
+  - 2: Polyhedral
+  - 3: Wireframe
+  - 4: Stick
+- 2nd item: 1 if Show models, 0 if not.
+- 3rd item: 1 if Show dot surface, 0 if not.
+
 e.g.
 ```
 MODEL   0  1  0
@@ -510,6 +536,18 @@ e.g.
 FORMS   0  1
 ```
 ### ATOMS
+
+Atom display settings.
+
+Properties > Atoms > Atom style
+
+- 1st item: Atom radii type. Default 0.
+  - 0: Atomic (default)
+  - 1: Ionic
+  - 2: van der Waals
+- 2nd item: 0 if "Show as balls". 1 if "Show as displacement ellipsoids".
+- 3rd item: 1: "Scale isotropic atoms by Uiso". 0: "Set radii of isotropic atoms as specified below".
+
 e.g.
 ```
 ATOMS   0  0  1
@@ -539,6 +577,16 @@ FORMP
   1  1.0   0   0   0
 ```
 ### ATOMP
+
+Atom style properties.
+
+Properties > Atoms > Atom style.
+
+- 3rd item: True/false 1/0 flag. "Show principal ellipses."
+- 4th item: Displacement ellipsoids probability.
+- 5th item: Outline width (of principal ellipses).
+- 6th item: True/false 1/0 flag. "Hide non-bonding atoms".
+
 e.g.
 ```
 ATOMP
