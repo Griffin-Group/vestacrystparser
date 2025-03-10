@@ -633,3 +633,24 @@ class VestaFile:
         """
         section = self["CELLP"]
         return section.data[0].copy()
+
+    def set_atom_material(self, r:int=None, g:int=None, b:int=None, shininess:float=None):
+        """
+        Sets the atom material for lighting purposes.
+
+        Unset parameters are left unchanged.
+
+        r,g,b - integers from 0 to 255.
+        shininess - float from 1 to 100; percentage.
+
+        ATOMM
+        """
+        section = self["ATOMM"]
+        # Set the colours
+        for i, x in enumerate([r,g,b]):
+            if x is not None:
+                section.data[0][i] = x
+        # Set the shininess
+        # VESTA converts from a 0-100 scale to a 0-128 scale.
+        if shininess is not None:
+            section.data[1][0] = 1.28 * shininess

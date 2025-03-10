@@ -817,6 +817,14 @@ TEXCL 0
 ```
 
 ## ATOMM
+
+Atom material.
+
+Properties > Atoms > Material
+
+- 1st line: R, G, B, A(? Doesn't change from 255.)
+- 2nd line: Shininess, float, percentage x 1.28. (So on scale from 1.280 to 128.000.)
+
 e.g.
 ```
 ATOMM
