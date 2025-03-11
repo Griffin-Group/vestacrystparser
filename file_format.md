@@ -484,6 +484,7 @@ Miscellaneous display flags, as binary bits.
 - +8192: Isosurface render from front-to-back (Properties > Isosurfaces).
 - +66536: "Show dot surface" is true.
 - +131072: "Show as displacement ellispoids" instead of "Show as balls" (Properties > Atoms > Atom style)
+- +2097152: Perspective projection (View > Overall Appearance > Projection)
 - +33554432: "Scale isotropic atoms by Uiso" (Properties > Atoms > Atom style)
 
 e.g.
@@ -707,6 +708,14 @@ e.g.
 LABEL 1    12  1.000 0
 ```
 ### PROJT
+
+Projection.
+
+View > Overall Appearance > Projection
+
+- 1st item: Flag. 0: Parallel. 1: Perspective. See also DISPF.
+- 2nd item: Viewpoint (for perspective). Ranges from 0.5 (far) to 2.0 (close).
+
 e.g.
 ```
 PROJT 0  0.962
@@ -730,6 +739,19 @@ e.g.
 DPTHQ 1 -0.5000  3.5000
 ```
 ### LIGHT0
+
+Lighting.
+
+View > Overall Appearance > Light
+
+- LIGHT0 line: true/false 1/0 "Enable lighting".
+- 1st-4th lines: Affine rotation matrix for direction of incident light. Identity matrix (default) is from direction of view.
+- 5th line: ? Default 0 0 20 0
+- 6th line: ? Default 0 0 -1
+- 7th line: Ambient, X X X 255, where X is converted from percent to 0-255, rounded to integer.
+- 8th line: Diffuse, X X X 255, where X is converted from percent to 0-255, rounded to integer.
+- 9th line: 255 255 255 255.
+
 e.g.
 ```
 LIGHT0 1

@@ -663,3 +663,47 @@ class VestaFile:
         """
         section = self["BKGRC"]
         section.data[0] = [r,g,b]
+    
+    def set_enable_lighting(self, enable:bool):
+        """
+        Sets whether or not to Enable Lighting.
+
+        LIGHT0
+        """
+        section = self["LIGHT0"]
+        section.inline[0] = int(enable)
+    
+    def set_lighting_angle(self, matrix:list):
+        """
+        Sets the angle for lighting, using a 3x3 rotation matrix.
+
+        LIGHT0
+        """
+        section = self["LIGHT0"]
+        for i in range(3):
+            for j in range(3):
+                section.data[i][j] = matrix[i][j]
+    def reset_lighting_angle(self):
+        """
+        Resets the lighting angle to directly overhead.
+
+        LIGHT0
+        """
+        self.set_lighting_angle([[1,0,0],[0,1,0],[0,0,1]])
+    
+    def set_lighting(self, ambient:int=None, diffuse:int=None):
+        """
+        Sets the ambient and diffuse character of lighting, in percent.
+
+        Unset properties are left unchanged.
+
+        LIGHT0
+        """
+        section = self["LIGHT0"]
+        # N.B. VESTA internally converts the percentages to 0-255 scale.
+        if ambient is not None:
+            x = int(ambient / 100 * 255)
+            section.data[6] = [x,x,x,255]
+        if diffuse is not None:
+            x = int(diffuse / 100 * 255)
+            section.data[7] = [x,x,x,255]
