@@ -447,7 +447,7 @@ This parameter is modified by the view control bar at the top of the GUI window.
 - First 4 lines: affine matrix describing the camera angle. Only the first 3x3 elements seem to be used; no translation component appears to be added here via the GUI.
 - 5th line: Horizontal and vertical displacement, in units of half the screen width. Default `0.000 0.000`.
 - 6th line: Zero. `0.000`.
-- 7th line: Zoom, as a multiplier (default `1.000`).
+- 7th line: Zoom, as a multiplier (default `1.000`). (Can also be set indirectly through View > Overall Appearance > Scale.)
 
 e.g.
 ```
