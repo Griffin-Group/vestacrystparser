@@ -78,7 +78,7 @@ class VestaSection:
         else:
             self.data.append(parse_line(line))
 
-    def to_text(self):
+    def __str__(self):
         """
         Convert the section back to text.
         
@@ -194,7 +194,7 @@ class VestaFile:
     def __str__(self) -> str:
         mystr = ""
         for sec_name in self.order:
-            mystr += self.sections[sec_name].to_text()
+            mystr += str(self.sections[sec_name])
         return mystr
 
     def summary(self) -> str:
