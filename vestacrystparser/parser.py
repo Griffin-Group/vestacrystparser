@@ -723,3 +723,33 @@ class VestaFile:
             section.inline[1] = start
         if end is not None:
             section.inline[2] = end
+    
+    def find_sites(self, elements:list[str]|str=None,
+                   xmin:float=0, xmax:float=1,
+                   ymin:float=0, ymax:float=1,
+                   zmin:float=0, zmax:float=1) -> list[int]:
+        """
+        Obtains the site indices (1-based) matching the provided list of elements
+        (if applicable) and with (fractional) coordinates within the specified
+        bounding box.
+
+        Fractional coordinates are probably in the interval [0,1).
+        """
+        stru = self.get_structure() # List of (index, element, label, x, y, z)
+        # Configure the elements list.
+        if elements is not None:
+            if isinstance(elements, str):
+                elements = [elements]
+        # Search
+        indices = []
+        for site in stru:
+            # If no element specified or element symbol matches.
+            if elements is None or site[1] in elements:
+                # If coordinates are within range
+                if xmin <= site[3] <= xmax and \
+                   ymin <= site[4] <= ymax and \
+                   zmin <= site[5] <= zmax:
+                    # Record the index.
+                    indices.append(site[0])
+        return indices
+    
