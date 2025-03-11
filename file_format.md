@@ -481,6 +481,7 @@ Miscellaneous display flags, as binary bits.
 
 - +2: "Show models" is true.
 - +2048: "Hide non-bonding atoms" is true (Properties > Atoms > Atom style)
+- +4096: Enable depth-cueing (View > Overall Appearance > Depth-cueing)
 - +8192: Isosurface render from front-to-back (Properties > Isosurfaces).
 - +66536: "Show dot surface" is true.
 - +131072: "Show as displacement ellispoids" instead of "Show as balls" (Properties > Atoms > Atom style)
@@ -734,6 +735,15 @@ BKGRC
  255 255 255
 ```
 ### DPTHQ
+
+Depth cueing.
+
+View > Overall Appearance > Depth-cueing
+
+- 1st item: 1/0 true/false, Enable depth-cueing. (See DISPF.)
+- 2nd item: Starting depth (float, Angstrom).
+- 3rd item: Ending depth (float, Angstrom).
+
 e.g.
 ```
 DPTHQ 1 -0.5000  3.5000

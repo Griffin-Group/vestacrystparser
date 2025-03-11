@@ -707,3 +707,19 @@ class VestaFile:
         if diffuse is not None:
             x = int(diffuse / 100 * 255)
             section.data[7] = [x,x,x,255]
+    
+    def set_depth_cueing(self, enable:bool=None, start:float=None, end:float=None):
+        """
+        Sets depth cueing settings.
+
+        Unset properties are left unchanged.
+
+        DPTHQ
+        """
+        section = self["DPTHQ"]
+        if enable is not None:
+            section.inline[0] = int(enable)
+        if start is not None:
+            section.inline[1] = start
+        if end is not None:
+            section.inline[2] = end
