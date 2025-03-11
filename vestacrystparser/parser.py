@@ -654,3 +654,12 @@ class VestaFile:
         # VESTA converts from a 0-100 scale to a 0-128 scale.
         if shininess is not None:
             section.data[1][0] = 1.28 * shininess
+    
+    def set_background_color(self, r:int, g:int, b:int):
+        """
+        Sets the background colour (RGB).
+
+        BKGRC
+        """
+        section = self["BKGRC"]
+        section.data[0] = [r,g,b]

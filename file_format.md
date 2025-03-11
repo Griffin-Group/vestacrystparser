@@ -712,6 +712,13 @@ e.g.
 PROJT 0  0.962
 ```
 ### BKGRC
+
+Background colour.
+
+View > Overall Appearance > Background Color
+
+R G B
+
 e.g.
 ```
 BKGRC
