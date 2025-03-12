@@ -13,16 +13,23 @@ The file has sections marked in all-caps, followed by a series of space- and new
 Metadata tag: version of the VESTA file format.
 The files I'm working with are in version 3.5.4.
 
+A blank line follows it.
+
 e.g.
 ```
 #VESTA_FORMAT_VERSION 3.5.4
+
 ```
 
 ## CRYSTAL
 
-No data is associated with this field. It appears to be a super-header.
-Has a blank line after it.
+Superheader for each crystal Phase (Edit Data > Phases).
+
+No data is associated with this field. However, it can appear multiple times. Following CRYSTAL are the sections from TITLE through to PLN2D inclusive, which contain the data specific to each crystal phase. (This means those sections are also unique either.) Additional phases begin with another CRYSTAL header.
+
+Has a blank line before and after it.
 ```
+
 CRYSTAL
 
 ```
@@ -30,6 +37,7 @@ CRYSTAL
 ## TITLE
 
 Name/title of the structure.
+
 One-line string.
 Defaults to "New structure".
 Has a blank line after it.
