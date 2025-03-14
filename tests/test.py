@@ -4,12 +4,12 @@ import os
 
 from vestacrystparser.parser import VestaFile
 
-testdir = os.path.dirname(os.path.abspath(__file__))
+TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Example usage:
 if __name__ == "__main__":
-    vesta_path = os.path.join(testdir,'Cu_primitive_plain.vesta')  # input file
-    output_path = os.path.join(testdir,'cu_modified.vesta')         # output file
+    vesta_path = os.path.join(TEST_DIR, 'data', 'Cu_primitive_plain.vesta')  # input file
+    output_path = os.path.join(TEST_DIR,'data', 'cu_modified.vesta')         # output file
     try:
         vfile = VestaFile(vesta_path)
         print(vfile.summary())

@@ -32,9 +32,12 @@ sections_with_blank_line = [
     "CRYSTAL",
     "TITLE",
     "IMPORT_DENSITY",
-    "HBOND",
     "SECCL",
     "TEXCL",
+]
+sections_with_blank_line_before = [
+    "CRYSTAL",
+    "STYLE",
 ]
 
 class VestaSection:
@@ -85,11 +88,14 @@ class VestaSection:
           - If inline data exists, it is written on the header line.
           - Then, any extra lines are written one per line.
         """
+        text = ""
+        if self.header in sections_with_blank_line_before:
+            text += "\n"
         if self.inline:
             inline_text = " ".join(str(x) for x in self.inline)
-            text = f"{self.header} {inline_text}\n"
+            text += f"{self.header} {inline_text}\n"
         else:
-            text = f"{self.header}\n"
+            text += f"{self.header}\n"
         for line in self.data:
             if self.header == "IMPORT_DENSITY":
                 # IMPORT_DENSITY requires a *signed* float.
