@@ -50,3 +50,32 @@ def test_save(tmp_path, sample_vestafile, sample_vesta_filename):
     with open(sample_vesta_filename, 'r') as f1:
         with open(tmp_path / "output.vesta", 'r') as f2:
             assert compare_vesta_strings(f1.read(), f2.read())
+
+def test_site_color(sample_vestafile):
+    """Tests set_site_color"""
+    # Check that writing works as expected.
+    sample_vestafile.set_site_color(1,12,16,100)
+    expected_sitet = """SITET
+    1 Cu 1.2800 12 16 100 34 71 220 204 0
+    0 0 0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["SITET"]), expected_sitet), "Site color not changed as expected"
+    # Check exception
+    with pytest.raises(IndexError):
+        sample_vestafile.set_site_color(0,20,30,40)
+    # Make sure nothing got changed.
+    assert compare_vesta_strings(str(sample_vestafile["SITET"]), expected_sitet), "Site color changed when it shouldn't have"
+    # Test what happens if do a list indexing.
+    sample_vestafile.set_site_color([1],15,25,35)
+    expected_sitet = """SITET
+    1 Cu 1.2800 15 25 35 34 71 220 204 0
+    0 0 0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["SITET"]), expected_sitet), "Site color from list of indices didn't work"
+    # To test: index out of range.
+    try:
+        sample_vestafile.set_site_color(2,11,22,33)
+    except IndexError:
+        # Currently it logs a warning. But I might change this behaviour in the future.
+        pass
+    # Confirm that nothing changed.
+    assert compare_vesta_strings(str(sample_vestafile["SITET"]), expected_sitet), "Site colors changed when called out-of-range index"
+    # I don't *expect* any side-effects from this function. Dunno how to easily test that, though.

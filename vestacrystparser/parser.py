@@ -231,6 +231,8 @@ class VestaFile:
         # Convert single-index to list.
         if isinstance(index, int):
             index = [index]
+        if 0 in index:
+            raise IndexError("Illegal site index 0 given! Remember VESTA is 1-based.")
         atom_section = self.get_section("SITET")
         if atom_section is None:
             raise TypeError("No SITET section found!")
@@ -265,6 +267,8 @@ class VestaFile:
             col = 0
         else:
             raise TypeError("Expected element to be int or str, got " + str(type(element)))
+        if element == 0:
+            raise IndexError("Illegal site index 0 given! Remember VESTA is 1-based.")
         # Find the row with the matching element
         found = False
         for row in section.data:
