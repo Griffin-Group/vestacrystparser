@@ -14,17 +14,30 @@ def sample_vesta_filename() -> str:
 def sample_vestafile(sample_vesta_filename) -> VestaFile:
     return VestaFile(sample_vesta_filename)
 
-def compare_vesta_strings(str1:str, str2:str) -> bool:
+def compare_vesta_strings(str1:str, str2:str, prec:int=None) -> bool:
     """
     Takes two VESTA strings, does basic parsing so no formatting,
     then checks if they are equivalent.
+
+    If provided, prec means floats are compared to prec digits of precision.
     """
     data1 = [parse_line(x) for x in str1.strip().split('\n')]
     data2 = [parse_line(x) for x in str2.strip().split('\n')]
     # Compare
-    assert len(data1) == len(data2)
+    if not len(data1) == len(data2):
+        return False
     for line1, line2 in zip(data1,data2):
-        assert line1 == line2
+        if not line1 == line2:
+            if prec is not None:
+                for x1,x2 in zip(line1,line2):
+                    if isinstance(x1,str) or isinstance(x2,str):
+                        if x1 != x2:
+                            return False
+                    else:
+                        if abs(x1-x2) >= 10**(-prec):
+                            return False
+            else:
+                return False
     return True
 
 def test_load(sample_vestafile, sample_vesta_filename):
@@ -234,6 +247,94 @@ def test_set_section_cutoff_levels(sample_vestafile):
     assert compare_vesta_strings(str(sample_vestafile["SECTP"]), expected_sectp)
     assert compare_vesta_strings(str(sample_vestafile["SECTS"]), expected_sects)
 
+def test_set_boundary(sample_vestafile):
+    # Test setting all 6 parameters
+    sample_vestafile.set_boundary(-0.1,1.1,-0.2,1.2,-0.5,0.5)
+    expected_bound = """BOUND
+       -0.1      1.1      -0.2      1.2      -0.5        0.5
+  0   0   0   0  0"""
+    assert compare_vesta_strings(str(sample_vestafile["BOUND"]), expected_bound)
+    # Test changing one parameter
+    sample_vestafile.set_boundary(ymin=0.3)
+    expected_bound = """BOUND
+       -0.1      1.1       0.3      1.2      -0.5        0.5
+  0   0   0   0  0"""
+    assert compare_vesta_strings(str(sample_vestafile["BOUND"]), expected_bound)
 
-    
-    
+def test_set_unit_cell_line_visibility(sample_vestafile):
+    # Hide line
+    assert sample_vestafile.set_unit_cell_line_visibility(show=False) == 0
+    expected_ucolp = """UCOLP
+   0   0  1.000   0   0   0"""
+    assert compare_vesta_strings(str(sample_vestafile["UCOLP"]), expected_ucolp)
+    # Show all lines
+    assert sample_vestafile.set_unit_cell_line_visibility(all=True) == 2
+    expected_ucolp = """UCOLP
+   0   2  1.000   0   0   0"""
+    assert compare_vesta_strings(str(sample_vestafile["UCOLP"]), expected_ucolp)
+    # Show just one line
+    assert sample_vestafile.set_unit_cell_line_visibility(show=True) == 1
+    expected_ucolp = """UCOLP
+   0   1  1.000   0   0   0"""
+    assert compare_vesta_strings(str(sample_vestafile["UCOLP"]), expected_ucolp)
+
+def test_set_compass_visibility(sample_vestafile):
+    # Turn off compass
+    assert sample_vestafile.set_compass_visibility(False) == 0
+    expected_comps = "COMPS 0"
+    assert compare_vesta_strings(str(sample_vestafile["COMPS"]), expected_comps)
+    # Turn on compass
+    assert sample_vestafile.set_compass_visibility(True) == 1
+    expected_comps = "COMPS 1"
+    assert compare_vesta_strings(str(sample_vestafile["COMPS"]), expected_comps)
+    # Turn on compass, but without axes labels
+    assert sample_vestafile.set_compass_visibility(True, axes=False) == 2
+    expected_comps = "COMPS 2"
+    assert compare_vesta_strings(str(sample_vestafile["COMPS"]), expected_comps)
+
+def test_set_scene_view_matrix(sample_vestafile):
+    # Apply a valid matrix
+    sample_vestafile.set_scene_view_matrix([[0.707107,0.707107,0],[-0.707107,0.707107,0],[0,0,1]])
+    expected_scene = """SCENE
+ 0.707107  0.707107  0.000000  0.000000
+-0.707107  0.707107  0.000000  0.000000
+ 0.000000  0.000000  1.000000  0.000000
+ 0.000000  0.000000  0.000000  1.000000
+  0.000   0.000
+  0.000
+  1.000"""
+    assert compare_vesta_strings(str(sample_vestafile["SCENE"]), expected_scene)
+    # Apply invalid matrix
+    with pytest.raises(ValueError):
+        sample_vestafile.set_scene_view_matrix([[1,0,0],[0,1,0],[0,0,1],[1,0,0]])
+    # Check nothing changed
+    assert compare_vesta_strings(str(sample_vestafile["SCENE"]), expected_scene)
+
+def test_set_scene_view_direction(sample_vestafile):
+    # Preset: 1
+    sample_vestafile.set_scene_view_direction('1')
+    expected_scene = """SCENE
+ 1.000000  0.000000  0.000000  0.000000
+ 0.000000  1.000000  0.000000  0.000000
+ 0.000000  0.000000  1.000000  0.000000
+ 0.000000  0.000000  0.000000  1.000000
+  0.000   0.000
+  0.000
+  1.000"""
+    assert compare_vesta_strings(str(sample_vestafile["SCENE"]), expected_scene),\
+        "Did not properly set view to '1'."
+    # Preset: c
+    sample_vestafile.set_scene_view_direction('c')
+    # Expected data obtained by actually doing it in VESTA.
+    expected_scene = """SCENE
+ 0.866025 -0.166667 -0.471405  0.000000
+ 0.000000  0.942809 -0.333333  0.000000
+ 0.500000  0.288675  0.816497  0.000000
+ 0.000000  0.000000  0.000000  1.000000
+  0.000   0.000
+  0.000
+  1.000"""
+    # Because floating-point operations are involved, only compare floats to
+    # 6 digits of precision, which is VESTA's default for SCENE.
+    assert compare_vesta_strings(str(sample_vestafile["SCENE"]), expected_scene, prec=6),\
+        "Did not properly set view to 'c'."

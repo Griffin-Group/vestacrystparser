@@ -504,7 +504,7 @@ class VestaFile:
 
         SCENE
         """
-        if len(matrix) != 3 or len(matrix[0]) != 3:
+        if len(matrix) != 3 or len(matrix[0]) != 3 or len(matrix[1]) != 3 or len(matrix[2]) != 3:
             raise ValueError("matrix must be 3x3")
         section = self["SCENE"]
         for i in range(3):
