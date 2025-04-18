@@ -51,7 +51,7 @@ def test_save(tmp_path, sample_vestafile, sample_vesta_filename):
         with open(tmp_path / "output.vesta", 'r') as f2:
             assert compare_vesta_strings(f1.read(), f2.read())
 
-def test_site_color(sample_vestafile):
+def test_set_site_color(sample_vestafile):
     """Tests set_site_color"""
     # Check that writing works as expected.
     sample_vestafile.set_site_color(1,12,16,100)
@@ -79,3 +79,161 @@ def test_site_color(sample_vestafile):
     # Confirm that nothing changed.
     assert compare_vesta_strings(str(sample_vestafile["SITET"]), expected_sitet), "Site colors changed when called out-of-range index"
     # I don't *expect* any side-effects from this function. Dunno how to easily test that, though.
+
+def test_set_atom_color(sample_vestafile):
+    # Check that writing works as expected
+    sample_vestafile.set_atom_color(1,12,16,100)
+    expected_sitet = """SITET
+    1 Cu 1.2800 12 16 100 34 71 220 204 0
+    0 0 0 0 0 0"""
+    expected_atomt = """ATOMT
+  1         Cu  1.2800  12  16 100  34  71 220 204
+  0 0 0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["ATOMT"]), expected_atomt), "Atom color not changed as expected"
+    assert compare_vesta_strings(str(sample_vestafile["SITET"]), expected_sitet), "Site color not changed as expected"
+    # Check exception
+    with pytest.raises(IndexError):
+        sample_vestafile.set_atom_color(0,20,30,40)
+    # Make sure nothing got changed
+    assert compare_vesta_strings(str(sample_vestafile["ATOMT"]), expected_atomt), "Atom color changed when it shouldn't have"
+    assert compare_vesta_strings(str(sample_vestafile["SITET"]), expected_sitet), "Site color changed when it shouldn't have"
+    # Test element-based indexing
+    sample_vestafile.set_atom_color('Cu', 15,25,35)
+    expected_sitet = """SITET
+    1 Cu 1.2800 15 25 35 34 71 220 204 0
+    0 0 0 0 0 0"""
+    expected_atomt = """ATOMT
+  1         Cu  1.2800  15  25  35  34  71 220 204
+  0 0 0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["ATOMT"]), expected_atomt), "Atom color not changed as expected"
+    assert compare_vesta_strings(str(sample_vestafile["SITET"]), expected_sitet), "Site color not changed as expected"
+    # Test that override_site_colors=False works
+    sample_vestafile.set_atom_color('Cu', 11,22,33, overwrite_site_colors=False)
+    expected_atomt = """ATOMT
+  1         Cu  1.2800  11  22  33  34  71 220 204
+  0 0 0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["ATOMT"]), expected_atomt), "Atom color not changed as expected"
+    assert compare_vesta_strings(str(sample_vestafile["SITET"]), expected_sitet), "Site color changed when it shouldn't have"
+    
+def test_lattice_plane(sample_vestafile):
+    # Check that deleting a lattice plane that doesn't exist doesn't change things
+    with pytest.raises(IndexError):
+        sample_vestafile.delete_lattice_plane(0)
+    empty_splan = """SPLAN
+  0   0   0   0"""
+    assert compare_vesta_strings(str(sample_vestafile["SPLAN"]), empty_splan), "SPLAN changed when it shouldn't have"
+    # Check that we can add a lattice plane
+    sample_vestafile.add_lattice_plane(1.5,-1,10, 5.35)
+    expected_splan = """SPLAN
+    1 1.5 -1 10 5.35 255 0 255 192
+    0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["SPLAN"]), expected_splan), "Expected lattice plane didn't get added"
+    # Add a second lattice plane, with colour
+    sample_vestafile.add_lattice_plane(1,0,0, -10, 0, 200, 0, 10)
+    expected_splan2 = """SPLAN
+    1 1.5 -1 10 5.35 255 0 255 192
+    2 1 0 0 -10 0 200 0 10
+    0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["SPLAN"]), expected_splan2), "Expected lattice plane didn't get added"
+    # Check that deleting reverts as expected
+    sample_vestafile.delete_lattice_plane(2)
+    assert compare_vesta_strings(str(sample_vestafile["SPLAN"]), expected_splan), "Expected lattice plane didn't get deleted"
+    # Add it back then remove number 1. See how re-indexing gets handled.
+    sample_vestafile.add_lattice_plane(1,0,0, -10, 0, 200, 0, 10)
+    sample_vestafile.delete_lattice_plane(1)
+    expected_splan = """SPLAN
+    1 1 0 0 -10 0 200 0 10
+    0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["SPLAN"]), expected_splan), "Expected lattice plane didn't get deleted or reindexed"
+    # Check out-of-range
+    with pytest.raises(IndexError):
+        sample_vestafile.delete_lattice_plane(3)
+    assert compare_vesta_strings(str(sample_vestafile["SPLAN"]), expected_splan), "SPLAN changed when it shouldn't have"
+    # Check deleting negative indices
+    sample_vestafile.delete_lattice_plane(-1)
+    assert compare_vesta_strings(str(sample_vestafile["SPLAN"]), empty_splan), "Didn't delete expected lattice plane"
+    
+def test_delete_isosurface(sample_vestafile):
+    # We currently have no isosurface test fixtures.
+    # So here we'll make sure it throws the right errors.
+    with pytest.raises(IndexError):
+        sample_vestafile.delete_isosurface(1)
+    empty_isurf = """ISURF
+    0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["ISURF"]), empty_isurf), "ISURF changed when it shouldn't have"
+    with pytest.raises(IndexError):
+        sample_vestafile.delete_isosurface(0)
+    assert compare_vesta_strings(str(sample_vestafile["ISURF"]), empty_isurf), "ISURF changed when it shouldn't have"
+
+def test_set_section_color_scheme(sample_vestafile):
+    # Initial values
+    expected_sectp = """SECTP
+  1  0.00000E+00  1.00000E+00  0.00000E+00  0.00000E+00  0.00000E+00  0.00000E+00"""    
+    expected_sects = "SECTS  32  1"
+    expected_seccl = "SECCL 0"
+    # Set to the current colour scheme
+    sample_vestafile.set_section_color_scheme("B-G-R")
+    assert compare_vesta_strings(str(sample_vestafile["SECTP"]), expected_sectp), "SECTP doesn't match B-G-R"
+    assert compare_vesta_strings(str(sample_vestafile["SECTS"]), expected_sects), "SECTS doesn't match B-G-R"
+    assert compare_vesta_strings(str(sample_vestafile["SECCL"]), expected_seccl), "SECCL doesn't match B-G-R"
+    # Reverse it
+    sample_vestafile.set_section_color_scheme("R-G-B")
+    expected_sectp = """SECTP
+ -1  0.00000E+00  1.00000E+00  0.00000E+00  0.00000E+00  0.00000E+00  0.00000E+00"""  
+    expected_seccl = "SECCL 1"
+    assert compare_vesta_strings(str(sample_vestafile["SECTP"]), expected_sectp), "SECTP doesn't match R-G-B"
+    assert compare_vesta_strings(str(sample_vestafile["SECTS"]), expected_sects), "SECTS doesn't match R-G-B"
+    assert compare_vesta_strings(str(sample_vestafile["SECCL"]), expected_seccl), "SECCL doesn't match R-G-B"
+    # Try an index-based assignment for Y-M-C (a reversed map)
+    sample_vestafile.set_section_color_scheme(3)
+    expected_seccl = "SECCL 3"
+    expected_sects = "SECTS  40  1"
+    assert compare_vesta_strings(str(sample_vestafile["SECTP"]), expected_sectp), "SECTP doesn't match Y-M-C"
+    assert compare_vesta_strings(str(sample_vestafile["SECTS"]), expected_sects), "SECTS doesn't match Y-M-C"
+    assert compare_vesta_strings(str(sample_vestafile["SECCL"]), expected_seccl), "SECCL doesn't match Y-M-C"
+    # Finally, cyclic ostwald
+    sample_vestafile.set_section_color_scheme("Cyclic: Ostwald")
+    expected_seccl = "SECCL 10"
+    expected_sects = "SECTS  48  1"
+    expected_sectp = """SECTP
+  1  0.00000E+00  1.00000E+00  0.00000E+00  0.00000E+00  0.00000E+00  0.00000E+00"""
+    assert compare_vesta_strings(str(sample_vestafile["SECTP"]), expected_sectp), "SECTP doesn't match Cyclic: Ostwald"
+    assert compare_vesta_strings(str(sample_vestafile["SECTS"]), expected_sects), "SECTS doesn't match Cyclic: Ostwald"
+    assert compare_vesta_strings(str(sample_vestafile["SECCL"]), expected_seccl), "SECCL doesn't match Cyclic: Ostwald"
+    # Finally, test an error
+    with pytest.raises(ValueError):
+        sample_vestafile.set_section_color_scheme("Not a real color scheme")
+    assert compare_vesta_strings(str(sample_vestafile["SECTP"]), expected_sectp), "SECTP changed when it shouldn't have"
+    assert compare_vesta_strings(str(sample_vestafile["SECTS"]), expected_sects), "SECTS changed when it shouldn't have"
+    assert compare_vesta_strings(str(sample_vestafile["SECCL"]), expected_seccl), "SECCL changed when it shouldn't have"
+    
+def test_set_section_cutoff_levels(sample_vestafile):
+    # Changing one thing at a time
+    expected_sects = "SECTS  32  1"
+    sample_vestafile.set_section_cutoff_levels(lattice_max=0.5)
+    expected_sectp = """SECTP
+  1  0.00000E+00  1.00000E+00  0.00000E+00  0.50000E+00  0.00000E+00  0.00000E+00"""
+    assert compare_vesta_strings(str(sample_vestafile["SECTP"]), expected_sectp)
+    assert compare_vesta_strings(str(sample_vestafile["SECTS"]), expected_sects)
+    # Change two things
+    sample_vestafile.set_section_cutoff_levels(lattice_min=0.1, isosurface_min=0.12)
+    expected_sectp = """SECTP
+  1  0.00000E+00  1.00000E+00  0.10000E+00  0.50000E+00  0.12000E+00  0.00000E+00"""
+    assert compare_vesta_strings(str(sample_vestafile["SECTP"]), expected_sectp)
+    assert compare_vesta_strings(str(sample_vestafile["SECTS"]), expected_sects)
+    # Set the manual flag too
+    sample_vestafile.set_section_cutoff_levels(isosurface_max=12, isosurface_auto=False)
+    expected_sectp = """SECTP
+  1  0.00000E+00  1.00000E+00  0.10000E+00  0.50000E+00  0.12000E+00  0.12000E+02"""
+    expected_sects = "SECTS 160  1"
+    assert compare_vesta_strings(str(sample_vestafile["SECTP"]), expected_sectp)
+    assert compare_vesta_strings(str(sample_vestafile["SECTS"]), expected_sects)
+    # Then unset the manual flag
+    sample_vestafile.set_section_cutoff_levels(isosurface_auto=True)
+    expected_sects = "SECTS  32  1"
+    assert compare_vesta_strings(str(sample_vestafile["SECTP"]), expected_sectp)
+    assert compare_vesta_strings(str(sample_vestafile["SECTS"]), expected_sects)
+
+
+    
+    

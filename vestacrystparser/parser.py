@@ -313,14 +313,16 @@ class VestaFile:
         """
         SPLAN
 
-        Index (1-based)
+        Index (1-based).
+        Accepts negative indices, counting from the end.
         """
         if index == 0:
-            raise ValueError("VESTA indices are 1-based; 0 is invalid index.")
+            raise IndexError("VESTA indices are 1-based; 0 is invalid index.")
         section = self["SPLAN"]
         # Process the index.
         if index < 0:
-            index = len(section) + 1 + index
+            # Note that length of section includes the empty 0-line.
+            index = len(section) + index
         if index <= 0 or index >= len(section):
             raise IndexError("Index is out of range.")
         # Delete the wanted row.
@@ -337,11 +339,12 @@ class VestaFile:
         Index (1-based)
         """
         if index == 0:
-            raise ValueError("VESTA indices are 1-based; 0 is invalid index.")
+            raise IndexError("VESTA indices are 1-based; 0 is invalid index.")
         section = self["ISURF"]
         # Process the index.
         if index < 0:
-            index = len(section) + 1 + index
+            # len(section) includes the empty 0-line
+            index = len(section) + index
         if index <= 0 or index >= len(section):
             raise IndexError("Index is out of range.")
         # Delete the wanted row.
@@ -404,8 +407,8 @@ class VestaFile:
             section.inline[0] &= ~16
         else:
             # Set bit 4, unset bit 3.
-            section.inline[0] &= 8
-            section.inline[0] |= ~16
+            section.inline[0] &= ~8
+            section.inline[0] |= 16
 
     def set_section_cutoff_levels(self,
                                 lattice_min:float=None,
