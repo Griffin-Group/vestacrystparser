@@ -620,9 +620,9 @@ class VestaFile:
             element = [len(section.data), symbol, 1.28, 128,128,128,128,128,128]
             section.data.insert(-1, element)
         # Use found data to set-up a new site
-        params = element[2:10] # Radius, RGB, RGB
+        params = element[2:10] # Radius, RGB, RGB, 204
         section = self["SITET"]
-        section.data.insert(-1, [new_idx, label] + params + [204, 0])
+        section.data.insert(-1, [new_idx, label] + params + [0])
         # TODO: Set up SBOND from style.ini
     
     def get_structure(self) -> list[list]:

@@ -375,3 +375,68 @@ def test_set_scene_view_direction(sample_vestafile):
     # 6 digits of precision, which is VESTA's default for SCENE.
     assert compare_vesta_strings(str(sample_vestafile["SCENE"]), expected_scene, prec=6),\
         "Did not properly set view to 'c'."
+
+def test_set_scene_zoom(sample_vestafile):
+    sample_vestafile.set_scene_zoom(1.5)
+    expected_scene = """SCENE
+ 0.000000  1.000000  0.000000  0.000000
+ 0.000000  0.000000  1.000000  0.000000
+ 1.000000  0.000000  0.000000  0.000000
+ 0.000000  0.000000  0.000000  1.000000
+  0.000   0.000
+  0.000
+  1.500"""
+    assert compare_vesta_strings(str(sample_vestafile["SCENE"]), expected_scene),\
+        "Did not properly set zoom."
+
+def test_add_site(sample_vestafile):
+    sample_vestafile.add_site('Cu','Cu',0.2,0.3,0.4,U=0.05)
+    expected_struc = """STRUC
+  1 Cu         Cu  1.0000   0.000000   0.000000   0.000000    1a       1
+                            0.000000   0.000000   0.000000  0.00
+  2 Cu         Cu  1.0000   0.200000   0.300000   0.400000    1a       1
+                            0.000000   0.000000   0.000000  0.00
+  0 0 0 0 0 0 0"""
+    expected_theri = """THERI 1
+  1         Cu  0.050000
+  2         Cu  0.050000
+  0 0 0"""
+    expected_sitet = """SITET
+  1         Cu  1.2800  34  71 220  34  71 220 204  0
+  2         Cu  1.2800  34  71 220  34  71 220 204  0
+  0 0 0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["STRUC"]), expected_struc),\
+        "Adding one atom did not change STRUC properly."
+    assert compare_vesta_strings(str(sample_vestafile["THERI"]), expected_theri),\
+        "Adding one atom did not change THERI properly."
+    assert compare_vesta_strings(str(sample_vestafile["SITET"]), expected_sitet),\
+        "Adding one atom did not change SITET properly."
+    # Check that changing atom colours works as expected.
+    sample_vestafile.set_atom_color('Cu',100,110,120, overwrite_site_colors=False)
+    sample_vestafile.add_site('Cu','X',0.5,0.5,0.5)
+    expected_struc = """STRUC
+  1 Cu         Cu  1.0000   0.000000   0.000000   0.000000    1a       1
+                            0.000000   0.000000   0.000000  0.00
+  2 Cu         Cu  1.0000   0.200000   0.300000   0.400000    1a       1
+                            0.000000   0.000000   0.000000  0.00
+  3 Cu         X   1.0000   0.500000   0.500000   0.500000    1a       1
+                            0.000000   0.000000   0.000000  0.00
+  0 0 0 0 0 0 0"""
+    expected_theri = """THERI 1
+  1         Cu  0.050000
+  2         Cu  0.050000
+  3         X   0.000000
+  0 0 0"""
+    expected_sitet = """SITET
+  1         Cu  1.2800  34  71 220  34  71 220 204  0
+  2         Cu  1.2800  34  71 220  34  71 220 204  0
+  3         X   1.2800 100 110 120  34  71 220 204  0
+  0 0 0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["STRUC"]), expected_struc),\
+        "Adding atom of different colour did not change STRUC properly."
+    assert compare_vesta_strings(str(sample_vestafile["THERI"]), expected_theri),\
+        "Adding atom of different colour did not change THERI properly."
+    assert compare_vesta_strings(str(sample_vestafile["SITET"]), expected_sitet),\
+        "Adding atom of different colour did not change SITET properly."
+    # TODO: SBOND
+    # TODO: different element, get default colours.
