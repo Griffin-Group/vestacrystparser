@@ -1,6 +1,7 @@
 import logging
 import math
 import os
+from typing import Union
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +82,7 @@ class VestaSection:
         else:
             self.data.append(parse_line(line))
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Convert the section back to text.
         
@@ -168,7 +169,7 @@ class VestaFile:
                     self.order.append("GLOBAL")
                 self.sections[current_section].add_line(line)
     
-    def get_section(self, section_name) -> VestaSection|None:
+    def get_section(self, section_name) -> Union[VestaSection, None]:
         """
         Retrieve a VestaSection by its header.
         
@@ -216,7 +217,7 @@ class VestaFile:
             summary += f"  {sec_name}: {nlines} additional line(s) ({typ})\n"
         return summary
 
-    def set_site_color(self, index:int|list[int], r:int, g:int, b:int):
+    def set_site_color(self, index:Union[int, list[int]], r:int, g:int, b:int):
         """
         Set the RGB site colour for sites with index (1-based).
         Supports setting multiple sites at once.
@@ -252,7 +253,7 @@ class VestaFile:
         if not changed:
             logger.warning(f"No sites with indices {index} found.")
     
-    def set_atom_color(self, element:str|int, r:int, g:int, b:int,
+    def set_atom_color(self, element:Union[str, int], r:int, g:int, b:int,
                        overwrite_site_colors:bool=True):
         """
         Sets the colour of all atoms of an element.
@@ -354,7 +355,7 @@ class VestaFile:
             if line[0] > 0:
                 line[0] = i + 1
 
-    def set_section_color_scheme(self, scheme:int|str):
+    def set_section_color_scheme(self, scheme:Union[int, str]):
         """
         Sets the section colour scheme, as in Properties > Sections > Sections and slices,
         from the drop-down menu.
@@ -737,7 +738,7 @@ class VestaFile:
         if end is not None:
             section.inline[2] = end
     
-    def find_sites(self, elements:list[str]|str=None,
+    def find_sites(self, elements:Union[list[str], str, None]=None,
                    xmin:float=0, xmax:float=1,
                    ymin:float=0, ymax:float=1,
                    zmin:float=0, zmax:float=1) -> list[int]:
