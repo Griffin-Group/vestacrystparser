@@ -7,7 +7,8 @@ from pymatgen.core import Structure
 
 from vestacrystparser.parser import VestaFile
 
-def vesta_from_structure(stru:Structure) -> VestaFile:
+
+def vesta_from_structure(stru: Structure) -> VestaFile:
     # Initialise an empty Vesta file
     vfile = VestaFile()
     # Set the lattice parameters.
@@ -18,4 +19,3 @@ def vesta_from_structure(stru:Structure) -> VestaFile:
         vfile.add_site(element, element, *site.frac_coords)
     # Done
     return vfile
-    

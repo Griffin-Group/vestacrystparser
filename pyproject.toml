@@ -32,6 +32,10 @@ classifiers = [
 
 [project.optional-dependencies]
 pymatgen = ["pymatgen"]
+dev = [
+    "flake8",
+    "autopep8",
+]
 
 [project.urls]
 Repository = "https://github.com/Griffin-Group/vestacrystparser"

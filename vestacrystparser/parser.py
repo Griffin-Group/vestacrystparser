@@ -5,9 +5,11 @@ from typing import Union
 
 logger = logging.getLogger(__name__)
 
-def parse_token(token):
+
+def parse_token(token: str) -> Union[int, float, str]:
     """
-    Convert a token to int or float if possible; otherwise, return it as a string.
+    Convert a token to int or float if possible.
+    Otherwise, return it as a string.
     """
     try:
         return int(token)
@@ -17,13 +19,15 @@ def parse_token(token):
         except ValueError:
             return token
 
-def parse_line(line):
+
+def parse_line(line: str) -> list[Union[int, float, str]]:
     """
     Split a line into tokens and convert each token.
     Returns a list of tokens.
     """
     tokens = line.split()
     return [parse_token(tok) for tok in tokens]
+
 
 # Sections that have a blank line after them.
 # (So far, I've only found this to be important for IMPORT_DENSITY,
@@ -41,17 +45,20 @@ sections_with_blank_line_before = [
     "STYLE",
 ]
 
+
 class VestaSection:
     def __init__(self, header_line):
         """
         Initialize a VESTA section from a header line.
-        
+
         For the TITLE section:
-          - Inline data is not preserved on the header, but moved to the multi-line data.
+          - Inline data is not preserved on the header, but moved to the
+            multi-line data.
         For other sections:
-          - If inline data is present on the header, it is stored (parsed) in self.inline.
+          - If inline data is present on the header, it is stored (parsed) in
+            self.inline.
           - Subsequent lines are stored in self.data.
-        
+
         Args:
             header_line (str): The complete header line (with any inline data).
         """
@@ -64,7 +71,7 @@ class VestaSection:
         stripped = line.lstrip()
         tokens = stripped.split(maxsplit=1)
         self.header = tokens[0]  # e.g., TITLE, CELL, TRANM, etc.
-        
+
         inline_text = tokens[1] if len(tokens) > 1 else ""
         # Tokenize inline data.
         self.inline = parse_line(inline_text) if inline_text else []
@@ -73,7 +80,7 @@ class VestaSection:
     def add_line(self, line):
         """
         Add a continuation line to the section.
-        
+
         For TITLE, store the entire line as a string.
         For other sections, split the line into tokens and convert them.
         """
@@ -85,7 +92,7 @@ class VestaSection:
     def __str__(self) -> str:
         """
         Convert the section back to text.
-        
+
           - If inline data exists, it is written on the header line.
           - Then, any extra lines are written one per line.
         """
@@ -107,17 +114,17 @@ class VestaSection:
         if self.header in sections_with_blank_line:
             text += "\n"
         return text
-    
+
     def __len__(self) -> int:
         """Number of lines (besides the header line)"""
         return len(self.data)
 
 
 class VestaFile:
-    def __init__(self, filename=None):
+    def __init__(self, filename: Union[str, None] = None):
         """
         Initialize a VESTA file instance.
-        
+
         Attributes:
             sections (dict): Maps section headers to VestaSection objects.
             order (list): The order in which sections appear in the file.
@@ -128,20 +135,22 @@ class VestaFile:
             self.load(filename)
         else:
             # Initialise the empty VESTA file.
-            # There's got to be a more rigorous way to store data files in a Python package...
-            filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), "default.vesta")
+            # There's got to be a more rigorous way to store data files in
+            # a Python package...
+            filename = os.path.join(os.path.dirname(
+                os.path.abspath(__file__)), "default.vesta")
             self.load(filename)
-    
+
     def load(self, filename):
         """
         Load and parse a VESTA file.
-        
+
         Args:
             filename (str): Path to the VESTA file.
         """
         with open(filename, 'r') as f:
             lines = f.readlines()
-        
+
         current_section = None
         for raw_line in lines:
             # Remove only the newline character.
@@ -168,20 +177,20 @@ class VestaFile:
                     self.sections["GLOBAL"] = section
                     self.order.append("GLOBAL")
                 self.sections[current_section].add_line(line)
-    
-    def get_section(self, section_name) -> Union[VestaSection, None]:
+
+    def get_section(self, section_name: str) -> Union[VestaSection, None]:
         """
         Retrieve a VestaSection by its header.
-        
+
         Args:
             section_name (str): e.g., 'TITLE', 'CELL'.
-            
+
         Returns:
             VestaSection or None: The corresponding section object.
         """
         return self.sections.get(section_name)
-    
-    def __getitem__(self, name) -> VestaSection:
+
+    def __getitem__(self, name: str) -> VestaSection:
         return self.sections[name]
 
     def __len__(self) -> int:
@@ -191,13 +200,13 @@ class VestaFile:
     def save(self, filename):
         """
         Write the current VESTA data to disk.
-        
+
         Args:
             filename (str): Output file path.
         """
         with open(filename, 'w') as f:
             f.write(str(self))
-    
+
     def __str__(self) -> str:
         mystr = ""
         for sec_name in self.order:
@@ -217,11 +226,12 @@ class VestaFile:
             summary += f"  {sec_name}: {nlines} additional line(s) ({typ})\n"
         return summary
 
-    def set_site_color(self, index:Union[int, list[int]], r:int, g:int, b:int):
+    def set_site_color(self, index: Union[int, list[int]],
+                       r: int, g: int, b: int):
         """
         Set the RGB site colour for sites with index (1-based).
         Supports setting multiple sites at once.
-        
+
         Args:
             index : indices or list of indices
             r (int): Red value (0-255).
@@ -233,7 +243,8 @@ class VestaFile:
         if isinstance(index, int):
             index = [index]
         if 0 in index:
-            raise IndexError("Illegal site index 0 given! Remember VESTA is 1-based.")
+            raise IndexError(
+                "Illegal site index 0 given! Remember VESTA is 1-based.")
         atom_section = self.get_section("SITET")
         if atom_section is None:
             raise TypeError("No SITET section found!")
@@ -252,9 +263,9 @@ class VestaFile:
         # which can happen if you specify invalid indices.
         if not changed:
             logger.warning(f"No sites with indices {index} found.")
-    
-    def set_atom_color(self, element:Union[str, int], r:int, g:int, b:int,
-                       overwrite_site_colors:bool=True):
+
+    def set_atom_color(self, element: Union[str, int], r: int, g: int, b: int,
+                       overwrite_site_colors: bool = True):
         """
         Sets the colour of all atoms of an element.
 
@@ -267,9 +278,11 @@ class VestaFile:
         elif isinstance(element, int):
             col = 0
         else:
-            raise TypeError("Expected element to be int or str, got " + str(type(element)))
+            raise TypeError(
+                "Expected element to be int or str, got " + str(type(element)))
         if element == 0:
-            raise IndexError("Illegal site index 0 given! Remember VESTA is 1-based.")
+            raise IndexError(
+                "Illegal site index 0 given! Remember VESTA is 1-based.")
         # Find the row with the matching element
         found = False
         for row in section.data:
@@ -280,7 +293,7 @@ class VestaFile:
             logger.warning(f"No elements of type {element} found!")
             return
         # Set the colour
-        row[3:6] = r,g,b
+        row[3:6] = r, g, b
         # If required, find the sites with this element and edit them too.
         if overwrite_site_colors:
             # Grab the element symbol
@@ -291,26 +304,27 @@ class VestaFile:
             for row in section.data:
                 if row[1] == element:
                     # Found a matching element. Edit the site colour
-                    self.set_site_color(row[0], r,g,b)
+                    self.set_site_color(row[0], r, g, b)
 
-    def add_lattice_plane(self, h:float,k:float,l:float,distance:float,
-                          r:int=255,g:int=0,b:int=255,a:int=192):
+    def add_lattice_plane(self, h: float, k: float, l: float, distance: float,
+                          r: int = 255, g: int = 0, b: int = 255,
+                          a: int = 192):
         """
         Adds a lattice plane, sectioning the volumetric data.
 
         Sets SPLAN.
         Mimics Edit Data > Lattice Planes > Add lattice planes.
-        
+
         Args:
             h,k,l - Miller indices of the plane.
             distance - distance from origin (Angstrom)
             r,g,b,a - colour (0-255) of section. Default is magenta.
         """
         section = self["SPLAN"]
-        new_plane = [len(section.data), h,k,l,distance,r,g,b,a]
+        new_plane = [len(section.data), h, k, l, distance, r, g, b, a]
         section.data.insert(-1, new_plane)
 
-    def delete_lattice_plane(self, index:int):
+    def delete_lattice_plane(self, index: int):
         """
         SPLAN
 
@@ -333,7 +347,7 @@ class VestaFile:
             if line[0] > 0:
                 line[0] = i + 1
 
-    def delete_isosurface(self, index:int):
+    def delete_isosurface(self, index: int):
         """
         ISURF
 
@@ -355,9 +369,10 @@ class VestaFile:
             if line[0] > 0:
                 line[0] = i + 1
 
-    def set_section_color_scheme(self, scheme:Union[int, str]):
+    def set_section_color_scheme(self, scheme: Union[int, str]):
         """
-        Sets the section colour scheme, as in Properties > Sections > Sections and slices,
+        Sets the section colour scheme, as in
+        Properties > Sections > Sections and slices,
         from the drop-down menu.
 
         scheme - either a string with the exact name of the colour scheme, or
@@ -380,7 +395,7 @@ class VestaFile:
             "Cyclic: Inverted Ostwald",
             "Cyclic: W-R-K-B-W",
             "Cyclic: K-R-W-B-K",
-            ]
+        ]
         # Convert string-name to index name.
         if isinstance(scheme, str):
             scheme = section_color_scheme_names.index(scheme)
@@ -412,14 +427,14 @@ class VestaFile:
             section.inline[0] |= 16
 
     def set_section_cutoff_levels(self,
-                                lattice_min:float=None,
-                                lattice_max:float=None,
-                                isosurface_min:float=None,
-                                isosurface_max:float=None,
-                                isosurface_auto:bool=None):
+                                  lattice_min: float = None,
+                                  lattice_max: float = None,
+                                  isosurface_min: float = None,
+                                  isosurface_max: float = None,
+                                  isosurface_auto: bool = None):
         """
         Sets cutoff levels for sections (Properties > Sections > Cutoff levels)
-        
+
         Unset keyword arguments are left unchanged.
 
         SECTP, SECTS
@@ -444,11 +459,12 @@ class VestaFile:
                 # Set the Manual bit
                 section.inline[0] |= 128
 
-    def set_boundary(self, xmin:float=None, xmax:float=None, ymin:float=None,
-                     ymax:float=None, zmin:float=None, zmax:float=None):
+    def set_boundary(self, xmin: float = None, xmax: float = None,
+                     ymin: float = None, ymax: float = None,
+                     zmin: float = None, zmax: float = None):
         """
         Sets Boundary.
-        
+
         Unset arguments are left unchanged.
 
         BOUND
@@ -457,31 +473,35 @@ class VestaFile:
         for i, x in enumerate([xmin, xmax, ymin, ymax, zmin, zmax]):
             if x is not None:
                 section.data[0][i] = x
-    
-    def set_unit_cell_line_visibility(self, show:bool=None, all:bool=False) -> int:
+
+    def set_unit_cell_line_visibility(self, show: bool = None,
+                                      all: bool = False) -> int:
         """
-        Sets whether to show the unit cell or whether to show all cells (vs just single)
+        Sets whether to show the unit cell or whether to show all cells
+        (vs just single)
 
         Returns the value of the flag that was set.
 
         UCOLP
         """
         # Validate input
-        if (show == False) and (all == True):
-            logger.warning("Cannot set both 'Do not show' and 'All unit cells'; doing 'do not show'")
+        if (show is False) and (all is True):
+            logger.warning(
+                "Cannot set both 'Do not show' and 'All unit cells'; doing 'do not show'")
             all = False
         section = self["UCOLP"]
-        if show == False:
+        if show is False:
             section.data[0][1] = 0
-        elif all == True:
+        elif all is True:
             section.data[0][1] = 2
-        elif show == True:
+        elif show is True:
             section.data[0][1] = 1
         else:
-            logger.warning("Unable to determine how to set unit_cell_line_visibility.")
+            logger.warning(
+                "Unable to determine how to set unit_cell_line_visibility.")
         return section.data[0][1]
-    
-    def set_compass_visibility(self, show:bool, axes:bool=True) -> int:
+
+    def set_compass_visibility(self, show: bool, axes: bool = True) -> int:
         """
         Set compass and axes label visibility.
 
@@ -493,26 +513,27 @@ class VestaFile:
         if not show:
             section.inline[0] = 0
         else:
-            if axes == False:
+            if axes is False:
                 section.inline[0] = 2
             else:
                 section.inline[0] = 1
         return section.inline[0]
-    
+
     def set_scene_view_matrix(self, matrix):
         """
         Set the 3x3 rotation matrix describing viewing angle.
 
         SCENE
         """
-        if len(matrix) != 3 or len(matrix[0]) != 3 or len(matrix[1]) != 3 or len(matrix[2]) != 3:
+        if (len(matrix) != 3 or len(matrix[0]) != 3 or len(matrix[1]) != 3
+                or len(matrix[2]) != 3):
             raise ValueError("matrix must be 3x3")
         section = self["SCENE"]
         for i in range(3):
             for j in range(3):
                 section.data[i][j] = matrix[i][j]
-    
-    def set_scene_view_direction(self, view:str):
+
+    def set_scene_view_direction(self, view: str) -> list[list[float]]:
         """
         Set view direction to a preset viewing direction.
 
@@ -524,7 +545,7 @@ class VestaFile:
         """
         # Get the unit cell parameters
         section = self["CELLP"]
-        a,b,c,alpha,beta,gamma = section.data[0]
+        a, b, c, alpha, beta, gamma = section.data[0]
         alpha = math.radians(alpha)
         beta = math.radians(beta)
         gamma = math.radians(gamma)
@@ -534,22 +555,26 @@ class VestaFile:
         elif view == "b":
             raise NotImplementedError
         elif view == "c":
-            #  c_x = c cos β,
-            #  c_y = c (cos α – cos β cos γ)/ sin γ,
-            #  c_z = c V   with V = √[1 – cos²β – ((cos α – cos β cos γ)/ sin γ)²].
+            # c_x = c cos β,
+            # c_y = c (cos α – cos β cos γ)/ sin γ,
+            # c_z = c V with V = √[1 – cos²β – ((cos α – cos β cos γ)/ sin γ)²].
             # cos θ = c_z/|c|   and  φ = arctan2(c_y, cₓ).
             # We rotate by Rz(-phi), then Ry(-theta) (which gets c to (0,0,1)),
-            # then Rz(asin(sin(phi)/sqrt(1-sin(theta)**2*cos(phi)**2))) to bring a_y to 0.
+            # then Rz(asin(sin(phi)/sqrt(1-sin(theta)**2*cos(phi)**2)))
+            # to bring a_y to 0.
             cx = math.cos(beta)
-            cy = (math.cos(alpha) - math.cos(beta)*math.cos(gamma))/math.sin(gamma)
-            ct = math.sqrt(1 - cx**2 - cy**2) # cos theta, also cz.
+            cy = (math.cos(alpha) - math.cos(beta)
+                  * math.cos(gamma))/math.sin(gamma)
+            ct = math.sqrt(1 - cx**2 - cy**2)  # cos theta, also cz.
             theta = math.acos(ct)
             phi = math.atan2(cy, cx)
-            cp = math.cos(phi) # cos phi
-            st = math.sin(theta) # sin theta
-            sp = math.sin(phi) # sin phi
-            ca = ct * cp / math.sqrt(1 - st**2 * cp**2) # cosine of angle needed for a
-            sa = sp / math.sqrt(1 - st**2 * cp**2) # sine of angle needed for a
+            cp = math.cos(phi)  # cos phi
+            st = math.sin(theta)  # sin theta
+            sp = math.sin(phi)  # sin phi
+            # cosine of angle needed for a
+            ca = ct * cp / math.sqrt(1 - st**2 * cp**2)
+            # sine of angle needed for a
+            sa = sp / math.sqrt(1 - st**2 * cp**2)
             matrix = [[ct*cp*ca + sp*sa, ct*sp*ca - cp*sa, -st*ca],
                       [ct*cp*sa - sp*ca, ct*sp*sa + cp*ca, -st*sa],
                       [st*cp, st*sp, ct]]
@@ -560,13 +585,13 @@ class VestaFile:
         elif view == "c*":
             raise NotImplementedError
         elif view == "1":
-            matrix = [[1,0,0],[0,1,0],[0,0,1]]
+            matrix = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
         else:
             raise ValueError("Do not recognise view: "+str(view))
         self.set_scene_view_matrix(matrix)
         return matrix
-    
-    def set_scene_zoom(self, zoom:float):
+
+    def set_scene_zoom(self, zoom: float):
         """
         Set zoom of the view. (1 is VESTA default)
 
@@ -575,7 +600,13 @@ class VestaFile:
         section = self["SCENE"]
         section.data[6] = [zoom]
 
-    def set_cell(self, a=None,b=None,c=None,alpha=None,beta=None,gamma=None):
+    def set_cell(self,
+                 a: float = None,
+                 b: float = None,
+                 c: float = None,
+                 alpha: float = None,
+                 beta: float = None,
+                 gamma: float = None):
         """
         Set unit cell parameters
 
@@ -584,12 +615,13 @@ class VestaFile:
         CELLP
         """
         section = self["CELLP"]
-        for i,x in enumerate([a,b,c,alpha,beta,gamma]):
+        for i, x in enumerate([a, b, c, alpha, beta, gamma]):
             if x is not None:
                 section.data[0][i] = x
-    
-    def add_site(self, symbol:str, label:str, x:float, y:float, z:float,
-                 dx=0.0, dy=0.0, dz=0.0, occupation=1.0, charge=0.0, U=0.0):
+
+    def add_site(self, symbol: str, label: str, x: float, y: float, z: float,
+                 dx: float = 0.0, dy: float = 0.0, dz: float = 0.0,
+                 occupation: float = 1.0, charge: float = 0.0, U: float = 0.0):
         """
         Adds a new site.
 
@@ -598,8 +630,9 @@ class VestaFile:
         # Add to structure parameters.
         section = self["STRUC"]
         new_idx = (len(section.data) - 1) // 2 + 1
-        section.data.insert(-1, [new_idx, symbol, label, occupation, x, y, z, '1a', 1])
-        section.data.insert(-1, [dx,dy,dz, charge])
+        section.data.insert(-1, [new_idx, symbol, label,
+                            occupation, x, y, z, '1a', 1])
+        section.data.insert(-1, [dx, dy, dz, charge])
         # Add the uncertainty entry
         section = self["THERI"]
         section.data.insert(-1, [new_idx, label, U])
@@ -618,17 +651,19 @@ class VestaFile:
         if not found:
             # Create a new element
             # TODO: Load data from elements.ini
-            element = [len(section.data), symbol, 1.28, 128,128,128,128,128,128]
+            element = [len(section.data), symbol, 1.28,
+                       128, 128, 128, 128, 128, 128]
             section.data.insert(-1, element)
         # Use found data to set-up a new site
-        params = element[2:10] # Radius, RGB, RGB, 204
+        params = element[2:10]  # Radius, RGB, RGB, 204
         section = self["SITET"]
         section.data.insert(-1, [new_idx, label] + params + [0])
         # TODO: Set up SBOND from style.ini
-    
+
     def get_structure(self) -> list[list]:
         """
-        Gets a list of the key site structure parameters (index, element, label, x, y, z)
+        Gets a list of the key site structure parameters
+        (index, element, label, x, y, z)
 
         Returned data is a copy.
         """
@@ -638,8 +673,8 @@ class VestaFile:
             if len(row) == 9:
                 my_list.append((row[0:3] + row[4:7]).copy())
         return my_list
-    
-    def get_cell(self) -> list[float,float,float,float,float,float]:
+
+    def get_cell(self) -> list[float, float, float, float, float, float]:
         """
         Gets the cell parameters: a,b,c,alpha,beta,gamma
 
@@ -648,7 +683,8 @@ class VestaFile:
         section = self["CELLP"]
         return section.data[0].copy()
 
-    def set_atom_material(self, r:int=None, g:int=None, b:int=None, shininess:float=None):
+    def set_atom_material(self, r: int = None, g: int = None, b: int = None,
+                          shininess: float = None):
         """
         Sets the atom material for lighting purposes.
 
@@ -661,24 +697,24 @@ class VestaFile:
         """
         section = self["ATOMM"]
         # Set the colours
-        for i, x in enumerate([r,g,b]):
+        for i, x in enumerate([r, g, b]):
             if x is not None:
                 section.data[0][i] = x
         # Set the shininess
         # VESTA converts from a 0-100 scale to a 0-128 scale.
         if shininess is not None:
             section.data[1][0] = 1.28 * shininess
-    
-    def set_background_color(self, r:int, g:int, b:int):
+
+    def set_background_color(self, r: int, g: int, b: int):
         """
         Sets the background colour (RGB).
 
         BKGRC
         """
         section = self["BKGRC"]
-        section.data[0] = [r,g,b]
-    
-    def set_enable_lighting(self, enable:bool):
+        section.data[0] = [r, g, b]
+
+    def set_enable_lighting(self, enable: bool):
         """
         Sets whether or not to Enable Lighting.
 
@@ -686,8 +722,8 @@ class VestaFile:
         """
         section = self["LIGHT0"]
         section.inline[0] = int(enable)
-    
-    def set_lighting_angle(self, matrix:list):
+
+    def set_lighting_angle(self, matrix: list):
         """
         Sets the angle for lighting, using a 3x3 rotation matrix.
 
@@ -697,15 +733,16 @@ class VestaFile:
         for i in range(3):
             for j in range(3):
                 section.data[i][j] = matrix[i][j]
+
     def reset_lighting_angle(self):
         """
         Resets the lighting angle to directly overhead.
 
         LIGHT0
         """
-        self.set_lighting_angle([[1,0,0],[0,1,0],[0,0,1]])
-    
-    def set_lighting(self, ambient:int=None, diffuse:int=None):
+        self.set_lighting_angle([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+
+    def set_lighting(self, ambient: int = None, diffuse: int = None):
         """
         Sets the ambient and diffuse character of lighting, in percent.
 
@@ -717,12 +754,13 @@ class VestaFile:
         # N.B. VESTA internally converts the percentages to 0-255 scale.
         if ambient is not None:
             x = int(ambient / 100 * 255)
-            section.data[6] = [x,x,x,255]
+            section.data[6] = [x, x, x, 255]
         if diffuse is not None:
             x = int(diffuse / 100 * 255)
-            section.data[7] = [x,x,x,255]
-    
-    def set_depth_cueing(self, enable:bool=None, start:float=None, end:float=None):
+            section.data[7] = [x, x, x, 255]
+
+    def set_depth_cueing(self, enable: bool = None, start: float = None,
+                         end: float = None):
         """
         Sets depth cueing settings.
 
@@ -737,19 +775,19 @@ class VestaFile:
             section.inline[1] = start
         if end is not None:
             section.inline[2] = end
-    
-    def find_sites(self, elements:Union[list[str], str, None]=None,
-                   xmin:float=0, xmax:float=1,
-                   ymin:float=0, ymax:float=1,
-                   zmin:float=0, zmax:float=1) -> list[int]:
+
+    def find_sites(self, elements: Union[list[str], str, None] = None,
+                   xmin: float = 0, xmax: float = 1,
+                   ymin: float = 0, ymax: float = 1,
+                   zmin: float = 0, zmax: float = 1) -> list[int]:
         """
-        Obtains the site indices (1-based) matching the provided list of elements
-        (if applicable) and with (fractional) coordinates within the specified
-        bounding box.
+        Obtains the site indices (1-based) matching the provided list of
+        elements (if applicable) and with (fractional) coordinates within
+        the specified bounding box.
 
         Fractional coordinates are probably in the interval [0,1).
         """
-        stru = self.get_structure() # List of (index, element, label, x, y, z)
+        stru = self.get_structure()  # List of (index, element, label, x, y, z)
         # Configure the elements list.
         if elements is not None:
             if isinstance(elements, str):
@@ -766,4 +804,3 @@ class VestaFile:
                     # Record the index.
                     indices.append(site[0])
         return indices
-    
