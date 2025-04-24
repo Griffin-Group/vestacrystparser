@@ -18,6 +18,12 @@ def sample_vestafile(sample_vesta_filename) -> VestaFile:
     return VestaFile(sample_vesta_filename)
 
 
+@pytest.fixture
+def default_vesta_filename() -> str:
+    ROOT_DIR = os.path.dirname(TEST_DIR)
+    return os.path.join(ROOT_DIR, 'vestacrystparser', 'default.vesta')
+
+
 def compare_vesta_strings(str1: str, str2: str, prec: int = None) -> bool:
     """
     Takes two VESTA strings, does basic parsing so no formatting,
@@ -45,6 +51,7 @@ def compare_vesta_strings(str1: str, str2: str, prec: int = None) -> bool:
     return True
 
 
+# TODO: test case with volumetric data (so IMPORT_DENISTY is called)
 def test_load(sample_vestafile, sample_vesta_filename):
     # Implicitly by the Fixture, we're testing the Load function.
     # Test that is has expected number of fields
@@ -63,6 +70,13 @@ def test_load(sample_vestafile, sample_vesta_filename):
     with open(sample_vesta_filename, 'r') as f:
         assert compare_vesta_strings(str(sample_vestafile), f.read()), \
             "Full file comparison failed."
+
+
+def test_empty(default_vesta_filename):
+    sample = VestaFile()
+    with open(default_vesta_filename, 'r') as f:
+        assert compare_vesta_strings(str(sample), f.read()), \
+            "Loaded default Vesta file didn't match saved file."
 
 
 def test_save(tmp_path, sample_vestafile, sample_vesta_filename):
@@ -153,6 +167,22 @@ def test_set_atom_color(sample_vestafile):
         "Atom color not changed as expected when overwrite_site_colors=False"
     assert compare_vesta_strings(str(sample_vestafile["SITET"]), expected_sitet), \
         "Site color changed despite overwrite_site_colors=False"
+    # Test exception in element
+    with pytest.raises(TypeError):
+        sample_vestafile.set_atom_color(str, 20, 30, 40)
+    # Make sure nothing got changed
+    assert compare_vesta_strings(str(sample_vestafile["ATOMT"]), expected_atomt), \
+        "Atom color changed when it shouldn't have"
+    assert compare_vesta_strings(str(sample_vestafile["SITET"]), expected_sitet), \
+        "Site color changed when it shouldn't have"
+    # Set element that isn't present
+    # (Currently it just logs a warning. This might change in the future.)
+    sample_vestafile.set_atom_color('Fe', 20, 30, 40)
+    # Make sure nothing got changed
+    assert compare_vesta_strings(str(sample_vestafile["ATOMT"]), expected_atomt), \
+        "Atom color changed when it shouldn't have"
+    assert compare_vesta_strings(str(sample_vestafile["SITET"]), expected_sitet), \
+        "Site color changed when it shouldn't have"
 
 
 def test_lattice_plane(sample_vestafile):
@@ -335,20 +365,29 @@ def test_set_unit_cell_line_visibility(sample_vestafile):
     assert sample_vestafile.set_unit_cell_line_visibility(show=False) == 0
     expected_ucolp = """UCOLP
    0   0  1.000   0   0   0"""
-    assert compare_vesta_strings(
-        str(sample_vestafile["UCOLP"]), expected_ucolp)
+    assert compare_vesta_strings(str(sample_vestafile["UCOLP"]), expected_ucolp), \
+        "Hiding unit cell lines didn't work."
     # Show all lines
     assert sample_vestafile.set_unit_cell_line_visibility(all=True) == 2
     expected_ucolp = """UCOLP
    0   2  1.000   0   0   0"""
-    assert compare_vesta_strings(
-        str(sample_vestafile["UCOLP"]), expected_ucolp)
+    assert compare_vesta_strings(str(sample_vestafile["UCOLP"]), expected_ucolp), \
+        "Showing all cell lines didn't work."
     # Show just one line
     assert sample_vestafile.set_unit_cell_line_visibility(show=True) == 1
     expected_ucolp = """UCOLP
    0   1  1.000   0   0   0"""
-    assert compare_vesta_strings(
-        str(sample_vestafile["UCOLP"]), expected_ucolp)
+    assert compare_vesta_strings(str(sample_vestafile["UCOLP"]), expected_ucolp), \
+        "Showing one unit cell line didn't work."
+    # Some of the less well-defined cases.
+    assert sample_vestafile.set_unit_cell_line_visibility(show=False, all=True) == 0
+    expected_ucolp = """UCOLP
+   0   0  1.000   0   0   0"""
+    assert compare_vesta_strings(str(sample_vestafile["UCOLP"]), expected_ucolp), \
+        "Hiding unit cell lines with all=True didn't hide."
+    assert sample_vestafile.set_unit_cell_line_visibility(all=False) == 0
+    assert compare_vesta_strings(str(sample_vestafile["UCOLP"]), expected_ucolp), \
+        "Setting just all=False caused a change."
 
 
 def test_set_compass_visibility(sample_vestafile):
@@ -420,6 +459,11 @@ def test_set_scene_view_direction(sample_vestafile):
     # 6 digits of precision, which is VESTA's default for SCENE.
     assert compare_vesta_strings(str(sample_vestafile["SCENE"]), expected_scene, prec=6), \
         "Did not properly set view to 'c'."
+    # Ask for an invalid direction
+    with pytest.raises(ValueError):
+        sample_vestafile.set_scene_view_direction('wrong')
+    assert compare_vesta_strings(str(sample_vestafile["SCENE"]), expected_scene, prec=6), \
+        "SCENE changed when it shouldn't have following error."
 
 
 def test_set_scene_zoom(sample_vestafile):
@@ -436,6 +480,7 @@ def test_set_scene_zoom(sample_vestafile):
         "Did not properly set zoom."
 
 
+# TODO: Add test case with THERM.
 def test_add_site(sample_vestafile):
     sample_vestafile.add_site('Cu', 'Cu', 0.2, 0.3, 0.4, U=0.05)
     expected_struc = """STRUC
@@ -499,11 +544,29 @@ def test_get_structure(sample_vestafile):
     expected_data = [[1, 'Cu', 'Cu', 0, 0, 0],
                      [2, 'Cu', 'X', 0.5, 0.5, 0.5]]
     data = sample_vestafile.get_structure()
-    assert data == expected_data, "Adding site did not properly change get_structure."
+    assert data == expected_data, \
+        "Adding site did not properly change get_structure."
     # Ensure returned data is a copy
     data[1][2] = 'foo'
     assert sample_vestafile.get_structure() == expected_data, \
         "Modifying returned list changed original data!"
+
+
+def test_set_cell(sample_vestafile):
+    # Set all values at once
+    sample_vestafile.set_cell(1.1, 1.2, 1.3, 20, 30, 40)
+    expected_cellp = """CELLP
+  1.100000   1.200000   1.300000  20.000000  30.000000  40.000000
+  0.000000   0.000000   0.000000   0.000000   0.000000   0.000000"""
+    assert compare_vesta_strings(str(sample_vestafile["CELLP"]), expected_cellp), \
+        "Setting all cell parameters didn't work as expected."
+    # Keyword set one value
+    sample_vestafile.set_cell(b=1.5)
+    expected_cellp = """CELLP
+  1.100000   1.500000   1.300000  20.000000  30.000000  40.000000
+  0.000000   0.000000   0.000000   0.000000   0.000000   0.000000"""
+    assert compare_vesta_strings(str(sample_vestafile["CELLP"]), expected_cellp), \
+        "Setting one cell parameter didn't work as expected."
 
 
 def test_get_cell(sample_vestafile):

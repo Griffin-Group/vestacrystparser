@@ -170,12 +170,8 @@ class VestaFile:
             else:
                 # Continuation of the current section.
                 if current_section is None:
-                    logger.warning("Data without section found! Line:\n"+line)
-                    # Create a default section if none exists.
-                    current_section = "GLOBAL"
-                    section = VestaSection("GLOBAL")
-                    self.sections["GLOBAL"] = section
-                    self.order.append("GLOBAL")
+                    # This shouldn't happen. We probably have malformed data.
+                    raise ValueError("Data without section found! Line:\n"+line)
                 self.sections[current_section].add_line(line)
 
     def get_section(self, section_name: str) -> Union[VestaSection, None]:
@@ -213,6 +209,7 @@ class VestaFile:
             mystr += str(self.sections[sec_name])
         return mystr
 
+    # TODO: Is this meaningful? Consider replacement.
     def summary(self) -> str:
         """
         Return a summary of the sections.
@@ -247,6 +244,7 @@ class VestaFile:
                 "Illegal site index 0 given! Remember VESTA is 1-based.")
         atom_section = self.get_section("SITET")
         if atom_section is None:
+            # TODO: Custom Error type for improper format?
             raise TypeError("No SITET section found!")
         for i, line in enumerate(atom_section.data):
             if isinstance(line, list) and len(line) >= 6:
@@ -482,12 +480,17 @@ class VestaFile:
 
         Returns the value of the flag that was set.
 
+        Avoid setting both at once. But currently, if you do,
+        show=False takes precedent over all=True, but don't count on it.
+        Note also that setting all=False without setting show
+        is undefined (and leaves it unchanged).
+
         UCOLP
         """
         # Validate input
         if (show is False) and (all is True):
-            logger.warning(
-                "Cannot set both 'Do not show' and 'All unit cells'; doing 'do not show'")
+            logger.warning("Cannot set both 'Do not show' and 'All unit cells';\
+                           doing 'do not show'")
             all = False
         section = self["UCOLP"]
         if show is False:
