@@ -440,3 +440,176 @@ def test_add_site(sample_vestafile):
         "Adding atom of different colour did not change SITET properly."
     # TODO: SBOND
     # TODO: different element, get default colours.
+
+def test_get_structure(sample_vestafile):
+    data = sample_vestafile.get_structure()
+    expected_data = [[1,'Cu','Cu',0,0,0]]
+    assert data == expected_data
+    # See what happens if we modify
+    sample_vestafile.add_site('Cu','X',0.5,0.5,0.5)
+    expected_data = [[1,'Cu','Cu',0,0,0],
+                     [2,'Cu','X',0.5,0.5,0.5]]
+    data = sample_vestafile.get_structure()
+    assert data == expected_data, "Adding site did not properly change get_structure."
+    # Ensure returned data is a copy
+    data[1][2] = 'foo'
+    assert sample_vestafile.get_structure() == expected_data,\
+        "Modifying returned list changed original data!"
+
+def test_get_cell(sample_vestafile):
+    cell = sample_vestafile.get_cell()
+    expected_data = [2.530000, 2.530000, 2.530000, 60.000000, 60.000000, 60.000000]
+    assert cell == expected_data, "get_cell gave the wrong data."
+    # Ensure data is read-only
+    cell[0] = 1.5
+    assert sample_vestafile.get_cell() == expected_data,\
+        "Modifying returned list changed original data!"
+
+def test_set_atom_material(sample_vestafile):
+    # Set RGB
+    sample_vestafile.set_atom_material(110,120,130)
+    expected_atomm = """ATOMM
+ 110 120 130 255
+  25.600"""
+    assert compare_vesta_strings(str(sample_vestafile["ATOMM"]), expected_atomm),\
+        "Setting RGB by position did not work as expected."
+    # Set shininess
+    sample_vestafile.set_atom_material(shininess=50)
+    expected_atomm = """ATOMM
+ 110 120 130 255
+  64.000"""
+    assert compare_vesta_strings(str(sample_vestafile["ATOMM"]), expected_atomm),\
+        "Setting shininess didn't work as expected."
+    # Set colour value by keyword
+    sample_vestafile.set_atom_material(g=99)
+    expected_atomm = """ATOMM
+ 110  99 130 255
+  64.000"""
+    assert compare_vesta_strings(str(sample_vestafile["ATOMM"]), expected_atomm),\
+        "Setting just Green didn't work as expected."
+
+def test_set_background_color(sample_vestafile):
+    sample_vestafile.set_background_color(110,120,130)
+    expected_bkgrc = """BKGRC
+ 110 120 130"""
+    assert compare_vesta_strings(str(sample_vestafile["BKGRC"]), expected_bkgrc)
+
+def test_set_enable_lighting(sample_vestafile):
+    # Turn off the lights
+    sample_vestafile.set_enable_lighting(False)
+    expected_light0 = """LIGHT0 0
+ 1.000000  0.000000  0.000000  0.000000
+ 0.000000  1.000000  0.000000  0.000000
+ 0.000000  0.000000  1.000000  0.000000
+ 0.000000  0.000000  0.000000  1.000000
+ 0.000000  0.000000 20.000000  0.000000
+ 0.000000  0.000000 -1.000000
+  26  26  26 255
+ 179 179 179 255
+ 255 255 255 255"""
+    assert compare_vesta_strings(str(sample_vestafile["LIGHT0"]), expected_light0),\
+        "Turning off the lighting didn't work as expected."
+    # Turn on the lights
+    sample_vestafile.set_enable_lighting(True)
+    expected_light0 = """LIGHT0 1
+ 1.000000  0.000000  0.000000  0.000000
+ 0.000000  1.000000  0.000000  0.000000
+ 0.000000  0.000000  1.000000  0.000000
+ 0.000000  0.000000  0.000000  1.000000
+ 0.000000  0.000000 20.000000  0.000000
+ 0.000000  0.000000 -1.000000
+  26  26  26 255
+ 179 179 179 255
+ 255 255 255 255"""
+    assert compare_vesta_strings(str(sample_vestafile["LIGHT0"]), expected_light0),\
+        "Turning on the lighting didn't work as expected."
+    # Check that turning it on again doesn't change things
+    sample_vestafile.set_enable_lighting(True)
+    assert compare_vesta_strings(str(sample_vestafile["LIGHT0"]), expected_light0),\
+        "Turning on lighting again changed things when it shouldn't have."
+
+def test_set_lighting_angle(sample_vestafile):
+    sample_vestafile.set_lighting_angle([[0.707107,0.707107,0],[-0.707107,0.707107,0],[0,0,1]])
+    expected_light0 = """LIGHT0 1
+ 0.707107  0.707107  0.000000  0.000000
+-0.707107  0.707107  0.000000  0.000000
+ 0.000000  0.000000  1.000000  0.000000
+ 0.000000  0.000000  0.000000  1.000000
+ 0.000000  0.000000 20.000000  0.000000
+ 0.000000  0.000000 -1.000000
+  26  26  26 255
+ 179 179 179 255
+ 255 255 255 255"""
+    assert compare_vesta_strings(str(sample_vestafile["LIGHT0"]), expected_light0, prec=6),\
+        "Setting lighting angle matrix didn't work as expected."
+    # Reset
+    sample_vestafile.reset_lighting_angle()
+    expected_light0 = """LIGHT0 1
+ 1.000000  0.000000  0.000000  0.000000
+ 0.000000  1.000000  0.000000  0.000000
+ 0.000000  0.000000  1.000000  0.000000
+ 0.000000  0.000000  0.000000  1.000000
+ 0.000000  0.000000 20.000000  0.000000
+ 0.000000  0.000000 -1.000000
+  26  26  26 255
+ 179 179 179 255
+ 255 255 255 255"""
+    assert compare_vesta_strings(str(sample_vestafile["LIGHT0"]), expected_light0),\
+        "Resetting lighting angle didn't work as expected."
+
+def test_set_lighting(sample_vestafile):
+    sample_vestafile.set_lighting(ambient=100, diffuse=0)
+    expected_light0 = """LIGHT0 1
+ 1.000000  0.000000  0.000000  0.000000
+ 0.000000  1.000000  0.000000  0.000000
+ 0.000000  0.000000  1.000000  0.000000
+ 0.000000  0.000000  0.000000  1.000000
+ 0.000000  0.000000 20.000000  0.000000
+ 0.000000  0.000000 -1.000000
+ 255 255 255 255
+   0   0   0 255
+ 255 255 255 255"""
+    assert compare_vesta_strings(str(sample_vestafile["LIGHT0"]), expected_light0),\
+        "Setting ambient=100% and diffuse=0% didn't work as expected."
+    sample_vestafile.set_lighting(diffuse=50)
+    expected_light0 = """LIGHT0 1
+ 1.000000  0.000000  0.000000  0.000000
+ 0.000000  1.000000  0.000000  0.000000
+ 0.000000  0.000000  1.000000  0.000000
+ 0.000000  0.000000  0.000000  1.000000
+ 0.000000  0.000000 20.000000  0.000000
+ 0.000000  0.000000 -1.000000
+ 255 255 255 255
+ 127 127 127 255
+ 255 255 255 255"""
+    assert compare_vesta_strings(str(sample_vestafile["LIGHT0"]), expected_light0),\
+        "Setting diffuse=50% didn't work as expected."
+
+def test_set_depth_cueing(sample_vestafile):
+    # Turn it off
+    sample_vestafile.set_depth_cueing(enable=False)
+    expected_dpthq = "DPTHQ 0 -0.5000  3.5000"
+    assert compare_vesta_strings(str(sample_vestafile["DPTHQ"]), expected_dpthq),\
+        "Turning off depth cueing didnt work as expected."
+    # Turn it on again
+    sample_vestafile.set_depth_cueing(enable=True)
+    expected_dpthq = "DPTHQ 1 -0.5000  3.5000"
+    assert compare_vesta_strings(str(sample_vestafile["DPTHQ"]), expected_dpthq),\
+        "Turning on depth cueing didnt work as expected."
+    sample_vestafile.set_depth_cueing(enable=True)
+    assert compare_vesta_strings(str(sample_vestafile["DPTHQ"]), expected_dpthq),\
+        "Turning on depth cueing again changed things when it shouldn't have."
+    # Now play with the depth
+    sample_vestafile.set_depth_cueing(start=1.2, end=2.4)
+    expected_dpthq = "DPTHQ 1  1.2000  2.4000"
+    assert compare_vesta_strings(str(sample_vestafile["DPTHQ"]), expected_dpthq),\
+        "Changing start and end of depth cueing didn't work as expected."
+
+def test_find_sites(sample_vestafile):
+    # sample_vestafile has a single Cu atom at 0,0,0.
+    assert sample_vestafile.find_sites() == [1]
+    assert sample_vestafile.find_sites('Cu') == [1]
+    assert sample_vestafile.find_sites('C') == []
+    assert sample_vestafile.find_sites(xmin=0, xmax=0.5, ymin=0, ymax=0.5) == [1]
+    assert sample_vestafile.find_sites(xmin=0, xmax=0.5, zmin=0.1, zmax=1) == []
+
