@@ -174,18 +174,6 @@ class VestaFile:
                     raise ValueError("Data without section found! Line:\n"+line)
                 self.sections[current_section].add_line(line)
 
-    def get_section(self, section_name: str) -> Union[VestaSection, None]:
-        """
-        Retrieve a VestaSection by its header.
-
-        Args:
-            section_name (str): e.g., 'TITLE', 'CELL'.
-
-        Returns:
-            VestaSection or None: The corresponding section object.
-        """
-        return self.sections.get(section_name)
-
     def __getitem__(self, name: str) -> VestaSection:
         return self.sections[name]
 
@@ -242,7 +230,7 @@ class VestaFile:
         if 0 in index:
             raise IndexError(
                 "Illegal site index 0 given! Remember VESTA is 1-based.")
-        atom_section = self.get_section("SITET")
+        atom_section = self["SITET"]
         if atom_section is None:
             # TODO: Custom Error type for improper format?
             raise TypeError("No SITET section found!")

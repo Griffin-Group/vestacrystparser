@@ -1,6 +1,6 @@
 .DS_Store
 *.swp
-tests/cu_modified.vesta
+tests/data/tmp.vesta
 
 .vscode/
 
