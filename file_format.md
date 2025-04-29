@@ -25,7 +25,7 @@ e.g.
 
 Superheader for each crystal Phase (Edit Data > Phases).
 
-No data is associated with this field. However, it can appear multiple times. Following CRYSTAL are the sections from TITLE through to PLN2D inclusive, which contain the data specific to each crystal phase. (This means those sections are also unique either.) Additional phases begin with another CRYSTAL header.
+No data is associated with this field. However, it can appear multiple times. Following CRYSTAL are the sections from TITLE through to PLN2D inclusive, which contain the data specific to each crystal phase. (This means those sections are not unique.) Additional phases begin with another CRYSTAL header.
 
 Has a blank line before and after it.
 ```
@@ -98,6 +98,13 @@ TRANM 0
 
 ## LTRANSL
 
+Translation of this phase with respect to another.
+
+Edit Data > Phase > Positioning
+
+- 1st row: Reference phase (0-indexed). The number in "Place (x,y,z) of this layer at (x,y,z) of layer..." minus 1. If `-1`, is the global coordinate system.
+- 2nd row: x,y,z of this layer; x,y,z of reference layer.
+
 e.g.
 ```
 LTRANSL
@@ -116,6 +123,10 @@ LORIENT
 ```
 
 ## LMATRIX
+
+Transformation matrix of this phase's coordinate system.
+
+- 5th row: 3 floats, translation. Is the (x,y,z) of the global coordinates minus the (x,y,z) of this phase, as specified in `LSTRANSL`. Actually, that's only true in orthorhombic coordinates. Reality is actually rather complicated.
 
 e.g.
 ```

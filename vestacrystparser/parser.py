@@ -44,7 +44,50 @@ sections_with_blank_line_before = [
     "CRYSTAL",
     "STYLE",
 ]
-
+# We also need to take note of what sections are in specific phases
+# and what sections are outside the phases.
+sections_that_are_global = [
+    "ATOMT",
+    "SCENE",
+    "HBOND",
+    "STYLE",
+    "DISPF",
+    "MODEL",
+    "SURFS",
+    "SECTS",
+    "FORMS",
+    "ATOMS",
+    "BONDS",
+    "POLYS",
+    "VECTS",
+    "FORMP",
+    "ATOMP",
+    "BONDP",
+    "POLYP",
+    "ISURF",
+    "TEX3P",
+    "SECTP",
+    "CONTR",
+    "HKLPP",
+    "UCOLP",
+    "COMPS",
+    "LABEL",
+    "PROJT",
+    "BKGRC",
+    "DPTHQ",
+    "LIGHT0",
+    "LIGHT1",
+    "LIGHT2",
+    "LIGHT3",
+    "SECCL",
+    "TEXCL",
+    "ATOMM",
+    "BONDM",
+    "POLYM",
+    "SURFM",
+    "FORMM",
+    "HKLPM",
+]
 
 class VestaSection:
     def __init__(self, header_line):
@@ -119,6 +162,35 @@ class VestaSection:
         """Number of lines (besides the header line)"""
         return len(self.data)
 
+class VestaPhase:
+    """A collection of uniquely-named VestaSection's"""
+    def __init__(self):
+        self._sections = {}
+        self._order = []
+    
+    def __getitem__(self, name: str) -> VestaSection:
+        return self._sections[name]
+
+    def __contains__(self, item: str) -> bool:
+        return item in self._sections
+    
+    def append(self, section: VestaSection):
+        header = section.header
+        if header in self:
+            raise KeyError(f"{header} is already in this VestaPhase! Cannot append.")
+        else:
+            # Intentionally not copying, as we want to update the
+            # VestaSection as we construct it.
+            self._sections[header] = section
+            self._order.append(header)
+    
+    def __len__(self) -> int:
+        return len(self._sections)
+    
+    def __iter__(self):
+        for header in self._order:
+            yield self._sections[header]
+
 
 class VestaFile:
     def __init__(self, filename: Union[str, None] = None):
@@ -129,13 +201,15 @@ class VestaFile:
             sections (dict): Maps section headers to VestaSection objects.
             order (list): The order in which sections appear in the file.
         """
-        self.sections = {}
-        self.order = []
+        self._phases = []
+        self._globalsections = VestaPhase()
+        self.current_phase = 0
+        self._vesta_format_version = None
         if filename:
             self.load(filename)
         else:
             # Initialise the empty VESTA file.
-            # There's got to be a more rigorous way to store data files in
+            # There's got to be a more rigorous way to store data files in.    
             # a Python package...
             filename = os.path.join(os.path.dirname(
                 os.path.abspath(__file__)), "default.vesta")
@@ -151,7 +225,7 @@ class VestaFile:
         with open(filename, 'r') as f:
             lines = f.readlines()
 
-        current_section = None
+        section = None
         for raw_line in lines:
             # Remove only the newline character.
             line = raw_line.rstrip("\n")
@@ -164,22 +238,51 @@ class VestaFile:
             if tokens and tokens[0].isupper():
                 # New section.
                 section = VestaSection(line)
-                self.sections[section.header] = section
-                self.order.append(section.header)
-                current_section = section.header
+                # Identify where we are to put this section.
+                if section.header == "#VESTA_FORMAT_VERSION":
+                    self._vesta_format_version = section
+                elif section.header == "CRYSTAL":
+                    # New phase.
+                    self._phases.append(VestaPhase())
+                    self._phases[-1].append(section)
+                elif section.header in sections_that_are_global:
+                    # This section belongs outside the phase information
+                    self._globalsections.append(section)
+                else:
+                    # This section belongs in the currently active phase
+                    self._phases[-1].append(section)
             else:
                 # Continuation of the current section.
-                if current_section is None:
+                if section is None:
                     # This shouldn't happen. We probably have malformed data.
-                    raise ValueError("Data without section found! Line:\n"+line)
-                self.sections[current_section].add_line(line)
+                    raise ValueError("Data without section header found! Line:\n"+line)
+                section.add_line(line)
 
-    def __getitem__(self, name: str) -> VestaSection:
-        return self.sections[name]
+    def __getitem__(self, name: str, phase: int = None) -> VestaSection:
+        if name == "#VESTA_FORMAT_VERSION":
+            return self._vesta_format_version
+        elif name in sections_that_are_global:
+            return self._globalsections[name]
+        elif phase is None:
+            return self._phases[self.current_phase][name]
+        else:
+            return self._phases[phase][name]
 
     def __len__(self) -> int:
         """Number of sections"""
-        return len(self.sections)
+        length = 0
+        if self._vesta_format_version is not None:
+            length += 1
+        for phase in self._phases:
+            length += len(phase)
+        length += len(self._globalsections)
+        return length
+    
+    def __iter__(self):
+        yield self._vesta_format_version
+        for phase in self._phases:
+            yield from phase
+        yield from self._globalsections
 
     def save(self, filename):
         """
@@ -193,8 +296,8 @@ class VestaFile:
 
     def __str__(self) -> str:
         mystr = ""
-        for sec_name in self.order:
-            mystr += str(self.sections[sec_name])
+        for section in self:
+            mystr += str(section)
         return mystr
 
     # TODO: Is this meaningful? Consider replacement.
@@ -628,7 +731,7 @@ class VestaFile:
         section = self["THERI"]
         section.data.insert(-1, [new_idx, label, U])
         # If applicable, add anisotropic uncertainty entry
-        if "THERM" in self.order:
+        if "THERM" in self._phases[self.current_phase]:
             section = self["THERM"]
             section.data.insert(-1, [new_idx, label] + [0.0]*6)
         # Add new element if applicable.
