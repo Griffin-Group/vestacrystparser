@@ -89,6 +89,7 @@ sections_that_are_global = [
     "HKLPM",
 ]
 
+
 class VestaSection:
     def __init__(self, header_line):
         """
@@ -162,31 +163,34 @@ class VestaSection:
         """Number of lines (besides the header line)"""
         return len(self.data)
 
+
 class VestaPhase:
     """A collection of uniquely-named VestaSection's"""
+
     def __init__(self):
         self._sections = {}
         self._order = []
-    
+
     def __getitem__(self, name: str) -> VestaSection:
         return self._sections[name]
 
     def __contains__(self, item: str) -> bool:
         return item in self._sections
-    
+
     def append(self, section: VestaSection):
         header = section.header
         if header in self:
-            raise KeyError(f"{header} is already in this VestaPhase! Cannot append.")
+            raise KeyError(
+                f"{header} is already in this VestaPhase! Cannot append.")
         else:
             # Intentionally not copying, as we want to update the
             # VestaSection as we construct it.
             self._sections[header] = section
             self._order.append(header)
-    
+
     def __len__(self) -> int:
         return len(self._sections)
-    
+
     def __iter__(self):
         for header in self._order:
             yield self._sections[header]
@@ -209,7 +213,7 @@ class VestaFile:
             self.load(filename)
         else:
             # Initialise the empty VESTA file.
-            # There's got to be a more rigorous way to store data files in.    
+            # There's got to be a more rigorous way to store data files in.
             # a Python package...
             filename = os.path.join(os.path.dirname(
                 os.path.abspath(__file__)), "default.vesta")
@@ -255,7 +259,8 @@ class VestaFile:
                 # Continuation of the current section.
                 if section is None:
                     # This shouldn't happen. We probably have malformed data.
-                    raise ValueError("Data without section header found! Line:\n"+line)
+                    raise ValueError(
+                        "Data without section header found! Line:\n"+line)
                 section.add_line(line)
 
     def __getitem__(self, name: str, phase: int = None) -> VestaSection:
@@ -277,7 +282,7 @@ class VestaFile:
             length += len(phase)
         length += len(self._globalsections)
         return length
-    
+
     def __iter__(self):
         yield self._vesta_format_version
         for phase in self._phases:
