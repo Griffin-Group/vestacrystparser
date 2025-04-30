@@ -54,7 +54,7 @@ def compare_vesta_strings(str1: str, str2: str, prec: int = None) -> bool:
 # TODO: test case with volumetric data (so IMPORT_DENISTY is called)
 def test_load(sample_vestafile, sample_vesta_filename):
     # Implicitly by the Fixture, we're testing the Load function.
-    # Test that is has expected number of fields
+    # Test that it has expected number of fields
     assert len(sample_vestafile) == 65, \
         "Did not load expected number of fields."
     # Test that we read the atom data right.

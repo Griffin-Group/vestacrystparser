@@ -1,7 +1,7 @@
 import logging
 import math
 import os
-from typing import Union
+from typing import Union, Generator
 
 logger = logging.getLogger(__name__)
 
@@ -263,7 +263,23 @@ class VestaFile:
                         "Data without section header found! Line:\n"+line)
                 section.add_line(line)
 
-    def __getitem__(self, name: str, phase: int = None) -> VestaSection:
+    def __getitem__(self, name: Union[str, tuple[str,int]]) \
+            -> VestaSection:
+        """
+        Gets the section with the given name, from the given or current phase
+
+        self[name]
+        self[name, phase]
+
+        phase defaults to self.current_phase
+        """
+        # Parse a multi-argument call, because getitem is special.
+        if isinstance(name, tuple):
+            phase = name[1]
+            name = name[0]
+        else:
+            phase = None
+        # Read the requested name, look for where we should grab the section
         if name == "#VESTA_FORMAT_VERSION":
             return self._vesta_format_version
         elif name in sections_that_are_global:
@@ -283,7 +299,8 @@ class VestaFile:
         length += len(self._globalsections)
         return length
 
-    def __iter__(self):
+    def __iter__(self) -> Generator[VestaSection]:
+        """Iterate over the sections"""
         yield self._vesta_format_version
         for phase in self._phases:
             yield from phase
@@ -304,6 +321,25 @@ class VestaFile:
         for section in self:
             mystr += str(section)
         return mystr
+
+    def set_current_phase(self, phase: int):
+        """
+        Sets the currently active phase by 0-based index.
+
+        __getitem__ calls, along with all set and get functions, will default
+        to this phase.
+
+        Accepts negative indices in the Pythonic manner, but it is recorded as a
+        positive index.
+        """
+        if not isinstance(phase, int):
+            raise TypeError(f"phase must be an integer, not {type(phase)}.")
+        if phase < 0:
+            phase += len(self._phases)
+        if phase < 0 or phase >= len(self._phases):
+            raise IndexError(
+                f"Index {phase} is out of range of a list of length {len(self._phases)}")
+        self.current_phase = phase
 
     # TODO: Is this meaningful? Consider replacement.
     def summary(self) -> str:
