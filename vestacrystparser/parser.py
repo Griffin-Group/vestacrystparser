@@ -1,7 +1,7 @@
 import logging
 import math
 import os
-from typing import Union, Generator
+from typing import Union, Iterator
 
 logger = logging.getLogger(__name__)
 
@@ -191,7 +191,7 @@ class VestaPhase:
     def __len__(self) -> int:
         return len(self._sections)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[VestaSection]:
         for header in self._order:
             yield self._sections[header]
 
@@ -263,7 +263,7 @@ class VestaFile:
                         "Data without section header found! Line:\n"+line)
                 section.add_line(line)
 
-    def __getitem__(self, name: Union[str, tuple[str,int]]) \
+    def __getitem__(self, name: Union[str, tuple[str, int]]) \
             -> VestaSection:
         """
         Gets the section with the given name, from the given or current phase
@@ -299,7 +299,7 @@ class VestaFile:
         length += len(self._globalsections)
         return length
 
-    def __iter__(self) -> Generator[VestaSection]:
+    def __iter__(self) -> Iterator[VestaSection]:
         """Iterate over the sections"""
         yield self._vesta_format_version
         for phase in self._phases:

@@ -9,6 +9,7 @@ from vestacrystparser.parser import VestaFile
 
 from test_parser import compare_vesta_strings, DATA_DIR
 
+
 @pytest.fixture
 def sample_vesta_filename() -> str:
     return os.path.join(DATA_DIR, "two_phase.vesta")
@@ -92,7 +93,8 @@ def test_getitem(sample_vestafile):
         sample_vestafile["SITET", -5]
     # Check that negative indexing works
     sample_vestafile.set_current_phase(0)
-    assert compare_vesta_strings(str(sample_vestafile["SITET"]), expected_section1)
+    assert compare_vesta_strings(
+        str(sample_vestafile["SITET"]), expected_section1)
     assert compare_vesta_strings(str(sample_vestafile["SITET", -1]),
                                  expected_section2), \
         "Negative indexing of phases didn't work."
