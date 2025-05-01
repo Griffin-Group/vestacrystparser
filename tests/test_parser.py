@@ -21,7 +21,8 @@ def sample_vestafile(sample_vesta_filename) -> VestaFile:
 @pytest.fixture
 def default_vesta_filename() -> str:
     ROOT_DIR = os.path.dirname(TEST_DIR)
-    return os.path.join(ROOT_DIR, 'vestacrystparser', 'default.vesta')
+    return os.path.join(ROOT_DIR, 'vestacrystparser', 'resources',
+                        'default.vesta')
 
 
 def compare_vesta_strings(str1: str, str2: str, prec: int = None) -> bool:

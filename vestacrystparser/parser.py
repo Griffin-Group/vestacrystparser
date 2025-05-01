@@ -2,6 +2,9 @@ import logging
 import math
 import os
 from typing import Union, Iterator
+import importlib.resources
+
+import vestacrystparser.resources
 
 logger = logging.getLogger(__name__)
 
@@ -213,10 +216,8 @@ class VestaFile:
             self.load(filename)
         else:
             # Initialise the empty VESTA file.
-            # There's got to be a more rigorous way to store data files in.
-            # a Python package...
-            filename = os.path.join(os.path.dirname(
-                os.path.abspath(__file__)), "default.vesta")
+            filename = importlib.resources.files(
+                vestacrystparser.resources) / "default.vesta"
             self.load(filename)
 
     def load(self, filename):
