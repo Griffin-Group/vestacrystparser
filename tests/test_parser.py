@@ -532,8 +532,85 @@ def test_add_site(sample_vestafile):
         "Adding atom of different colour did not change THERI properly."
     assert compare_vesta_strings(str(sample_vestafile["SITET"]), expected_sitet), \
         "Adding atom of different colour did not change SITET properly."
+    # Add a different element. It should load default colours.
+    sample_vestafile.add_site('Mg', 'XX', 0.1, 0.1, 0.3)
+    expected_struc = """STRUC
+  1 Cu         Cu  1.0000   0.000000   0.000000   0.000000    1a       1
+                            0.000000   0.000000   0.000000  0.00
+  2 Cu         Cu  1.0000   0.200000   0.300000   0.400000    1a       1
+                            0.000000   0.000000   0.000000  0.00
+  3 Cu         X   1.0000   0.500000   0.500000   0.500000    1a       1
+                            0.000000   0.000000   0.000000  0.00
+  4 Mg         XX  1.0000   0.100000   0.100000   0.300000    1a       1
+                            0.000000   0.000000   0.000000  0.00
+  0 0 0 0 0 0 0"""
+    expected_theri = """THERI 1
+  1         Cu  0.050000
+  2         Cu  0.050000
+  3         X   0.000000
+  4         XX  0.000000
+  0 0 0"""
+    expected_sitet = """SITET
+  1         Cu  1.2800  34  71 220  34  71 220 204  0
+  2         Cu  1.2800  34  71 220  34  71 220 204  0
+  3         X   1.2800 100 110 120  34  71 220 204  0
+  4         XX  1.6000 251 123  21 251 123  21 204  0
+  0 0 0 0 0 0"""
+    expected_atomt = """ATOMT
+  1         Cu  1.2800 100 110 120  34  71 220 204
+  2         Mg  1.6000 251 123  21 251 123  21 204
+    0 0 0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["STRUC"]), expected_struc), \
+        "Adding atom of new element did not change STRUC properly."
+    assert compare_vesta_strings(str(sample_vestafile["THERI"]), expected_theri), \
+        "Adding atom of new element did not change THERI properly."
+    assert compare_vesta_strings(str(sample_vestafile["SITET"]), expected_sitet), \
+        "Adding atom of new element did not change SITET properly."
+    assert compare_vesta_strings(str(sample_vestafile["ATOMT"]), expected_atomt), \
+        "Adding atom of new element did not change ATOMT properly."
+    # Add an element with a symbol not in elements.ini
+    # It should load the default values, 'XX' in elements.ini
+    sample_vestafile.add_site('A', 'A', 0.3, 0.3, 0.1)
+    expected_struc = """STRUC
+  1 Cu         Cu  1.0000   0.000000   0.000000   0.000000    1a       1
+                            0.000000   0.000000   0.000000  0.00
+  2 Cu         Cu  1.0000   0.200000   0.300000   0.400000    1a       1
+                            0.000000   0.000000   0.000000  0.00
+  3 Cu         X   1.0000   0.500000   0.500000   0.500000    1a       1
+                            0.000000   0.000000   0.000000  0.00
+  4 Mg         XX  1.0000   0.100000   0.100000   0.300000    1a       1
+                            0.000000   0.000000   0.000000  0.00
+  5 A          A   1.0000   0.300000   0.300000   0.100000    1a       1
+                            0.000000   0.000000   0.000000  0.00
+  0 0 0 0 0 0 0"""
+    expected_theri = """THERI 1
+  1         Cu  0.050000
+  2         Cu  0.050000
+  3         X   0.000000
+  4         XX  0.000000
+  5         A  0.000000
+  0 0 0"""
+    expected_sitet = """SITET
+  1         Cu  1.2800  34  71 220  34  71 220 204  0
+  2         Cu  1.2800  34  71 220  34  71 220 204  0
+  3         X   1.2800 100 110 120  34  71 220 204  0
+  4         XX  1.6000 251 123  21 251 123  21 204  0
+  5         A   0.8000  76  76  76  76  76  76 204  0
+  0 0 0 0 0 0"""
+    expected_atomt = """ATOMT
+  1         Cu  1.2800 100 110 120  34  71 220 204
+  2         Mg  1.6000 251 123  21 251 123  21 204
+  3         A   0.8000  76  76  76  76  76  76 204
+    0 0 0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["STRUC"]), expected_struc), \
+        "Adding atom of unspecified element did not change STRUC properly."
+    assert compare_vesta_strings(str(sample_vestafile["THERI"]), expected_theri), \
+        "Adding atom of unspecified element did not change THERI properly."
+    assert compare_vesta_strings(str(sample_vestafile["SITET"]), expected_sitet), \
+        "Adding atom of unspecified element did not change SITET properly."
+    assert compare_vesta_strings(str(sample_vestafile["ATOMT"]), expected_atomt), \
+        "Adding atom of unspecified element did not change ATOMT properly."
     # TODO: SBOND
-    # TODO: different element, get default colours.
 
 
 def test_get_structure(sample_vestafile):

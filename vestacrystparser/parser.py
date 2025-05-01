@@ -1,6 +1,5 @@
 import logging
 import math
-import os
 from typing import Union, Iterator
 import importlib.resources
 
@@ -30,6 +29,37 @@ def parse_line(line: str) -> list[Union[int, float, str]]:
     """
     tokens = line.split()
     return [parse_token(tok) for tok in tokens]
+
+
+def load_elements_data(element: Union[int, str]) -> \
+        list[int, str, float, float, float, int, int, int]:
+    fn = importlib.resources.files(vestacrystparser.resources) / "elements.ini"
+    with open(fn, 'r') as f:
+        for line in f.readlines():
+            tokens = parse_line(line)
+            if tokens[0] == element or tokens[1] == element:
+                # Convert float RGB to int RGB
+                for i in [5, 6, 7]:
+                    tokens[i] = int(tokens[i]*255)
+                return tokens
+    # For other elements, load the default.
+    if element != 'XX':
+        logger.info(f"Element {element} not in elements.ini. Using defaults.")
+        try:
+            tokens = load_elements_data('XX')
+        except ValueError:
+            # Return a more useful error message.
+            raise ValueError(
+                f"Element {element} not in elements.ini and unable to load \
+                    default! (This shouldn't happen.)")
+        # Change the atomic symbol to the one provided.
+        if isinstance(element, str):
+            tokens[1] = element
+        return tokens
+    else:
+        # 'XX' is not in elements.ini. Break before we hit an infinite loop.
+        # This shouldn't happen.
+        raise ValueError("Unable to load default element from elements.ini.")
 
 
 # Sections that have a blank line after them.
@@ -786,9 +816,15 @@ class VestaFile:
                 break
         if not found:
             # Create a new element
-            # TODO: Load data from elements.ini
-            element = [len(section.data), symbol, 1.28,
-                       128, 128, 128, 128, 128, 128]
+            # Load data from elements.ini
+            element_data = load_elements_data(symbol)
+            # Figure out which radius to use
+            radii_type = self["ATOMS"].inline[0]
+            # 0=atomic, 1=ionic, 2=vdW.
+            # elements_data has 2=atomic, 3=vdW, 4=ionic.
+            radii_type = {0: 2, 1: 4, 2: 3}[radii_type]
+            element = [len(section.data), symbol, element_data[radii_type]] + \
+                element_data[5:] + element_data[5:] + [204]
             section.data.insert(-1, element)
         # Use found data to set-up a new site
         params = element[2:10]  # Radius, RGB, RGB, 204
