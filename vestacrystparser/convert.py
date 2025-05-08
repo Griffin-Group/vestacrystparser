@@ -38,5 +38,5 @@ def vesta_from_poscar(fname: str) -> VestaFile:
     # Create a VestaFile from the structure
     vfile = vesta_from_structure(pos.structure)
     # Set the title
-    vfile.set_title(pos.comment)
+    vfile.title = pos.comment
     return vfile

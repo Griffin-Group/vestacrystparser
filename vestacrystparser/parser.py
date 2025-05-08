@@ -265,6 +265,15 @@ class VestaPhase:
         for header in self._order:
             yield self._sections[header]
 
+    @property
+    def title(self) -> str:
+        return self["TITLE"].data[0][0]
+
+    @property
+    def nsites(self) -> int:
+        """Number of sites (read-only)"""
+        return len(self["SITET"].data) - 1
+
 
 class VestaFile:
     def __init__(self, filename: Union[str, None] = None):
@@ -363,6 +372,21 @@ class VestaFile:
         else:
             return self._phases[phase][name]
 
+    def __contains__(self, name: Union[str, tuple[str, int]]) -> bool:
+        """
+        name
+        (name, phase)
+
+        phase defaults to self.current_phase
+        """
+        try:
+            # Why copy the __getitem__ logic when I can just do this?
+            self[name]
+        except (KeyError, IndexError):
+            return False
+        else:
+            return True
+
     def __len__(self) -> int:
         """Number of sections"""
         length = 0
@@ -391,6 +415,7 @@ class VestaFile:
             f.write(str(self))
 
     def __str__(self) -> str:
+        """Entire VestaFile as multi-line string"""
         mystr = ""
         for section in self:
             mystr += str(section)
@@ -417,16 +442,36 @@ class VestaFile:
 
     def __repr__(self) -> str:
         """
-        Titles and number of sites of each phase.
+        Compact representation. Titles and number of sites of each phase.
         """
         mystr = "<VestaFile: "
         data = []
         for phase in self._phases:
-            title = phase["TITLE"].data[0][0]
-            nsites = len(phase["SITET"].data)-1
-            data.append(f"{title} [{nsites} site{'s' if nsites==0 else ''}]")
+            data.append(
+                f"{phase.title} [{phase.nsites} site{'s' if phase.nsites == 0 else ''}]")
         return mystr + '; '.join(data) + ">"
 
+    # Properties
+    @property
+    def title(self) -> str:
+        """Title of the current phase (settable)"""
+        return self["TITLE"].data[0][0]
+
+    @title.setter
+    def title(self, value):
+        self.set_title(value)
+
+    @property
+    def nphases(self) -> int:
+        """Number of phases (read-only)"""
+        return len(self._phases)
+
+    @property
+    def nsites(self) -> int:
+        """Number of sites in the current phase (read-only)"""
+        return len(self["SITET"].data) - 1
+
+    # Methods for modifying the system.
     def set_site_color(self, index: Union[int, list[int]],
                        r: int, g: int, b: int):
         """
@@ -849,7 +894,7 @@ class VestaFile:
         section = self["THERI"]
         section.data.insert(-1, [new_idx, label, U])
         # If applicable, add anisotropic uncertainty entry
-        if "THERM" in self._phases[self.current_phase]:
+        if "THERM" in self:
             section = self["THERM"]
             section.data.insert(-1, [new_idx, label] + [0.0]*6)
         # Add new element if applicable.
