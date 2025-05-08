@@ -90,7 +90,7 @@ def test_save(tmp_path, sample_vestafile, sample_vesta_filename):
 
 
 def test_repr(sample_vestafile):
-    assert repr(sample_vestafile) == "<VestaFile: New structure>"
+    assert repr(sample_vestafile) == "<VestaFile: New structure [1 site]>"
 
 
 def test_set_site_color(sample_vestafile):

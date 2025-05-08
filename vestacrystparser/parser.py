@@ -417,11 +417,15 @@ class VestaFile:
 
     def __repr__(self) -> str:
         """
-        Titles of phases.
+        Titles and number of sites of each phase.
         """
         mystr = "<VestaFile: "
-        titles = "; ".join([phase["TITLE"].data[0][0] for phase in self._phases])
-        return mystr + titles + ">"
+        data = []
+        for phase in self._phases:
+            title = phase["TITLE"].data[0][0]
+            nsites = len(phase["SITET"].data)-1
+            data.append(f"{title} [{nsites} site{'s' if nsites==0 else ''}]")
+        return mystr + '; '.join(data) + ">"
 
     def set_site_color(self, index: Union[int, list[int]],
                        r: int, g: int, b: int):
