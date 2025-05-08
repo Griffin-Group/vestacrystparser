@@ -89,6 +89,10 @@ def test_save(tmp_path, sample_vestafile, sample_vesta_filename):
             assert compare_vesta_strings(f1.read(), f2.read())
 
 
+def test_repr(sample_vestafile):
+    assert repr(sample_vestafile) == "<VestaFile: New structure>"
+
+
 def test_set_site_color(sample_vestafile):
     """Tests set_site_color"""
     # Check that writing works as expected.

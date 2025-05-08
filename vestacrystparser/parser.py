@@ -415,19 +415,13 @@ class VestaFile:
                 f"Index {phase} is out of range of a list of length {len(self._phases)}")
         self.current_phase = phase
 
-    # TODO: Is this meaningful? Consider replacement.
-    def summary(self) -> str:
+    def __repr__(self) -> str:
         """
-        Return a summary of the sections.
-        What sections exist and how many lines they have.
+        Titles of phases.
         """
-        summary = "VESTA file sections:\n"
-        for sec_name in self.order:
-            sec = self.sections[sec_name]
-            typ = "Inline preserved" if sec.inline else "No inline"
-            nlines = len(sec.data)
-            summary += f"  {sec_name}: {nlines} additional line(s) ({typ})\n"
-        return summary
+        mystr = "<VestaFile: "
+        titles = "; ".join([phase["TITLE"].data[0][0] for phase in self._phases])
+        return mystr + titles + ">"
 
     def set_site_color(self, index: Union[int, list[int]],
                        r: int, g: int, b: int):

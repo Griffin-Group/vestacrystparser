@@ -40,6 +40,10 @@ def test_save(tmp_path, sample_vestafile, sample_vesta_filename):
             assert compare_vesta_strings(f1.read(), f2.read())
 
 
+def test_repr(sample_vestafile):
+    assert repr(sample_vestafile) == "<VestaFile: New structure; Phase Two>"
+
+
 def test_set_current_phase(sample_vestafile):
     # Check that we have the expected initial value.
     assert sample_vestafile.current_phase == 0, \
