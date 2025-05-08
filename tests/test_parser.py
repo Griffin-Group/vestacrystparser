@@ -854,3 +854,17 @@ def test_find_sites(sample_vestafile):
         xmin=0, xmax=0.5, ymin=0, ymax=0.5) == [1]
     assert sample_vestafile.find_sites(
         xmin=0, xmax=0.5, zmin=0.1, zmax=1) == []
+
+
+def test_set_title(sample_vestafile):
+    expected_title = """TITLE
+Foobar
+"""
+    sample_vestafile.set_title("Foobar")
+    assert compare_vesta_strings(str(sample_vestafile["TITLE"]), expected_title), \
+        "Title did not change as expected."
+    # Test error case. No newlines allowed.
+    with pytest.raises(ValueError):
+        sample_vestafile.set_title("Hello \nWorld")
+    assert compare_vesta_strings(str(sample_vestafile["TITLE"]), expected_title), \
+        "Title changed despite error setting title."

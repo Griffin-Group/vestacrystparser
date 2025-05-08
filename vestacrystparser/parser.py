@@ -1093,3 +1093,13 @@ class VestaFile:
                     # Record the index.
                     indices.append(site[0])
         return indices
+
+    def set_title(self, title: str):
+        """Sets the TITLE field. No newlines allowed."""
+        # Verify that title is one line.
+        lines = title.splitlines()  # This also strips off any trailing newlines
+        if len(lines) > 1:
+            raise ValueError("Title not allowed to include line breaks!")
+        # Set the title
+        section = self["TITLE"]
+        section.data[0][0] = lines[0]

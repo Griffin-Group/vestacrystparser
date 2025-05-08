@@ -6,7 +6,8 @@ import os
 import pytest
 
 from vestacrystparser.parser import VestaFile
-from vestacrystparser.convert import vesta_from_structure, Structure
+from vestacrystparser.convert import vesta_from_structure, vesta_from_poscar, \
+    Structure
 
 from test_parser import compare_vesta_strings, DATA_DIR
 
@@ -40,7 +41,7 @@ def test_hBN_title(sample_vestafile):
         str(sample_vestafile["TITLE"]), expected_title)
 
 
-def test_convert(poscar_structure, sample_vestafile):
+def test_vesta_from_structure(poscar_structure, sample_vestafile):
     # Load the file, then compare it with the file we loaded.
     converted_file = vesta_from_structure(poscar_structure)
     # Compare line-by-line, so can diagnose issues
@@ -48,3 +49,11 @@ def test_convert(poscar_structure, sample_vestafile):
         if sec1.header != "TITLE":
             # Title is not saved in pymatgen.core.Structure
             assert compare_vesta_strings(str(sec1), str(sec2), prec=6)
+
+
+def test_vesta_from_poscar(poscar_filename, sample_vestafile):
+    # Load the file, then compare it with the file we loaded.
+    converted_file = vesta_from_poscar(poscar_filename)
+    # TITLE *is* included in POSCAR, so this one should work.
+    assert compare_vesta_strings(
+        str(converted_file), str(sample_vestafile), prec=6)

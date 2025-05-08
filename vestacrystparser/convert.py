@@ -4,11 +4,13 @@ Create VESTA file from pymatgen object
 """
 
 from pymatgen.core import Structure
+from pymatgen.io.vasp.inputs import Poscar
 
 from vestacrystparser.parser import VestaFile
 
 
 def vesta_from_structure(stru: Structure) -> VestaFile:
+    """From pymatgen.core.Structure, create a VestaFile"""
     # Initialise an empty Vesta file
     vfile = VestaFile()
     # Set the lattice parameters.
@@ -26,4 +28,15 @@ def vesta_from_structure(stru: Structure) -> VestaFile:
                        *site.frac_coords,
                        add_bonds=True)
     # Done
+    return vfile
+
+
+def vesta_from_poscar(fname: str) -> VestaFile:
+    """From a POSCAR file a fname, create a VestaFile"""
+    # Load the POSCAR
+    pos = Poscar.from_file(fname)
+    # Create a VestaFile from the structure
+    vfile = vesta_from_structure(pos.structure)
+    # Set the title
+    vfile.set_title(pos.comment)
     return vfile
