@@ -306,7 +306,13 @@ class VestaFile:
             # Use lstrip() to test for a header token.
             stripped = line.lstrip()
             tokens = stripped.split(maxsplit=1)
-            if tokens and tokens[0].isupper():
+            # If we are in the line immediately after TITLE, record it
+            # The title might be uppercase, and that's allowed.
+            if section is not None and section.header == "TITLE" \
+                    and len(section.data) == 0:
+                section.add_line(line)
+            # Otherwise, an all-uppercase word is a section header.
+            elif tokens and tokens[0].isupper():
                 # New section.
                 section = VestaSection(line)
                 # Identify where we are to put this section.
@@ -876,7 +882,8 @@ class VestaFile:
                     # If there is a bond length, add a new bond.
                     maxlen = load_default_bond_length(symbol, A2)
                     if maxlen is not None:
-                        self.add_bond(symbol, A2, max_length=maxlen)
+                        # Sort A1 and A2 alphabetically.
+                        self.add_bond(*sorted([symbol, A2]), max_length=maxlen)
         # Use found data to set-up a new site
         params = element[2:10]  # Radius, RGB, RGB, 204
         section = self["SITET"]
