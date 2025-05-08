@@ -482,6 +482,7 @@ def test_set_scene_zoom(sample_vestafile):
 
 
 # TODO: Add test case with THERM.
+# TODO: Test case with hBN where I play with add_bonds
 def test_add_site(sample_vestafile):
     sample_vestafile.add_site('Cu', 'Cu', 0.2, 0.3, 0.4, U=0.05)
     expected_struc = """STRUC
@@ -610,7 +611,44 @@ def test_add_site(sample_vestafile):
         "Adding atom of unspecified element did not change SITET properly."
     assert compare_vesta_strings(str(sample_vestafile["ATOMT"]), expected_atomt), \
         "Adding atom of unspecified element did not change ATOMT properly."
-    # TODO: SBOND
+
+
+def test_add_bond(sample_vestafile):
+    expected_sbond = """SBOND
+    1 Cu Cu 0.00000 2.5000 0 1 1 0 1 0.250 2.000 127 127 127
+    0 0 0 0"""
+    sample_vestafile.add_bond('Cu', 'Cu', max_length=2.5)
+    assert compare_vesta_strings(str(sample_vestafile["SBOND"]), expected_sbond), \
+        "Adding a bond didn't work as expected."
+    # Test some failure cases
+    with pytest.raises(ValueError):
+        sample_vestafile.add_bond('Cu', 'Cu', search_mode=1.5)
+    with pytest.raises(ValueError):
+        sample_vestafile.add_bond('Cu', 'Cu', search_mode=4)
+    with pytest.raises(ValueError):
+        sample_vestafile.add_bond('Cu', 'Cu', boundary_mode=1.5)
+    with pytest.raises(ValueError):
+        sample_vestafile.add_bond('Cu', 'Cu', boundary_mode=0)
+    assert compare_vesta_strings(str(sample_vestafile["SBOND"]), expected_sbond), \
+        "SBOND changed despite add_bond hitting an error."
+    # Try a different search mode
+    expected_sbond = """SBOND
+    1 Cu Cu 0.00000 2.5000 0 1 1 0 1 0.250 2.000 127 127 127
+    2 XX XX 0.00000 1.6000 2 2 1 0 1 0.250 2.000 127 127 127
+    0 0 0 0"""
+    sample_vestafile.add_bond('Cu', 'Cu', search_mode=3)
+    assert compare_vesta_strings(str(sample_vestafile["SBOND"]), expected_sbond), \
+        "search_mode=3 didn't work as expected."
+    # Add some other flags.
+    expected_sbond = """SBOND
+    1 Cu Cu 0.00000 2.5000 0 1 1 0 1 0.250 2.000 127 127 127
+    2 XX XX 0.00000 1.6000 2 2 1 0 1 0.250 2.000 127 127 127
+    3 Cu Cu 0.10000 1.6000 0 1 0 1 1 0.250 2.000 127 127 127
+    0 0 0 0"""
+    sample_vestafile.add_bond('Cu', 'Cu', min_length=0.1, show_polyhedra=False,
+                              search_by_label=True)
+    assert compare_vesta_strings(str(sample_vestafile["SBOND"]), expected_sbond), \
+        "show_polyhedra, search_by_label, or min_length didn't work as expected."    
 
 
 def test_get_structure(sample_vestafile):

@@ -276,9 +276,46 @@ BOUND
 
 ## SBOND
 
+Bonding information.
+Lists pairs of elements and specifications for when and how to draw bonds between them.
+
+Geometry edited in Edit > Bonds.
+
+Appearance edited in Properties > Bonds > Radius and color. Edits all existing bonds at once, but not any new ones strangely enough.
+
+Also Objects > Bonds.
+
+Search mode:
+- Search A2 bonded to A1: `0  1  1  0  1` (boundary mode defaults to 2)
+- Search atoms bonded to A1: `1  1  1  0  1` (sets A2 to `XX`) (boundary mode defaults to 2)
+- Search molecules: `2 2 1 0 1` (sets A1 and A2 to `XX`) (boundary mode defaults to 3)
+
+Boundary mode:
+1. Do not search atoms beyond the boundary.
+2. Search additional atoms if A1 is included in the boundary.
+3. Search additional atoms recursively if either A1 or A2 is visible.
+
+Each row:
+- 1st item: Index.
+- 2nd item: A1 (Atom 1).
+- 3rd item: A2 (Atom 2).
+- 4th item: Minimum length.
+- 5th item: Maximum length.
+- 6th item: `0` if "Search A2 bonded to A1", else boundary mode - 1.
+- 7th item: Boundary mode - 1.
+- 8th item: Show polyhedra, 0/1.
+- 9th item: Search by label, 0/1. If 1, A1 and A2 are site labels rather than element symbols.
+- 10th item: ? `1`
+- 11th item: Radius (cylinder). Default `0.250`.
+- 12th item: Width (line). Default `2.000`.
+- 13th-15th items: Bond color (RGB) (may be overridden by atom colours depending on bond style). (Default `127 127 127`, but can be edited individually in Objects > Bonds.)
+
+Block ends with four `0`'s.
+
 e.g.
 ```
 SBOND
+  1     B     N    0.00000    1.93846  0  1  1  0  1  0.250  2.000 127 127 127
   0 0 0 0
 ```
 
@@ -407,6 +444,9 @@ DLATM
  -1
 ```
 ## DLBND
+
+Visibility of bonds? Objects > Bonds.
+
 e.g.
 ```
 DLBND
@@ -614,6 +654,21 @@ ATOMP
  24  24   0  50  2.0   0
 ```
 ### BONDP
+
+Bond style properties.
+
+Properties > Bonds > Resolution
+
+Properties > Bonds > Radius and color
+
+Strangely, the radius and color data seem to be ignored when creating new bonds in favour of the defaults in style.ini.
+
+- 1st item: Resolution > Stacks
+- 2nd item: Resolution > Slices
+- 3rd item: Radius and color > Radius (cylinder)
+- 4th item: Radius and color > Width (line)
+- 5-7th items: Radius and color > Color; RGB.
+
 e.g.
 ```
 BONDP

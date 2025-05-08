@@ -61,6 +61,42 @@ def load_elements_data(element: Union[int, str]) -> \
         # This shouldn't happen.
         raise ValueError("Unable to load default element from elements.ini.")
 
+def load_default_bond_length(A1:str, A2:str) -> Union[float, None]:
+    """
+    Loads default maximum bond length for a pair of elements (if present).
+    
+    May be None. Not every element pair has default bonds in style.ini.
+    (N.B. If adding bonds manually, VESTA GUI defaults to 1.6.)
+    """
+    # Load style.ini file.
+    fn = importlib.resources.files(vestacrystparser.resources) / "style.ini"
+    with open(fn, 'r') as f:
+        # Find and parse the SBOND block.
+        in_sbond = False
+        for line in f.readlines():
+            if not in_sbond:
+                if line.strip() == "SBOND":
+                    in_sbond = True
+            else:
+                if line.split() == ["0"]*4:
+                    # End of SBOND section
+                    # No match found.
+                    return None
+                # Parse line
+                tokens = parse_line(line)
+                if ((tokens[1] == A1 and tokens[2] == A2) or 
+                    (tokens[1] == A2 and tokens[2] == A1)):
+                    # A1 and A2 are interchangeable.
+                    # We've found our match.
+                    return tokens[4]
+    # We shouldn't have gotten here.
+    if in_sbond:
+        raise RuntimeError("SBOND section in style.ini not properly terminated!"
+                           "(Your installation's resources are broken.)")
+    else:
+        raise RuntimeError("SBOND section missing from style.ini!"
+                           "(Your installation's resources are broken.)")
+
 
 # Sections that have a blank line after them.
 # (So far, I've only found this to be important for IMPORT_DENSITY,
@@ -787,11 +823,16 @@ class VestaFile:
 
     def add_site(self, symbol: str, label: str, x: float, y: float, z: float,
                  dx: float = 0.0, dy: float = 0.0, dz: float = 0.0,
-                 occupation: float = 1.0, charge: float = 0.0, U: float = 0.0):
+                 occupation: float = 1.0, charge: float = 0.0, U: float = 0.0,
+                 add_bonds: bool = False):
         """
         Adds a new site.
 
-        STRUC, THERI, THERM, ATOMT, SITET
+        If requested, will create new bonds if this is a new element.
+        While not the default behaviour in VESTA, this is provided as a
+        convenience function.
+
+        STRUC, THERI, THERM, ATOMT, SITET, (ATOMS)
         """
         # Add to structure parameters.
         section = self["STRUC"]
@@ -826,11 +867,78 @@ class VestaFile:
             element = [len(section.data), symbol, element_data[radii_type]] + \
                 element_data[5:] + element_data[5:] + [204]
             section.data.insert(-1, element)
+            # If requested, create new bonds.
+            if add_bonds:
+                # Get the atomic symbols of the other elements.
+                # Read from ATOMT
+                other_symbols = [section.data[i][1] for i in range(len(section.data)-2)]
+                for A2 in other_symbols:
+                    # If there is a bond length, add a new bond.
+                    maxlen = load_default_bond_length(symbol, A2)
+                    if maxlen is not None:
+                        self.add_bond(symbol, A2, max_length=maxlen)
         # Use found data to set-up a new site
         params = element[2:10]  # Radius, RGB, RGB, 204
         section = self["SITET"]
         section.data.insert(-1, [new_idx, label] + params + [0])
-        # TODO: Set up SBOND from style.ini
+
+    def add_bond(self, A1: str, A2: str, min_length: float = 0.0,
+                 max_length: float = 1.6, search_mode: int = 1,
+                 boundary_mode: Union[int, None] = None, show_polyhedra: bool = True,
+                 search_by_label: bool = False):
+        """
+        Add a new bond type.
+
+        Edit > Bonds
+
+        search_mode:
+            1 = Search A2 bonded to A1 (default)
+            2 = Search atoms bonded to A1. (Overwrites A2 to be 'XX'.)
+            3 = Search molecules. (Overwrites A1 and A2 to be 'XX'.)
+        boundary_mode:
+            1 = Do not search atoms beyond the boundary.
+            2 = Search additional atoms if A1 is included in the boundary.
+                (default for search_mode = 1 or 2)
+            3 = Search additional atoms recursively if either A1 or A2 is
+                visible. (default for search_mode = 3)
+
+        SBOND
+        """
+        # Validate search_mode and boundary_mode inputs
+        if search_mode not in [1, 2, 3]:
+            raise ValueError("search_mode must be 1, 2, or 3. Got ",
+                             str(search_mode))
+        if boundary_mode not in [None, 1, 2, 3]:
+            raise ValueError("boundary_mode must be 1, 2, or 3. Got ",
+                             str(boundary_mode))
+        # Overwrite A1 and A2.
+        if search_mode > 1:
+            A2 = "XX"
+        if search_mode == 3:
+            A1 = "XX"
+        # Get default boundary_mode.
+        if boundary_mode is None:
+            if search_mode == 3:
+                boundary_mode = 3
+            else:
+                boundary_mode = 2
+        section = self["SBOND"]
+        # Construct the line we need to add.
+        index = len(section.data) # Index
+        radius = 0.25 # Default radius
+        width = 2.0 # Default width
+        r, g, b = (127, 127, 127) # Default colour.
+        # The 6th item.
+        if search_mode == 1:
+            x = 0
+        else:
+            x = boundary_mode - 1
+        # Write the line
+        tokens = [index, A1, A2, min_length, max_length, x, boundary_mode - 1,
+                  int(show_polyhedra), int(search_by_label), 1,
+                  radius, width, r, g, b]
+        section.data.insert(-1, tokens)
+        # TODO: validation that A1 and A2 are valid symbols/labels.
 
     def get_structure(self) -> list[list]:
         """

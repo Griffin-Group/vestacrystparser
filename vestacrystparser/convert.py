@@ -16,6 +16,7 @@ def vesta_from_structure(stru: Structure) -> VestaFile:
     # Add the sites
     for site in stru:
         element = site.specie.symbol
-        vfile.add_site(element, element, *site.frac_coords)
+        vfile.add_site(element, element, *site.frac_coords,
+                       add_bonds=True)
     # Done
     return vfile
