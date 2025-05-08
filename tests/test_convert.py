@@ -36,7 +36,9 @@ def test_hBN_title(sample_vestafile):
     expected_title = """TITLE
 "B1 N1"
 """
-    assert compare_vesta_strings(str(sample_vestafile["TITLE"]), expected_title)
+    assert compare_vesta_strings(
+        str(sample_vestafile["TITLE"]), expected_title)
+
 
 def test_convert(poscar_structure, sample_vestafile):
     # Load the file, then compare it with the file we loaded.

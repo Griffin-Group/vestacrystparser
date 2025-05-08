@@ -381,7 +381,8 @@ def test_set_unit_cell_line_visibility(sample_vestafile):
     assert compare_vesta_strings(str(sample_vestafile["UCOLP"]), expected_ucolp), \
         "Showing one unit cell line didn't work."
     # Some of the less well-defined cases.
-    assert sample_vestafile.set_unit_cell_line_visibility(show=False, all=True) == 0
+    assert sample_vestafile.set_unit_cell_line_visibility(
+        show=False, all=True) == 0
     expected_ucolp = """UCOLP
    0   0  1.000   0   0   0"""
     assert compare_vesta_strings(str(sample_vestafile["UCOLP"]), expected_ucolp), \
@@ -648,7 +649,7 @@ def test_add_bond(sample_vestafile):
     sample_vestafile.add_bond('Cu', 'Cu', min_length=0.1, show_polyhedra=False,
                               search_by_label=True)
     assert compare_vesta_strings(str(sample_vestafile["SBOND"]), expected_sbond), \
-        "show_polyhedra, search_by_label, or min_length didn't work as expected."    
+        "show_polyhedra, search_by_label, or min_length didn't work as expected."
 
 
 def test_get_structure(sample_vestafile):

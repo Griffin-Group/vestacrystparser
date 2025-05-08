@@ -61,10 +61,11 @@ def load_elements_data(element: Union[int, str]) -> \
         # This shouldn't happen.
         raise ValueError("Unable to load default element from elements.ini.")
 
-def load_default_bond_length(A1:str, A2:str) -> Union[float, None]:
+
+def load_default_bond_length(A1: str, A2: str) -> Union[float, None]:
     """
     Loads default maximum bond length for a pair of elements (if present).
-    
+
     May be None. Not every element pair has default bonds in style.ini.
     (N.B. If adding bonds manually, VESTA GUI defaults to 1.6.)
     """
@@ -84,8 +85,8 @@ def load_default_bond_length(A1:str, A2:str) -> Union[float, None]:
                     return None
                 # Parse line
                 tokens = parse_line(line)
-                if ((tokens[1] == A1 and tokens[2] == A2) or 
-                    (tokens[1] == A2 and tokens[2] == A1)):
+                if ((tokens[1] == A1 and tokens[2] == A2) or
+                        (tokens[1] == A2 and tokens[2] == A1)):
                     # A1 and A2 are interchangeable.
                     # We've found our match.
                     return tokens[4]
@@ -877,7 +878,8 @@ class VestaFile:
             if add_bonds:
                 # Get the atomic symbols of the other elements.
                 # Read from ATOMT
-                other_symbols = [section.data[i][1] for i in range(len(section.data)-2)]
+                other_symbols = [section.data[i][1]
+                                 for i in range(len(section.data)-2)]
                 for A2 in other_symbols:
                     # If there is a bond length, add a new bond.
                     maxlen = load_default_bond_length(symbol, A2)
@@ -931,10 +933,10 @@ class VestaFile:
                 boundary_mode = 2
         section = self["SBOND"]
         # Construct the line we need to add.
-        index = len(section.data) # Index
-        radius = 0.25 # Default radius
-        width = 2.0 # Default width
-        r, g, b = (127, 127, 127) # Default colour.
+        index = len(section.data)  # Index
+        radius = 0.25  # Default radius
+        width = 2.0  # Default width
+        r, g, b = (127, 127, 127)  # Default colour.
         # The 6th item.
         if search_mode == 1:
             x = 0
