@@ -347,18 +347,18 @@ SITET
 
 Vectors to draw on the atoms.
 
-Each vector has a block of entries. The first row is the vector.
-It has an index, which is the vector's index (because multiple atoms can
-share a vector, so VESTA indexes vectors separately), followed by the
-Cartesian coordinates of the vector, followed by a 0 for axial vectors or
-1 for polar vectors.
-After the vector entry is the atoms entry. It starts with the atomic index,
-followed by some 4 integers (which should be 0 in our cases, but may be
-non-zero if you are selecting an individual atom instead of a
-crystallographic site).
-There may be multiple atoms entries; each entry receives the same vector.
-Each entry is terminated by a row of 5 zeroes.
-The block is terminated by 5 more zeroes.
+There are multiple blocks, one for each vector specification, which may be attached to multiple atoms. Each block is terminated by five `0`'s.
+The whole section is terminated by another row of five `0`'s.
+
+In each block:
+- 1st row:
+  - 1st item: vector index.
+  - 2nd-4th items: vector coordinates, modulus along crystallographic axes (i.e. a basis of unit vectors parallel to the lattice vectors). (default 0 0 c-axis-length)
+  - 5th item: 0/1 axial/polar vector. (default 0)
+- 2nd+ rows (optional):
+  - 1st item: site index to attach this vector to.
+  - 2nd item: 0 if crystallographic site, 1+ if individual site (default 0). Values >1 occur for symmetric images under symmetry group transformation (e.g. If you have P2, and a site with structure parameter (0.2,0,0), then you have an image at (-0.2,0,0); that site would have a value of 2 here.).
+  - 3rd-5th items: Number of unit cells/lattice vectors away from the original site, in x, y, and z directions (default 0,0,0).
 
 Files lacking vectors have an empty VECTR block with just ` 0 0 0 0 0`.
 
@@ -626,6 +626,8 @@ POLYS   1
 ### VECTS
 
 Global scaling factor for vectors.
+
+Edit > Vectors > Scale factor for modulus
 
 e.g.
 ```
