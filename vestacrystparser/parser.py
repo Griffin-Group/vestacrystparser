@@ -796,8 +796,7 @@ class VestaFile:
         SCENE
         """
         # Get the unit cell parameters
-        section = self["CELLP"]
-        a, b, c, alpha, beta, gamma = section.data[0]
+        a, b, c, alpha, beta, gamma = self.get_cell()
         alpha = math.radians(alpha)
         beta = math.radians(beta)
         gamma = math.radians(gamma)
@@ -1015,6 +1014,30 @@ class VestaFile:
         section = self["CELLP"]
         return section.data[0].copy()
 
+    def get_cell_matrix(self) -> list[list[float]]:
+        """
+        Gets the lattice vectors as a 3x3 matrix.
+
+        VESTA aligns the 1st lattice vectors with the x axis, and the 2nd in
+        the x-y plane.
+        """
+        a, b, c, alpha, beta, gamma = self.get_cell()
+        alpha = math.radians(alpha)
+        beta = math.radians(beta)
+        gamma = math.radians(gamma)
+        # a is aligned along the x-axis.
+        ax, ay, az = [a, 0, 0]
+        # b is in the x-y plane.
+        bx = b * math.cos(gamma)
+        by = b * math.sin(gamma)
+        bz = 0
+        # c is more free.
+        cx = c * math.cos(beta)
+        cy = c * (math.cos(alpha) - math.cos(beta)
+                  * math.cos(gamma))/math.sin(gamma)
+        cz = math.sqrt(c**2 - cx**2 - cy**2)
+        return [[ax, ay, az], [bx, by, bz], [cx, cy, cz]]
+
     def set_atom_material(self, r: int = None, g: int = None, b: int = None,
                           shininess: float = None):
         """
@@ -1146,3 +1169,178 @@ class VestaFile:
         # Set the title
         section = self["TITLE"]
         section.data[0][0] = lines[0]
+
+    def _convert_vector_coords(self, x: float, y: float, z: float,
+                               coord_type: str) -> tuple[float, float, float]:
+        """
+        Converts x, y, z in coord_type coordinates to modulus.
+        """
+        if coord_type == "modulus":
+            # This is the internal representation. No change needed.
+            pass
+        elif coord_type == "uvw":
+            # To get to modulus, multiply by length of lattice vectors
+            va, vb, vc, _, _, _ = self.get_cell()
+            x *= va
+            y *= vb
+            z *= vc
+        elif coord_type == "xyz":
+            # Project onto the lattice vectors.
+            va, vb, vc = self.get_cell_matrix()
+            # Copy
+            cart = [x, y, z]
+            # Lengths of lattice vectors, to divide out
+            lengths = [math.sqrt(sum(v[i]**2 for i in range(3)))
+                       for v in (va, vb, vc)]
+            # Project with dot product
+            x = sum(cart[i] * va[i] for i in range(3)) / lengths[0]
+            y = sum(cart[i] * vb[i] for i in range(3)) / lengths[1]
+            z = sum(cart[i] * vc[i] for i in range(3)) / lengths[2]
+        else:
+            raise ValueError(
+                "coord_type must be modulus, uvw, or xyz, but got ", coord_type)
+        return x, y, z
+
+    def add_vector_type(self, x: float, y: float, z: float,
+                        polar: bool = False, radius: float = 0.5,
+                        r: int = 255, g: int = 0, b: int = 0,
+                        penetrate_atoms: bool = True,
+                        add_atom_radius: bool = False,
+                        coord_type: str = "xyz"):
+        """
+        Create a new type of vector (Edit > Vectors > New)
+
+        Arguments:
+            - x, y, z: floats, coordinates of vector.
+            - polar: bool, whether this is a polar vector (rather than axial).
+                Default False.
+            - radius: float (positive), radius of rendered arrow. Default 0.5.
+            - r, g, b: int (0-255). RGB colour of vector. Default 255, 0, 0.
+            - penetrate_atoms: bool. Whether the vector penetrates the atom,
+                such that it sticks out on both sides. Default True.
+            - add_atom_radius: bool. Whether to add the atomic radius to the
+                length of the vector. Default False.
+            - coord_type: {"xyz", "uvw", "modulus"}. Coordinate basis for
+                x, y, z arguments.
+                - "xyz": Cartesian vector notation. (Default)
+                - "uvw": Lattice vector notation.
+                - "modulus": Modulus along crystallographic axes. (This is the
+                    internal representation.)
+
+        VECTR, VECTT.
+        """
+        # Convert input coordinates.
+        x, y, z = self._convert_vector_coords(x, y, z, coord_type)
+        # Add vector formatting.
+        # (I do this first because it's easier to get the index from here.)
+        section = self["VECTT"]
+        # Index of the new vector.
+        idx = len(section.data)
+        # Exploit Python converting bools to ints. True = 1.
+        flag = penetrate_atoms + 2 * add_atom_radius
+        section.data.insert(-1, [idx, radius, r, g, b, flag])
+        # Add the new vector block
+        section = self["VECTR"]
+        section.data.insert(-1, [idx, x, y, z, int(polar)])
+        section.data.insert(-1, [0, 0, 0, 0, 0])  # Block termination.
+
+    def edit_vector_type(self,
+                         index: int,
+                         x: float = None,
+                         y: float = None,
+                         z: float = None,
+                         polar: bool = None,
+                         radius: float = None,
+                         r: int = None,
+                         g: int = None,
+                         b: int = None,
+                         penetrate_atoms: bool = None,
+                         add_atom_radius: bool = None,
+                         coord_type: str = "xyz"):
+        """
+        Edits an existing type of vector (Edit > Vectors > Edit)
+
+        Accepts negative indices, counting from the end.
+
+        All arguments after index are optional. Unset arguments are left 
+        unchanged.
+        If x, y, or z are provided, all of x, y, and z need to be provided.
+
+        Arguments:
+            - index: int, index (1-based) of the vector.
+            - x, y, z: floats, coordinates of vector.
+            - polar: bool, whether this is a polar vector (rather than axial).
+            - radius: float (positive), radius of rendered arrow.
+            - r, g, b: int (0-255). RGB colour of vector.
+            - penetrate_atoms: bool. Whether the vector penetrates the atom,
+                such that it sticks out on both sides.
+            - add_atom_radius: bool. Whether to add the atomic radius to the
+                length of the vector.
+            - coord_type: {"xyz", "uvw", "modulus"}. Coordinate basis for
+                x, y, z arguments.
+                - "xyz": Cartesian vector notation.
+                - "uvw": Lattice vector notation.
+                - "modulus": Modulus along crystallographic axes. (This is the
+                    internal representation.)
+
+        VECTR, VECTT.
+        """
+        if index == 0:
+            raise IndexError("VESTA indices are 1-based; 0 is invalid index.")
+        section = self["VECTT"]
+        # Process the index.
+        if index < 0:
+            # Note that length of section includes the empty 0-line.
+            index = len(section) + index
+        if index <= 0 or index >= len(section):
+            raise IndexError("Index is out of range.")
+        # Process the vector coordinates if provided.
+        if x is not None:
+            if y is None or z is None:
+                raise TypeError("x, y, and z must be specified together.")
+            else:
+                x, y, z = self._convert_vector_coords(x, y, z, coord_type)
+        else:
+            if y is not None or z is not None:
+                raise TypeError("x, y, and z must be specified together.")
+        # Update values
+        if radius is not None:
+            section.data[index-1][1] = radius
+        if r is not None:
+            section.data[index-1][2] = r
+        if g is not None:
+            section.data[index-1][3] = g
+        if b is not None:
+            section.data[index-1][4] = b
+        if penetrate_atoms is not None:
+            # Set bit flags.
+            if penetrate_atoms:
+                section.data[index-1][5] |= 1
+            else:
+                section.data[index-1][5] &= ~1
+        if add_atom_radius is not None:
+            if add_atom_radius:
+                section.data[index-1][5] |= 2
+            else:
+                section.data[index-1][5] &= ~2
+        section = self["VECTR"]
+        # Find the row that has the target index.
+        idx = None
+        for i, row in enumerate(section.data):
+            if row[0] == index:
+                idx = i
+                break
+        if idx is None:
+            raise RuntimeError(
+                "VECTR malformed? Could not find entry with index ", index)
+        # Update data
+        if x is not None:
+            section.data[idx][1:4] = x, y, z
+        if polar is not None:
+            section.data[idx][4] = int(polar)
+
+    # TODO delete_vector_type,
+    # set_vector_to_site, remove_vector_from_site
+    # set_vector_scale
+
+    # TODO: Toggle visibility of atoms, sites, etc.

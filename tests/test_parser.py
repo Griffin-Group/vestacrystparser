@@ -872,3 +872,17 @@ Foobar
         sample_vestafile.set_title("Hello \nWorld")
     assert compare_vesta_strings(str(sample_vestafile["TITLE"]), expected_title), \
         "Title changed despite error setting title."
+
+
+def test_get_cell_matrix(sample_vestafile):
+    mat = sample_vestafile.get_cell_matrix()
+    # Obtained from converting to POSCAR.
+    expected_mat = [[2.5299999714, 0.0000000000, 0.0000000000],
+                    [1.2649999857, 2.1910442468, 0.0000000000],
+                    [1.2649999857, 0.7303480823, 2.0657363264]]
+    # Floating point comparisons
+    assert len(mat) == 3
+    for i in range(3):
+        assert len(mat[i]) == 3
+        for j in range(3):
+            assert abs(mat[i][j] - expected_mat[i][j]) <= 10**(-6)
