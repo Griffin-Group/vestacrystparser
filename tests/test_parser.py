@@ -971,3 +971,10 @@ def test_add_vector_type(sample_vestafile):
         "VECTR doesn't match expected value from modulus coords."
     assert compare_vesta_strings(str(sample_vestafile["VECTT"]), expected_vectt), \
         "VECTT wasn't updated properly with radius or add_atom_radius."
+    # Invalid coords type
+    with pytest.raises(ValueError):
+        sample_vestafile.add_vector_type(1, 2, 3, coord_type="jhfdak")
+    assert compare_vesta_strings(str(sample_vestafile["VECTR"]), expected_vectr, prec=5), \
+        "VECTR changed despite invalid coords type."
+    assert compare_vesta_strings(str(sample_vestafile["VECTT"]), expected_vectt), \
+        "VECTT changed despite invalid coords type."
