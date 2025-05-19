@@ -64,7 +64,8 @@ def invert_matrix(mat: list[list[float]]) -> list[list[float]]:
             # Each term is built from the co-factor, i.e. determinant of the
             # rest of the matrix.
             # But also, transpose the terms
-            inverse[j][i] = (mat[x1][y1] * mat[x2][y2] - mat[x1][y2] * mat[x2][y1]) / detfull
+            inverse[j][i] = (mat[x1][y1] * mat[x2][y2] -
+                             mat[x1][y2] * mat[x2][y1]) / detfull
     return inverse
 
 
@@ -1226,7 +1227,7 @@ class VestaFile:
             a, b, c, _, _, _ = self.get_cell()
             mat = self.get_cell_matrix()
             # Convert lattice vectors to unit vectors
-            for i, length in enumerate((a,b,c)):
+            for i, length in enumerate((a, b, c)):
                 for j in range(3):
                     mat[i][j] /= length
             # Obtain inverse matrix

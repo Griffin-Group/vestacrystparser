@@ -907,18 +907,21 @@ def test_get_cell_matrix(sample_vestafile):
                     [1.2649999857, 0.7303480823, 2.0657363264]]
     assert compare_matrices(mat, expected_mat, prec=6)
 
+
 def test_inverse_matrix():
-    M = [[1,0,0],[0,1,0],[0,0,1]]
-    assert compare_matrices(invert_matrix(M), M, prec=12), "Identity matrix not matched"
+    M = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+    assert compare_matrices(invert_matrix(
+        M), M, prec=12), "Identity matrix not matched"
     # Get a more complex inversion
     M = [[2.53, 0, 0],
          [1.2650000000000001, 2.1910442715746297, 0],
          [1.2650000000000001, 0.7303480905248766, 2.0657363497471466]]
     # Inverse from numpy.linalg.inv(M)
-    Mi = [[ 0.39525692,  0.        ,  0.        ],
-          [-0.22820169,  0.45640337,  0.        ],
+    Mi = [[0.39525692,  0.,  0.],
+          [-0.22820169,  0.45640337,  0.],
           [-0.16136296, -0.16136296,  0.48408888]]
     assert compare_matrices(invert_matrix(M), Mi, prec=7)
+
 
 def test_add_vector_type(sample_vestafile):
     # Set with default x-y-z, in y direction.

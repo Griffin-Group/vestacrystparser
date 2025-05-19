@@ -34,7 +34,8 @@ def test_load(sample_vestafile, sample_vesta_filename):
 
 def test_edit_vector_type(sample_vestafile):
     # Simple updating of coordinates
-    sample_vestafile.edit_vector_type(1, x=0.11, y=0.22, z=0.33, coord_type = "modulus")
+    sample_vestafile.edit_vector_type(
+        1, x=0.11, y=0.22, z=0.33, coord_type="modulus")
     expected_vectr = """VECTR
    1    0.11000    0.22000    0.33000 0
     1   0    0    0    0
@@ -87,7 +88,8 @@ def test_edit_vector_type(sample_vestafile):
     assert compare_vesta_strings(str(sample_vestafile["VECTT"]), expected_vectt), \
         "Updating polar, g, radius of 2 didn't work as expected"
     # Use negative indexing, and add_atom_radius
-    sample_vestafile.edit_vector_type(-2, r=100, g=110, b=120, add_atom_radius=True)
+    sample_vestafile.edit_vector_type(-2, r=100, g=110, b=120,
+                                      add_atom_radius=True)
     expected_vectt = """VECTT
    1  0.350 255   0   0 1
    2  0.500 255 150   0 1
