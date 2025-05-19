@@ -1,8 +1,9 @@
 import os
+import math
 
 import pytest
 
-from vestacrystparser.parser import VestaFile, parse_line
+from vestacrystparser.parser import VestaFile, parse_line, invert_matrix
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(TEST_DIR, 'data')
@@ -49,6 +50,30 @@ def compare_vesta_strings(str1: str, str2: str, prec: int = None) -> bool:
                             return False
             else:
                 return False
+    return True
+
+
+def compare_matrices(M1, M2, prec: int = None) -> bool:
+    """
+    Takes two matrix-like objects and compares them.
+
+    If provided, prec means floats are compared to prec digits of precision.
+    """
+    # Check first dimension is the same length.
+    if not len(M1) == len(M2):
+        return False
+    for i in range(len(M1)):
+        # Check second dimension is the same length
+        if not len(M1[i]) == len(M2[i]):
+            return False
+        for j in range(len(M1[i])):
+            # Compare elements
+            if prec is None:
+                if not M1[i][j] == M2[i][j]:
+                    return False
+            else:
+                if not abs(M1[i][j] - M2[i][j]) <= 10**(-prec):
+                    return False
     return True
 
 
@@ -880,9 +905,69 @@ def test_get_cell_matrix(sample_vestafile):
     expected_mat = [[2.5299999714, 0.0000000000, 0.0000000000],
                     [1.2649999857, 2.1910442468, 0.0000000000],
                     [1.2649999857, 0.7303480823, 2.0657363264]]
-    # Floating point comparisons
-    assert len(mat) == 3
-    for i in range(3):
-        assert len(mat[i]) == 3
-        for j in range(3):
-            assert abs(mat[i][j] - expected_mat[i][j]) <= 10**(-6)
+    assert compare_matrices(mat, expected_mat, prec=6)
+
+def test_inverse_matrix():
+    M = [[1,0,0],[0,1,0],[0,0,1]]
+    assert compare_matrices(invert_matrix(M), M, prec=12), "Identity matrix not matched"
+    # Get a more complex inversion
+    M = [[2.53, 0, 0],
+         [1.2650000000000001, 2.1910442715746297, 0],
+         [1.2650000000000001, 0.7303480905248766, 2.0657363497471466]]
+    # Inverse from numpy.linalg.inv(M)
+    Mi = [[ 0.39525692,  0.        ,  0.        ],
+          [-0.22820169,  0.45640337,  0.        ],
+          [-0.16136296, -0.16136296,  0.48408888]]
+    assert compare_matrices(invert_matrix(M), Mi, prec=7)
+
+def test_add_vector_type(sample_vestafile):
+    # Set with default x-y-z, in y direction.
+    sample_vestafile.add_vector_type(5/2, math.sqrt(3)*5/2, 0)
+    expected_vectr = """VECTR
+    1    0.00000    5.00000    0.00000 0
+    0 0 0 0 0
+    0 0 0 0 0"""
+    expected_vectt = """VECTT
+   1  0.500 255   0   0 1
+ 0 0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["VECTR"]), expected_vectr, prec=5), \
+        "VECTR doesn't match expected value from xyz coords."
+    assert compare_vesta_strings(str(sample_vestafile["VECTT"]), expected_vectt), \
+        "VECTT wasn't updated properly from defaults."
+    # Try uvw with some changed defaults
+    sample_vestafile.add_vector_type(1, 0, 0, polar=True, r=100, g=120, b=140,
+                                     coord_type="uvw", penetrate_atoms=False)
+    expected_vectr = """VECTR
+    1    0.00000    5.00000    0.00000 0
+    0 0 0 0 0
+    2    2.53000    0.00000    0.00000 1
+    0 0 0 0 0
+    0 0 0 0 0"""
+    expected_vectt = """VECTT
+   1  0.500 255   0   0 1
+   2  0.500 100 120 140 0
+ 0 0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["VECTR"]), expected_vectr, prec=5), \
+        "VECTR doesn't match expected value from uvw coords or polar vector."
+    assert compare_vesta_strings(str(sample_vestafile["VECTT"]), expected_vectt), \
+        "VECTT wasn't updated properly with different colours or penetrate_atoms=False."
+    # Now do modulus with some other parameters.
+    sample_vestafile.add_vector_type(0, 5, 0, radius=0.35, add_atom_radius=True,
+                                     penetrate_atoms=True, coord_type="modulus")
+    expected_vectr = """VECTR
+    1    0.00000    5.00000    0.00000 0
+    0 0 0 0 0
+    2    2.53000    0.00000    0.00000 1
+    0 0 0 0 0
+    3    0.00000    5.00000    0.00000 0
+    0 0 0 0 0
+    0 0 0 0 0"""
+    expected_vectt = """VECTT
+   1  0.500 255   0   0 1
+   2  0.500 100 120 140 0
+   3  0.350 255   0   0 3
+ 0 0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["VECTR"]), expected_vectr, prec=5), \
+        "VECTR doesn't match expected value from modulus coords."
+    assert compare_vesta_strings(str(sample_vestafile["VECTT"]), expected_vectt), \
+        "VECTT wasn't updated properly with radius or add_atom_radius."

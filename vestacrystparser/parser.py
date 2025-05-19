@@ -31,6 +31,43 @@ def parse_line(line: str) -> list[Union[int, float, str]]:
     return [parse_token(tok) for tok in tokens]
 
 
+def invert_matrix(mat: list[list[float]]) -> list[list[float]]:
+    """Inverts a 3x3 matrix"""
+    # Implementation using raw Python; importing numpy is overkill.
+    # https://mathworld.wolfram.com/MatrixInverse.html
+    assert len(mat) == 3, "mat must be 3x3"
+    assert len(mat[0]) == 3, "mat must be 3x3"
+    # Determinant of full matrix
+    detfull = mat[0][0] * (mat[1][1]*mat[2][2] - mat[2][1]*mat[1][2]) \
+        - mat[0][1] * (mat[1][0]*mat[2][2] - mat[1][2]*mat[2][0]) \
+        + mat[0][2] * (mat[1][0]*mat[2][1] - mat[1][1]*mat[2][0])
+    if detfull == 0:
+        raise ValueError("Singular matrix")
+    # Make determinants for each element.
+    # Initialise
+    inverse = [[None, None, None] for _ in range(3)]
+    for i in range(3):
+        # Grab the co-factor coordinates
+        if i == 0:
+            x1, x2 = 1, 2
+        elif i == 1:
+            x1, x2 = 2, 0
+        else:
+            x1, x2 = 0, 1
+        for j in range(3):
+            if j == 0:
+                y1, y2 = 1, 2
+            elif j == 1:
+                y1, y2 = 2, 0
+            else:
+                y1, y2 = 0, 1
+            # Each term is built from the co-factor, i.e. determinant of the
+            # rest of the matrix.
+            # But also, transpose the terms
+            inverse[j][i] = (mat[x1][y1] * mat[x2][y2] - mat[x1][y2] * mat[x2][y1]) / detfull
+    return inverse
+
+
 def load_elements_data(element: Union[int, str]) -> \
         list[int, str, float, float, float, int, int, int]:
     fn = importlib.resources.files(vestacrystparser.resources) / "elements.ini"
@@ -1185,17 +1222,21 @@ class VestaFile:
             y *= vb
             z *= vc
         elif coord_type == "xyz":
-            # Project onto the lattice vectors.
-            va, vb, vc = self.get_cell_matrix()
+            # Get lattice vector directions
+            a, b, c, _, _, _ = self.get_cell()
+            mat = self.get_cell_matrix()
+            # Convert lattice vectors to unit vectors
+            for i, length in enumerate((a,b,c)):
+                for j in range(3):
+                    mat[i][j] /= length
+            # Obtain inverse matrix
+            imat = invert_matrix(mat)
+            # (x',y',z') = (x,y,z) * imat (row vectors)
             # Copy
             cart = [x, y, z]
-            # Lengths of lattice vectors, to divide out
-            lengths = [math.sqrt(sum(v[i]**2 for i in range(3)))
-                       for v in (va, vb, vc)]
-            # Project with dot product
-            x = sum(cart[i] * va[i] for i in range(3)) / lengths[0]
-            y = sum(cart[i] * vb[i] for i in range(3)) / lengths[1]
-            z = sum(cart[i] * vc[i] for i in range(3)) / lengths[2]
+            x = sum(imat[i][0] * cart[i] for i in range(3))
+            y = sum(imat[i][1] * cart[i] for i in range(3))
+            z = sum(imat[i][2] * cart[i] for i in range(3))
         else:
             raise ValueError(
                 "coord_type must be modulus, uvw, or xyz, but got ", coord_type)
