@@ -153,3 +153,77 @@ def test_edit_vector_type(sample_vestafile):
         "VECTR changed when it shouldn't have due to incomplete x,y,z"
     assert compare_vesta_strings(str(sample_vestafile["VECTT"]), expected_vectt), \
         "VECTT changed when it shouldn't have due to incomplete x,y,z"
+
+
+def test_delete_vector_type(sample_vestafile):
+    expected_vectr = """VECTR
+   1    0.40825    0.40825    0.40825 0
+    1   0    0    0    0
+ 0 0 0 0 0
+   2    0.40825    0.40825   -1.22474 0
+    2   0    0    0    0
+ 0 0 0 0 0
+   3   -0.40825    1.22474   -0.40825 0
+    3   0    0    0    0
+ 0 0 0 0 0
+   4    1.22474   -0.40825   -0.40825 0
+    4   0    0    0    0
+ 0 0 0 0 0
+ 0 0 0 0 0"""
+    expected_vectt = """VECTT
+   1  0.350 255   0   0 1
+   2  0.350 255   0   0 1
+   3  0.350 255   0   0 1
+   4  0.350 255   0   0 1
+ 0 0 0 0 0"""
+    # First, we'll test index errors before we delete our list.
+    with pytest.raises(IndexError):
+        sample_vestafile.delete_vector_type(5)
+    with pytest.raises(IndexError):
+        sample_vestafile.delete_vector_type(0)
+    with pytest.raises(IndexError):
+        sample_vestafile.delete_vector_type(-10)
+    assert compare_vesta_strings(str(sample_vestafile["VECTR"]), expected_vectr), \
+        "VECTR changed when it shouldn't have due to IndexError"
+    assert compare_vesta_strings(str(sample_vestafile["VECTT"]), expected_vectt), \
+        "VECTT changed when it shouldn't have due to IndexError"
+    # Test that deleting the first element works as expected.
+    sample_vestafile.delete_vector_type(1)
+    expected_vectr = """VECTR
+   1    0.40825    0.40825   -1.22474 0
+    2   0    0    0    0
+ 0 0 0 0 0
+   2   -0.40825    1.22474   -0.40825 0
+    3   0    0    0    0
+ 0 0 0 0 0
+   3    1.22474   -0.40825   -0.40825 0
+    4   0    0    0    0
+ 0 0 0 0 0
+ 0 0 0 0 0"""
+    expected_vectt = """VECTT
+   1  0.350 255   0   0 1
+   2  0.350 255   0   0 1
+   3  0.350 255   0   0 1
+ 0 0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["VECTR"]), expected_vectr), \
+        "VECTR improperly deleted vector 1"
+    assert compare_vesta_strings(str(sample_vestafile["VECTT"]), expected_vectt), \
+        "VECTT improperly deleted vector 1"
+    # Try negative indexing
+    sample_vestafile.delete_vector_type(-2)
+    expected_vectr = """VECTR
+   1    0.40825    0.40825   -1.22474 0
+    2   0    0    0    0
+ 0 0 0 0 0
+   2    1.22474   -0.40825   -0.40825 0
+    4   0    0    0    0
+ 0 0 0 0 0
+ 0 0 0 0 0"""
+    expected_vectt = """VECTT
+   1  0.350 255   0   0 1
+   2  0.350 255   0   0 1
+ 0 0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["VECTR"]), expected_vectr), \
+        "VECTR improperly deleted vector -2"
+    assert compare_vesta_strings(str(sample_vestafile["VECTT"]), expected_vectt), \
+        "VECTT improperly deleted vector -2"

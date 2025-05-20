@@ -1381,8 +1381,56 @@ class VestaFile:
         if polar is not None:
             section.data[idx][4] = int(polar)
 
-    # TODO delete_vector_type,
-    # set_vector_to_site, remove_vector_from_site
-    # set_vector_scale
+    def delete_vector_type(self, index: int):
+        """
+        Delete the given vector type
+
+        VECTT, VECTR
+
+        Index (1-based)
+        """
+        if index == 0:
+            raise IndexError("VESTA indices are 1-based; 0 is invalid index.")
+        # Vector styles are easier to parse number of vectors
+        section = self["VECTT"]
+        nvec = len(section)
+        # VECTT has n+1 rows; the last row is all 0's.
+        # Indexing starts at 1 in the 0'th row.
+        # Process the index.
+        if index < 0:
+            # len(section) includes the empty 0-line
+            index = nvec + index
+        if index <= 0 or index >= nvec:
+            raise IndexError("Index is out of range.")
+        # Delete the wanted row.
+        del section.data[index-1]
+        # Re-index remaining entries.
+        for i, line in enumerate(section.data):
+            if line[0] > 0:
+                line[0] = i + 1
+        # Now delete the row in VECTR
+        section = self["VECTR"]
+        for i, line in enumerate(section.data):
+            # Find the relevant row
+            if line[0] == index and (i == 0 or section.data[i-1] == [0]*5):
+                # We have found the matching index.
+                # Now delete lines until we delete the block-end line.
+                while section.data.pop(i) != [0]*5:
+                    pass
+                # We're done deleting things
+                break
+        # Re-index.
+        if nvec > 1:
+            idx = 1
+            for i, line in enumerate(section.data):
+                # Find the starting line of each block
+                if (i == 0 or section.data[i-1] == [0]*5) and line != [0]*5:
+                    # Re-write the index.
+                    line[0] = idx
+                    idx += 1
+
+    # TODO set_vector_to_site
+    # TODO remove_vector_from_site
+    # TODO set_vector_scale
 
     # TODO: Toggle visibility of atoms, sites, etc.

@@ -981,3 +981,22 @@ def test_add_vector_type(sample_vestafile):
         "VECTR changed despite invalid coords type."
     assert compare_vesta_strings(str(sample_vestafile["VECTT"]), expected_vectt), \
         "VECTT changed despite invalid coords type."
+
+
+def test_delete_vector_type(sample_vestafile):
+    # We have no vectors.
+    # Attempting to delete should raise an error and not do anything.
+    expected_vectr = """VECTR
+ 0 0 0 0 0"""
+    expected_vectt = """VECTT
+ 0 0 0 0 0"""
+    with pytest.raises(IndexError):
+        sample_vestafile.delete_vector_type(1)
+    with pytest.raises(IndexError):
+        sample_vestafile.delete_vector_type(0)
+    with pytest.raises(IndexError):
+        sample_vestafile.delete_vector_type(-1)
+    assert compare_vesta_strings(str(sample_vestafile["VECTR"]), expected_vectr), \
+        "VECTR changed despite no vectors to delete."
+    assert compare_vesta_strings(str(sample_vestafile["VECTT"]), expected_vectt), \
+        "VECTT changed despite no vectors to delete."
