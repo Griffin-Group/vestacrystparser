@@ -1429,7 +1429,42 @@ class VestaFile:
                     line[0] = idx
                     idx += 1
 
-    # TODO set_vector_to_site
+    def set_vector_to_site(self, type:int, site:int):
+        """
+        Attach a vector of type `type` to atomic `site`.
+
+        Currently, we attach to all symmetrically equivalent sites based on
+        the current space group.
+        Also, no duplicate checking is performed.
+
+        VECTR
+        """
+        # Validate inputs
+        if type <= 0:
+            raise IndexError("type should be positive, but got ", type)
+        if site <= 0:
+            raise IndexError("site should be positive, but got ", site)
+        section = self["VECTR"]
+        # Find the relevant block matching the type.
+        idx = 0
+        while idx < len(section.data):
+            # Start of a block has the end of a block before it.
+            if (section.data[idx][0] == type) and (idx == 0 or section.data[idx-1] == 5*[0]):
+                break
+            idx += 1
+        if idx == len(section.data):
+            raise IndexError("Vector of type ", type, " does not exist.")
+        # Now that we've found the start of the block, let's go to the end of the block.
+        while idx < len(section.data):
+            # If I want to, check for duplicates here.
+            # But I think duplicates are allowed.
+            if section.data[idx] == 5*[0]:
+                break
+            idx += 1
+        if idx == len(section.data):
+            raise RuntimeError("Malformed VECTR; no block termination detected.")
+        # Insert
+        section.data.insert(idx, [site, 0, 0, 0, 0])
     # TODO remove_vector_from_site
     # TODO set_vector_scale
 

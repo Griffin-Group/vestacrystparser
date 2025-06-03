@@ -227,3 +227,48 @@ def test_delete_vector_type(sample_vestafile):
         "VECTR improperly deleted vector -2"
     assert compare_vesta_strings(str(sample_vestafile["VECTT"]), expected_vectt), \
         "VECTT improperly deleted vector -2"
+
+
+def test_set_vector_to_site(sample_vestafile):
+    expected_vectr = """VECTR
+   1    0.40825    0.40825    0.40825 0
+    1   0    0    0    0
+ 0 0 0 0 0
+   2    0.40825    0.40825   -1.22474 0
+    2   0    0    0    0
+ 0 0 0 0 0
+   3   -0.40825    1.22474   -0.40825 0
+    3   0    0    0    0
+ 0 0 0 0 0
+   4    1.22474   -0.40825   -0.40825 0
+    4   0    0    0    0
+ 0 0 0 0 0
+ 0 0 0 0 0"""
+    # Test invalid inputs
+    with pytest.raises(IndexError):
+        sample_vestafile.set_vector_to_site(0, 1)
+    with pytest.raises(IndexError):
+        sample_vestafile.set_vector_to_site(2, -1)
+    with pytest.raises(IndexError):
+        sample_vestafile.set_vector_to_site(5, 1)
+    assert compare_vesta_strings(str(sample_vestafile["VECTR"]), expected_vectr), \
+        "VECTR improperly modified with invalid indices."
+    # Now add a vector.
+    sample_vestafile.set_vector_to_site(3, 1)
+    expected_vectr = """VECTR
+   1    0.40825    0.40825    0.40825 0
+    1   0    0    0    0
+ 0 0 0 0 0
+   2    0.40825    0.40825   -1.22474 0
+    2   0    0    0    0
+ 0 0 0 0 0
+   3   -0.40825    1.22474   -0.40825 0
+    3   0    0    0    0
+    1   0    0    0    0 
+ 0 0 0 0 0
+   4    1.22474   -0.40825   -0.40825 0
+    4   0    0    0    0
+ 0 0 0 0 0
+ 0 0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["VECTR"]), expected_vectr), \
+        "Failed to attach a vector to a site."
