@@ -272,3 +272,57 @@ def test_set_vector_to_site(sample_vestafile):
  0 0 0 0 0"""
     assert compare_vesta_strings(str(sample_vestafile["VECTR"]), expected_vectr), \
         "Failed to attach a vector to a site."
+
+
+def test_remove_vector_from_site(sample_vestafile):
+    expected_vectr = """VECTR
+   1    0.40825    0.40825    0.40825 0
+    1   0    0    0    0
+ 0 0 0 0 0
+   2    0.40825    0.40825   -1.22474 0
+    2   0    0    0    0
+ 0 0 0 0 0
+   3   -0.40825    1.22474   -0.40825 0
+    3   0    0    0    0
+ 0 0 0 0 0
+   4    1.22474   -0.40825   -0.40825 0
+    4   0    0    0    0
+ 0 0 0 0 0
+ 0 0 0 0 0"""
+    # Test invalid inputs
+    with pytest.raises(IndexError):
+        sample_vestafile.remove_vector_from_site(0, 1)
+    with pytest.raises(IndexError):
+        sample_vestafile.remove_vector_from_site(5, 1)
+    assert compare_vesta_strings(str(sample_vestafile["VECTR"]), expected_vectr), \
+        "VECTR improperly modified with invalid type."
+    # Test removing a vector from a non-matching site,
+    # which should do nothing.
+    sample_vestafile.remove_vector_from_site(1, 2)
+    sample_vestafile.remove_vector_from_site(2, 0)
+    assert compare_vesta_strings(str(sample_vestafile["VECTR"]), expected_vectr), \
+        "VECTR improperly modified with non-matching sites."
+    # Now delete a vector.
+    sample_vestafile.remove_vector_from_site(3, 3)
+    expected_vectr = """VECTR
+   1    0.40825    0.40825    0.40825 0
+    1   0    0    0    0
+ 0 0 0 0 0
+   2    0.40825    0.40825   -1.22474 0
+    2   0    0    0    0
+ 0 0 0 0 0
+   3   -0.40825    1.22474   -0.40825 0
+ 0 0 0 0 0
+   4    1.22474   -0.40825   -0.40825 0
+    4   0    0    0    0
+ 0 0 0 0 0
+ 0 0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["VECTR"]), expected_vectr), \
+        "Did not properly delete vector."
+    sample_vestafile.remove_vector_from_site(3, 0)
+    assert compare_vesta_strings(str(sample_vestafile["VECTR"]), expected_vectr), \
+        "VECTR improperly modified with non-matching sites."
+
+
+def test_nvectors(sample_vestafile):
+    assert sample_vestafile.nvectors == 4

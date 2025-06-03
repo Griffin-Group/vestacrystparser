@@ -102,3 +102,19 @@ def test_getitem(sample_vestafile):
     assert compare_vesta_strings(str(sample_vestafile["SITET", -1]),
                                  expected_section2), \
         "Negative indexing of phases didn't work."
+
+
+def test_title(sample_vestafile):
+    assert sample_vestafile.title == "New structure", \
+        "First phase title doesn't match."
+    sample_vestafile.set_current_phase(1)
+    assert sample_vestafile.title == "Phase Two", \
+        "Second phase title doesn't match."
+
+
+def test_nsites(sample_vestafile):
+    assert sample_vestafile.nsites == 1, \
+        "First phase nsites doesn't match."
+    sample_vestafile.set_current_phase(1)
+    assert sample_vestafile.nsites == 0, \
+        "Second phase nsites doesn't match."

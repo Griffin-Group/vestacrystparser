@@ -1000,3 +1000,19 @@ def test_delete_vector_type(sample_vestafile):
         "VECTR changed despite no vectors to delete."
     assert compare_vesta_strings(str(sample_vestafile["VECTT"]), expected_vectt), \
         "VECTT changed despite no vectors to delete."
+
+
+def test_title(sample_vestafile):
+    assert sample_vestafile.title == "New structure"
+
+
+def test_nphases(sample_vestafile):
+    assert sample_vestafile.nphases == 1
+
+
+def test_nsites(sample_vestafile):
+    assert sample_vestafile.nsites == 1
+
+
+def test_nvectors(sample_vestafile):
+    assert sample_vestafile.nvectors == 0

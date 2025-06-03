@@ -509,6 +509,11 @@ class VestaFile:
         """Number of sites in the current phase (read-only)"""
         return len(self["SITET"].data) - 1
 
+    @property
+    def nvectors(self) -> int:
+        """Number of vector types in the current phase (read-only)"""
+        return len(self["VECTT"].data) - 1
+
     # Methods for modifying the system.
     def set_site_color(self, index: Union[int, list[int]],
                        r: int, g: int, b: int):
@@ -1465,7 +1470,45 @@ class VestaFile:
             raise RuntimeError("Malformed VECTR; no block termination detected.")
         # Insert
         section.data.insert(idx, [site, 0, 0, 0, 0])
-    # TODO remove_vector_from_site
+    
+    def remove_vector_from_site(self, type:int, site:int):
+        """
+        Removes vectors of type `type` from atomic site `site`.
+
+        Will remove multiple matching sites if there are duplicates.
+
+        Silent does nothing if `site` not found, but will raise an error if
+        `type` is not valid.
+
+        VECTR
+        """
+        # Validate inputs
+        if type <= 0:
+            raise IndexError("type should be positive, but got ", type)
+        section = self["VECTR"]
+        # Find the relevant block matching the type.
+        idx = 0
+        while idx < len(section.data):
+            # Start of a block has the end of a block before it.
+            if (section.data[idx][0] == type) and (idx == 0 or section.data[idx-1] == 5*[0]):
+                break
+            idx += 1
+        if idx == len(section.data):
+            raise IndexError("Vector of type ", type, " does not exist.")
+        # Now that we've found the start of the block, let's go through the
+        # block and delete matching rows.
+        idx += 1 # Get past the first row of the block which defines the vector. 
+        while idx < len(section.data):
+            # If hit end of block, exit.
+            if section.data[idx] == 5*[0]:
+                break
+            # If this entry matches the site, delete it.
+            if section.data[idx][0] == site:
+                del section.data[idx]
+                # Do not increment, index, because the next row moved to us.
+            else:
+                idx += 1
+    
     # TODO set_vector_scale
 
     # TODO: Toggle visibility of atoms, sites, etc.
