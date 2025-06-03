@@ -1434,7 +1434,7 @@ class VestaFile:
                     line[0] = idx
                     idx += 1
 
-    def set_vector_to_site(self, type:int, site:int):
+    def set_vector_to_site(self, type: int, site: int):
         """
         Attach a vector of type `type` to atomic `site`.
 
@@ -1467,11 +1467,12 @@ class VestaFile:
                 break
             idx += 1
         if idx == len(section.data):
-            raise RuntimeError("Malformed VECTR; no block termination detected.")
+            raise RuntimeError(
+                "Malformed VECTR; no block termination detected.")
         # Insert
         section.data.insert(idx, [site, 0, 0, 0, 0])
-    
-    def remove_vector_from_site(self, type:int, site:int):
+
+    def remove_vector_from_site(self, type: int, site: int):
         """
         Removes vectors of type `type` from atomic site `site`.
 
@@ -1497,7 +1498,8 @@ class VestaFile:
             raise IndexError("Vector of type ", type, " does not exist.")
         # Now that we've found the start of the block, let's go through the
         # block and delete matching rows.
-        idx += 1 # Get past the first row of the block which defines the vector. 
+        # Get past the first row of the block which defines the vector.
+        idx += 1
         while idx < len(section.data):
             # If hit end of block, exit.
             if section.data[idx] == 5*[0]:
@@ -1508,8 +1510,8 @@ class VestaFile:
                 # Do not increment, index, because the next row moved to us.
             else:
                 idx += 1
-    
-    def set_vector_scale(self, scale:float):
+
+    def set_vector_scale(self, scale: float):
         """Sets global vector scale factor (VECTS)"""
         self["VECTS"].inline = [scale]
 

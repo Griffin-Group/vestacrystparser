@@ -41,7 +41,8 @@ def test_save(tmp_path, sample_vestafile, sample_vesta_filename):
 
 
 def test_repr(sample_vestafile):
-    assert repr(sample_vestafile) == "<VestaFile: New structure [1 site]; Phase Two [0 sites]>"
+    assert repr(sample_vestafile) == \
+        "<VestaFile: New structure [1 site]; Phase Two [0 sites]>"
 
 
 def test_set_current_phase(sample_vestafile):
