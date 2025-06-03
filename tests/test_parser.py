@@ -1016,3 +1016,10 @@ def test_nsites(sample_vestafile):
 
 def test_nvectors(sample_vestafile):
     assert sample_vestafile.nvectors == 0
+
+
+def test_set_vector_scale(sample_vestafile):
+    expected_vects = """VECTS 2.300000"""
+    sample_vestafile.set_vector_scale(2.3)
+    assert compare_vesta_strings(str(sample_vestafile["VECTS"]), expected_vects), \
+        """Did not set vector scale factor."""

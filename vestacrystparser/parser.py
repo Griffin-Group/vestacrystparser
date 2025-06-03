@@ -1509,6 +1509,8 @@ class VestaFile:
             else:
                 idx += 1
     
-    # TODO set_vector_scale
+    def set_vector_scale(self, scale:float):
+        """Sets global vector scale factor (VECTS)"""
+        self["VECTS"].inline = [scale]
 
     # TODO: Toggle visibility of atoms, sites, etc.
