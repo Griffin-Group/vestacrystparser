@@ -1540,68 +1540,71 @@ class VestaFile:
         """Sets global vector scale factor (VECTS)"""
         self["VECTS"].inline = [scale]
 
+    # This function is incomplete. I'm setting it aside for future me to deal
+    # with, as it turns out to require some fairly advanced computation to
+    # make work.
     # TODO: Toggle visibility of atoms, sites, etc.
     # TODO: A way to invert this function, so I can reverse out which sites are hidden
     # before I add new bonds or change the boundary, then reconstruct DLATM.
-    def set_site_visibility(self, site: int, show: bool = None):
-        """
-        Toggles visibility of a specified site (by index, 1-based, as in STRUC).
+    # def set_site_visibility(self, site: int, show: bool = None):
+    #     """
+    #     Toggles visibility of a specified site (by index, 1-based, as in STRUC).
 
-        If `show` not set, toggle. Otherwise, set visibility to show.
+    #     If `show` not set, toggle. Otherwise, set visibility to show.
 
-        As in Objects visibility check-boxes.
+    #     As in Objects visibility check-boxes.
 
-        The algorithm here is non-trivial, as we have to track all visible
-        objects. As such, we only support limited symmetry groups and bonding
-        boundary modes.
+    #     The algorithm here is non-trivial, as we have to track all visible
+    #     objects. As such, we only support limited symmetry groups and bonding
+    #     boundary modes.
 
-        WIP!
+    #     WIP!
 
-        DLATM.
-        """
-        # (I should probably understand how GROUP is formatted a bit better...)
-        if self["GROUP"].data != [[1, 1, "P", 1]]:
-            raise NotImplementedError(
-                "Unable to process site visibility for non-trivial symmetry groups.")
-        # Validate input
-        if site <= 0 or site > self.nsites:
-            raise IndexError("Site ", site,
-                             " is out of range for a structure with ",
-                             self.nsites, " sites.")
-        # Get the important data.
-        structure = self.get_structure()
-        boundary = self["BOUND"].data[0].copy()
-        cell_mat = self.get_cell_matrix()
-        inv_cell = invert_matrix(cell_mat)
-        # TODO: Get cut-off planes.
-        # Identify relevant bonds.
-        bonds = []
-        section = self["SBOND"]
-        for bond in section.data:
-            if bond[6] == 2: # Boundary mode
-                raise NotImplementedError(
-                    "Unable to process site visibility when bonds with "
-                    "recursive boundary mode are present.")
-            if bond[5] == 2 and bond[6] != 0: # Search mode
-                raise NotImplementedError(
-                    "Unable to process site visibility with bonds with "
-                    "search molecules search mode that search beyond the bondary.")
-            if bond[6] != 0 and (bond[2] == 'XX' or
-                                 (structure[site-1][1] in bond[1:3] and not bond[8]) or
-                                 (structure[site-1][2] in bond[1:3] and bond[8])):
-                # To be relevant, search mode must stretch beyond the boundary
-                # (bond[6] != 0), and the site must match A1 or A2 (bond[1], bond[2]),
-                # which might be as a wild-card ('XX'), by element (if bond[8] == 0),
-                # or by site label (if bond[8] == 1).
-                bonds.append(bond)
-        # Count all the visible atoms 
-        # (N.B. "Hide non-bonding atoms" is tracked separately.)
-        # It is the bond boundary mode which makes a difference here.
-        natoms = 0
-        for isite in range(1,site):
-            # Count the number of visible atoms for each site.
-            # First, find the coordinates of all elements within the boundary.
-            # Next, find the bonding distances with all atoms
-            # Finally, count the atoms of this site outside the boundary which 
-            # would be bonded to atoms within the boundary.
-            pass
+    #     DLATM.
+    #     """
+    #     # (I should probably understand how GROUP is formatted a bit better...)
+    #     if self["GROUP"].data != [[1, 1, "P", 1]]:
+    #         raise NotImplementedError(
+    #             "Unable to process site visibility for non-trivial symmetry groups.")
+    #     # Validate input
+    #     if site <= 0 or site > self.nsites:
+    #         raise IndexError("Site ", site,
+    #                          " is out of range for a structure with ",
+    #                          self.nsites, " sites.")
+    #     # Get the important data.
+    #     structure = self.get_structure()
+    #     boundary = self["BOUND"].data[0].copy()
+    #     cell_mat = self.get_cell_matrix()
+    #     inv_cell = invert_matrix(cell_mat)
+    #     # TODO: Get cut-off planes.
+    #     # Identify relevant bonds.
+    #     bonds = []
+    #     section = self["SBOND"]
+    #     for bond in section.data:
+    #         if bond[6] == 2: # Boundary mode
+    #             raise NotImplementedError(
+    #                 "Unable to process site visibility when bonds with "
+    #                 "recursive boundary mode are present.")
+    #         if bond[5] == 2 and bond[6] != 0: # Search mode
+    #             raise NotImplementedError(
+    #                 "Unable to process site visibility with bonds with "
+    #                 "search molecules search mode that search beyond the bondary.")
+    #         if bond[6] != 0 and (bond[2] == 'XX' or
+    #                              (structure[site-1][1] in bond[1:3] and not bond[8]) or
+    #                              (structure[site-1][2] in bond[1:3] and bond[8])):
+    #             # To be relevant, search mode must stretch beyond the boundary
+    #             # (bond[6] != 0), and the site must match A1 or A2 (bond[1], bond[2]),
+    #             # which might be as a wild-card ('XX'), by element (if bond[8] == 0),
+    #             # or by site label (if bond[8] == 1).
+    #             bonds.append(bond)
+    #     # Count all the visible atoms 
+    #     # (N.B. "Hide non-bonding atoms" is tracked separately.)
+    #     # It is the bond boundary mode which makes a difference here.
+    #     natoms = 0
+    #     for isite in range(1,site):
+    #         # Count the number of visible atoms for each site.
+    #         # First, find the coordinates of all elements within the boundary.
+    #         # Next, find the bonding distances with all atoms
+    #         # Finally, count the atoms of this site outside the boundary which 
+    #         # would be bonded to atoms within the boundary.
+    #         pass
