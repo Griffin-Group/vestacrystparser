@@ -100,16 +100,23 @@ def load_elements_data(element: Union[int, str]) -> \
         raise ValueError("Unable to load default element from elements.ini.")
 
 
-def load_default_bond_style(A1: str, A2: str) -> Union[list[float, float, int, int, int, int, int], None]:
+def load_default_bond_style(A1: str, A2: str, hbond: bool = False) \
+      -> Union[list[int, str, str, float, float, int, int, int, int, int], None]:
     """
     Loads default bond style for a pair of elements (if present).
 
-    returns: [minimum length,
+    hbond - if True, grab the hydrogen bond, if present.
+    This is the second matching entry in style.ini
+
+    returns: [index (ignore),
+              A1,
+              A2,
+              minimum length,
               maximum length,
               search mode,
               boundary mode,
               show polyhedra,
-              0,
+              0 (search by label = False),
               normal (1) or H-bond (5)]
 
     May be None. Not every element pair has default bonds in style.ini.
@@ -117,6 +124,7 @@ def load_default_bond_style(A1: str, A2: str) -> Union[list[float, float, int, i
     """
     # Load style.ini file.
     fn = importlib.resources.files(vestacrystparser.resources) / "style.ini"
+    first = True
     with open(fn, 'r') as f:
         # Find and parse the SBOND block.
         in_sbond = False
@@ -135,7 +143,10 @@ def load_default_bond_style(A1: str, A2: str) -> Union[list[float, float, int, i
                         (tokens[1] == A2 and tokens[2] == A1)):
                     # A1 and A2 are interchangeable.
                     # We've found our match.
-                    return tokens
+                    if not hbond or (hbond and not first):
+                        return tokens
+                    else:
+                        first = False
     # We shouldn't have gotten here.
     if in_sbond:
         raise RuntimeError("SBOND section in style.ini not properly terminated!"
@@ -988,12 +999,32 @@ class VestaFile:
                                  for i in range(len(section.data)-2)]
                 for A2 in other_symbols:
                     # If there is a bond length, add a new bond.
-                    # TODO: handle bonds with different styles (e.g. Carbon-based),
-                    # TODO: and handle hydrogen bonds, which show up twice (but only for H O and D O).
-                    maxlen = load_default_bond_length(symbol, A2)
-                    if maxlen is not None:
-                        # Sort A1 and A2 alphabetically.
-                        self.add_bond(*sorted([symbol, A2]), max_length=maxlen)
+                    bond = load_default_bond_style(symbol, A2)
+                    # If there is a hydrogen bond, load it.
+                    if symbol == "H" or A2 == "H":
+                        hbond = load_default_bond_style(symbol, A2, hbond=True)
+                    else:
+                        hbond = None
+                    if bond is not None:
+                        self.add_bond(bond[1], bond[2],
+                                      min_length=bond[3],
+                                      max_length=bond[4],
+                                      search_mode=bond[5]+1,
+                                      boundary_mode=bond[6]+1,
+                                      show_polyhedra=bool(bond[7]),
+                                      search_by_label=bool(bond[8]),
+                                      hbond=bond[9] == 5,
+                        )
+                    if hbond is not None:
+                        self.add_bond(hbond[1], hbond[2],
+                                    min_length=hbond[3],
+                                    max_length=hbond[4],
+                                    search_mode=hbond[5]+1,
+                                    boundary_mode=hbond[6]+1,
+                                    show_polyhedra=bool(hbond[7]),
+                                    search_by_label=bool(hbond[8]),
+                                    hbond=hbond[9] == 5,
+                        )
         # Use found data to set-up a new site
         params = element[2:10]  # Radius, RGB, RGB, 204
         section = self["SITET"]
@@ -1002,7 +1033,7 @@ class VestaFile:
     def add_bond(self, A1: str, A2: str, min_length: float = 0.0,
                  max_length: float = 1.6, search_mode: int = 1,
                  boundary_mode: Union[int, None] = None, show_polyhedra: bool = True,
-                 search_by_label: bool = False):
+                 search_by_label: bool = False, hbond: bool = False):
         """
         Add a new bond type.
 
@@ -1018,8 +1049,6 @@ class VestaFile:
                 (default for search_mode = 1 or 2)
             3 = Search additional atoms recursively if either A1 or A2 is
                 visible. (default for search_mode = 3)
-        
-        TODO: Handle hydrogen bonds.
 
         SBOND
         """
@@ -1053,8 +1082,9 @@ class VestaFile:
         else:
             x = boundary_mode - 1
         # Write the line
+        ihbond = 5 if hbond else 1
         tokens = [index, A1, A2, min_length, max_length, x, boundary_mode - 1,
-                  int(show_polyhedra), int(search_by_label), 1,
+                  int(show_polyhedra), int(search_by_label), ihbond,
                   radius, width, r, g, b]
         section.data.insert(-1, tokens)
         # TODO: validation that A1 and A2 are valid symbols/labels.
