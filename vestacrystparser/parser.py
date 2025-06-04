@@ -100,9 +100,17 @@ def load_elements_data(element: Union[int, str]) -> \
         raise ValueError("Unable to load default element from elements.ini.")
 
 
-def load_default_bond_length(A1: str, A2: str) -> Union[float, None]:
+def load_default_bond_style(A1: str, A2: str) -> Union[list[float, float, int, int, int, int, int], None]:
     """
-    Loads default maximum bond length for a pair of elements (if present).
+    Loads default bond style for a pair of elements (if present).
+
+    returns: [minimum length,
+              maximum length,
+              search mode,
+              boundary mode,
+              show polyhedra,
+              0,
+              normal (1) or H-bond (5)]
 
     May be None. Not every element pair has default bonds in style.ini.
     (N.B. If adding bonds manually, VESTA GUI defaults to 1.6.)
@@ -127,7 +135,7 @@ def load_default_bond_length(A1: str, A2: str) -> Union[float, None]:
                         (tokens[1] == A2 and tokens[2] == A1)):
                     # A1 and A2 are interchangeable.
                     # We've found our match.
-                    return tokens[4]
+                    return tokens
     # We shouldn't have gotten here.
     if in_sbond:
         raise RuntimeError("SBOND section in style.ini not properly terminated!"
@@ -136,6 +144,19 @@ def load_default_bond_length(A1: str, A2: str) -> Union[float, None]:
         raise RuntimeError("SBOND section missing from style.ini!"
                            "(Your installation's resources are broken.)")
 
+
+def load_default_bond_length(A1: str, A2: str) -> Union[float, None]:
+    """
+    Loads default maximum bond length for a pair of elements (if present).
+
+    May be None. Not every element pair has default bonds in style.ini.
+    (N.B. If adding bonds manually, VESTA GUI defaults to 1.6.)
+    """
+    tokens = load_default_bond_style(A1, A2)
+    if tokens is None:
+        return None
+    else:
+        return tokens[4]
 
 # Sections that have a blank line after them.
 # (So far, I've only found this to be important for IMPORT_DENSITY,
@@ -967,6 +988,8 @@ class VestaFile:
                                  for i in range(len(section.data)-2)]
                 for A2 in other_symbols:
                     # If there is a bond length, add a new bond.
+                    # TODO: handle bonds with different styles (e.g. Carbon-based),
+                    # TODO: and handle hydrogen bonds, which show up twice (but only for H O and D O).
                     maxlen = load_default_bond_length(symbol, A2)
                     if maxlen is not None:
                         # Sort A1 and A2 alphabetically.
@@ -995,6 +1018,8 @@ class VestaFile:
                 (default for search_mode = 1 or 2)
             3 = Search additional atoms recursively if either A1 or A2 is
                 visible. (default for search_mode = 3)
+        
+        TODO: Handle hydrogen bonds.
 
         SBOND
         """
@@ -1516,3 +1541,67 @@ class VestaFile:
         self["VECTS"].inline = [scale]
 
     # TODO: Toggle visibility of atoms, sites, etc.
+    # TODO: A way to invert this function, so I can reverse out which sites are hidden
+    # before I add new bonds or change the boundary, then reconstruct DLATM.
+    def set_site_visibility(self, site: int, show: bool = None):
+        """
+        Toggles visibility of a specified site (by index, 1-based, as in STRUC).
+
+        If `show` not set, toggle. Otherwise, set visibility to show.
+
+        As in Objects visibility check-boxes.
+
+        The algorithm here is non-trivial, as we have to track all visible
+        objects. As such, we only support limited symmetry groups and bonding
+        boundary modes.
+
+        WIP!
+
+        DLATM.
+        """
+        # (I should probably understand how GROUP is formatted a bit better...)
+        if self["GROUP"].data != [[1, 1, "P", 1]]:
+            raise NotImplementedError(
+                "Unable to process site visibility for non-trivial symmetry groups.")
+        # Validate input
+        if site <= 0 or site > self.nsites:
+            raise IndexError("Site ", site,
+                             " is out of range for a structure with ",
+                             self.nsites, " sites.")
+        # Get the important data.
+        structure = self.get_structure()
+        boundary = self["BOUND"].data[0].copy()
+        cell_mat = self.get_cell_matrix()
+        inv_cell = invert_matrix(cell_mat)
+        # TODO: Get cut-off planes.
+        # Identify relevant bonds.
+        bonds = []
+        section = self["SBOND"]
+        for bond in section.data:
+            if bond[6] == 2: # Boundary mode
+                raise NotImplementedError(
+                    "Unable to process site visibility when bonds with "
+                    "recursive boundary mode are present.")
+            if bond[5] == 2 and bond[6] != 0: # Search mode
+                raise NotImplementedError(
+                    "Unable to process site visibility with bonds with "
+                    "search molecules search mode that search beyond the bondary.")
+            if bond[6] != 0 and (bond[2] == 'XX' or
+                                 (structure[site-1][1] in bond[1:3] and not bond[8]) or
+                                 (structure[site-1][2] in bond[1:3] and bond[8])):
+                # To be relevant, search mode must stretch beyond the boundary
+                # (bond[6] != 0), and the site must match A1 or A2 (bond[1], bond[2]),
+                # which might be as a wild-card ('XX'), by element (if bond[8] == 0),
+                # or by site label (if bond[8] == 1).
+                bonds.append(bond)
+        # Count all the visible atoms 
+        # (N.B. "Hide non-bonding atoms" is tracked separately.)
+        # It is the bond boundary mode which makes a difference here.
+        natoms = 0
+        for isite in range(1,site):
+            # Count the number of visible atoms for each site.
+            # First, find the coordinates of all elements within the boundary.
+            # Next, find the bonding distances with all atoms
+            # Finally, count the atoms of this site outside the boundary which 
+            # would be bonded to atoms within the boundary.
+            pass

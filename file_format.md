@@ -286,9 +286,9 @@ Appearance edited in Properties > Bonds > Radius and color. Edits all existing b
 Also Objects > Bonds.
 
 Search mode:
-- Search A2 bonded to A1: `0  1  1  0  1` (boundary mode defaults to 2)
-- Search atoms bonded to A1: `1  1  1  0  1` (sets A2 to `XX`) (boundary mode defaults to 2)
-- Search molecules: `2 2 1 0 1` (sets A1 and A2 to `XX`) (boundary mode defaults to 3)
+1. Search A2 bonded to A1 (boundary mode defaults to 2)
+2. Search atoms bonded to A1 (sets A2 to `XX`) (boundary mode defaults to 2)
+3. Search molecules (sets A1 and A2 to `XX`) (boundary mode defaults to 3)
 
 Boundary mode:
 1. Do not search atoms beyond the boundary.
@@ -301,11 +301,11 @@ Each row:
 - 3rd item: A2 (Atom 2).
 - 4th item: Minimum length.
 - 5th item: Maximum length.
-- 6th item: `0` if "Search A2 bonded to A1", else boundary mode - 1.
+- 6th item: Search mode - 1.
 - 7th item: Boundary mode - 1.
 - 8th item: Show polyhedra, 0/1.
 - 9th item: Search by label, 0/1. If 1, A1 and A2 are site labels rather than element symbols.
-- 10th item: ? `1`
+- 10th item: `1` for standard bonds. `5` for hydrogen bonds. For hydrogen bonds, H should be A1.
 - 11th item: Radius (cylinder). Default `0.250`.
 - 12th item: Width (line). Default `2.000`.
 - 13th-15th items: Bond color (RGB) (may be overridden by atom colours depending on bond style). (Default `127 127 127`, but can be edited individually in Objects > Bonds.)
@@ -438,14 +438,26 @@ LBLSP
 ```
 
 ## DLATM
+
+Delete/hides the specified atoms. Objects > Atoms.
+
+However, the atoms are not indexed by the expected indices. Instead, they are indexed by an internal index, which has a unique 0-based index for every single atom, including those in adjacent unit cells.
+It seems to be sorted by site. So first the index exhausts all atoms of the first site type, then the second, and so on. So a single site has a continuous set of indices.
+
+Format: a list of integers (indices), terminated with a `-1`.
+
 e.g.
 ```
 DLATM
- -1
+ 1 2 3  -1
 ```
 ## DLBND
 
-Visibility of bonds? Objects > Bonds.
+Deletes/hides the specified bonds. Objects > Bonds.
+
+However, as for DLATM, the indices are different to the usual indices, instead with each drawn object being given a different 0-based index.
+
+Format: a list of integers (indices), terminated with a `-1`.
 
 e.g.
 ```
