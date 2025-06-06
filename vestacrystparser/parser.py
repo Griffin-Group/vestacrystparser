@@ -1034,6 +1034,10 @@ class VestaFile:
                 other_symbols = [section.data[i][1]
                                  for i in range(len(section.data)-2)]
                 for A2 in other_symbols:
+                    # TODO: It turns out, when VESTA loads a POSCAR, it only
+                    # adds bonds that could be drawn. If no atoms satisfy the
+                    # length requirements, it does not add the bond.
+                    
                     # If there is a bond length, add a new bond.
                     bond = load_default_bond_style(symbol, A2)
                     # If there is a hydrogen bond, load it.
