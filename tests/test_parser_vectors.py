@@ -326,3 +326,28 @@ def test_remove_vector_from_site(sample_vestafile):
 
 def test_nvectors(sample_vestafile):
     assert sample_vestafile.nvectors == 4
+
+
+def test_set_boundary(sample_vestafile):
+    # Not, strictly, a vector test. But this file also has hidden atoms.
+    # So we see if my handling of this is okay.
+    sample_vestafile.set_boundary(xmax=2)
+    expected_bound = """BOUND
+       0        2         0        1         0        1
+  0   0   0   0  0"""
+    expected_dlatm = """DLATM
+ -1"""
+    assert compare_vesta_strings(str(sample_vestafile["BOUND"]), expected_bound), \
+        "Boundary did not change as expected!"
+    assert compare_vesta_strings(str(sample_vestafile["DLATM"]), expected_dlatm), \
+        "On changing the boundary, DLATM should have reset. But it didn't."
+
+def test_add_site(sample_vestafile):
+    # Mostly to see DLATM get reset.
+    # It also draws in a H-bond.
+    sample_vestafile.add_site("H", "H1", 0.1, 0.1, 0.1, add_bonds=True)
+    expected_dlatm = """DLATM
+ -1"""
+    assert compare_vesta_strings(str(sample_vestafile["DLATM"]), expected_dlatm), \
+        "On adding a site, DLATM should have reset. But it didn't."
+

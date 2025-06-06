@@ -781,6 +781,40 @@ class VestaFile:
                 # Set the Manual bit
                 section.inline[0] |= 128
 
+    def unhide_atoms(self):
+        """Unhides all hidden atoms (DLATM)"""
+        self["DLATM"].data = [[-1]]
+    
+    def unhide_bonds(self):
+        """Unhides all hidden bonds (DLBND)"""
+        self["DLBND"].data = [[-1]]
+    
+    def unhide_polyhedra(self):
+        """Unhides all hidden polyhedra (DLPLY)"""
+        self["DLPLY"].data = [[-1]]
+
+    def _reset_hidden(self):
+        """
+        Handles DLATM, DLBND, and DLPLY, reverting them to null if not null.
+        You should call this when your function potentially changes the number
+        of visible atoms or bonds or polyhedra, because I don't support 
+        modifying those via this API yet.
+        Although, you're probably safe if you just add atoms and they don't
+        add bonds that can connect to older atoms.
+        """
+        if self["DLATM"].data != [[-1]]:
+            logger.warning(
+                "Reseting atom visibility (computing hidden atoms not supported).")
+            self.unhide_atoms()
+        if self["DLBND"].data != [[-1]]:
+            logger.warning(
+                "Reseting bond visibility (computing hidden bonds not supported).")
+            self.unhide_bonds()
+        if self["DLPLY"].data != [[-1]]:
+            logger.warning(
+                "Reseting polyhedra visibility (computing hidden polyhedra not supported).")
+            self.unhide_polyhedra()
+
     def set_boundary(self, xmin: float = None, xmax: float = None,
                      ymin: float = None, ymax: float = None,
                      zmin: float = None, zmax: float = None):
@@ -795,6 +829,8 @@ class VestaFile:
         for i, x in enumerate([xmin, xmax, ymin, ymax, zmin, zmax]):
             if x is not None:
                 section.data[0][i] = x
+        # Reset the hidden atoms, bonds, polyhedra.
+        self._reset_hidden()
 
     def set_unit_cell_line_visibility(self, show: bool = None,
                                       all: bool = False) -> int:
@@ -1013,7 +1049,7 @@ class VestaFile:
                                       boundary_mode=bond[6]+1,
                                       show_polyhedra=bool(bond[7]),
                                       search_by_label=bool(bond[8]),
-                                      hbond=bond[9] == 5,
+                                      style=bond[9]+1,
                         )
                     if hbond is not None:
                         self.add_bond(hbond[1], hbond[2],
@@ -1023,17 +1059,33 @@ class VestaFile:
                                     boundary_mode=hbond[6]+1,
                                     show_polyhedra=bool(hbond[7]),
                                     search_by_label=bool(hbond[8]),
-                                    hbond=hbond[9] == 5,
+                                    style=hbond[9]+1,
                         )
         # Use found data to set-up a new site
         params = element[2:10]  # Radius, RGB, RGB, 204
         section = self["SITET"]
         section.data.insert(-1, [new_idx, label] + params + [0])
+        # Correct the hidden atoms, bonds, polyhedra if required.
+        # If this site might bond to other sites outside the boundary, we
+        # need to reset. Or if it might draw new bonds from older bonds,
+        # we'd also need to reset.
+        # (Really, we're doing better than VESTA, because VESTA doesn't
+        # even track this.)
+        bonds = self.get_bonds()
+        for bond in bonds:
+            # Check if we have matching elements.
+            if bond["A1"] == "XX" or bond["A2"] == "XX":
+                self._reset_hidden()
+                break
+            elif bond["search_by_label"] and (bond["A1"] == label or bond["A2"] == label) or \
+                 not bond["search_by_label"] and (bond["A1"] == element or bond["A2"] == element):
+                self._reset_hidden()
+                break
 
     def add_bond(self, A1: str, A2: str, min_length: float = 0.0,
                  max_length: float = 1.6, search_mode: int = 1,
                  boundary_mode: Union[int, None] = None, show_polyhedra: bool = True,
-                 search_by_label: bool = False, hbond: bool = False):
+                 search_by_label: bool = False, style: int = 2):
         """
         Add a new bond type.
 
@@ -1049,6 +1101,13 @@ class VestaFile:
                 (default for search_mode = 1 or 2)
             3 = Search additional atoms recursively if either A1 or A2 is
                 visible. (default for search_mode = 3)
+        style:
+            1 = Unicolor cylinder
+            2 = Bicolor cylinder (default for standard bonds)
+            3 = Color line
+            4 = Gradient line
+            5 = Dotted line
+            6 = Dashed line (default for hydrogen bonds)
 
         SBOND
         """
@@ -1076,18 +1135,47 @@ class VestaFile:
         radius = 0.25  # Default radius
         width = 2.0  # Default width
         r, g, b = (127, 127, 127)  # Default colour.
-        # The 6th item.
-        if search_mode == 1:
-            x = 0
-        else:
-            x = boundary_mode - 1
         # Write the line
-        ihbond = 5 if hbond else 1
-        tokens = [index, A1, A2, min_length, max_length, x, boundary_mode - 1,
-                  int(show_polyhedra), int(search_by_label), ihbond,
+        tokens = [index, A1, A2, min_length, max_length, search_mode - 1, boundary_mode - 1,
+                  int(show_polyhedra), int(search_by_label), style - 1,
                   radius, width, r, g, b]
         section.data.insert(-1, tokens)
         # TODO: validation that A1 and A2 are valid symbols/labels.
+        # Correct the visible atoms if required.
+        # Because I don't process the data, identify if any new bonds could
+        # have been drawn to sites outside the boundary.
+        if boundary_mode > 1:
+            # I could check if A1 and A2 are actually present,
+            # but they should be anyway.
+            self._reset_hidden()
+
+    def get_bonds(self) -> list[dict]:
+        """
+        Gets a list of what bond types exist.
+
+        Each element is a dictionary, which can be used directly as keyword
+        arguments for self.add_bond.
+        
+        Data is a copy.
+
+        SBOND
+        """
+        section = self["SBOND"]
+        bonds = []
+        for row in section.data[:-1]:
+            # Unpack each row, converting data type if requried.
+            bonds.append(dict(
+                A1 = row[1],
+                A2 = row[2],
+                min_length = row[3],
+                max_length = row[4],
+                search_mode = row[5] + 1,
+                boundary_mode = row[6] + 1,
+                show_polyhedra = bool(row[7]),
+                search_by_label = bool(row[8]),
+                style = row[9] + 1,
+            ))
+        return bonds
 
     def get_structure(self) -> list[list]:
         """
@@ -1095,6 +1183,8 @@ class VestaFile:
         (index, element, label, x, y, z)
 
         Returned data is a copy.
+
+        STRUC
         """
         section = self["STRUC"]
         my_list = []
@@ -1576,6 +1666,10 @@ class VestaFile:
     # TODO: Toggle visibility of atoms, sites, etc.
     # TODO: A way to invert this function, so I can reverse out which sites are hidden
     # before I add new bonds or change the boundary, then reconstruct DLATM.
+    # Actually, not even VESTA attempts to invert this. Which elements are shown or
+    # hidden is tracked in the GUI session only. But if you close and open the file
+    # again, then the check-boxes for visibility are all checked, and if you change
+    # the boundary it resets to everything being visible.
     # def set_site_visibility(self, site: int, show: bool = None):
     #     """
     #     Toggles visibility of a specified site (by index, 1-based, as in STRUC).

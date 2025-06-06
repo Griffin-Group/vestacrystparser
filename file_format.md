@@ -295,6 +295,14 @@ Boundary mode:
 2. Search additional atoms if A1 is included in the boundary.
 3. Search additional atoms recursively if either A1 or A2 is visible.
 
+Style:
+1. Unicolor cylinder
+2. Bicolor cylinder (default for standard bonds)
+3. Color line
+4. Gradient line
+5. Dotted line
+6. Dashed line (default for hydrogen bonds)
+
 Each row:
 - 1st item: Index.
 - 2nd item: A1 (Atom 1).
@@ -305,9 +313,9 @@ Each row:
 - 7th item: Boundary mode - 1.
 - 8th item: Show polyhedra, 0/1.
 - 9th item: Search by label, 0/1. If 1, A1 and A2 are site labels rather than element symbols.
-- 10th item: `1` for standard bonds. `5` for hydrogen bonds. For hydrogen bonds, H should be A1.
+- 10th item: Style - 1.
 - 11th item: Radius (cylinder). Default `0.250`.
-- 12th item: Width (line). Default `2.000`.
+- 12th item: Width (line). Default `2.000`. Units px.
 - 13th-15th items: Bond color (RGB) (may be overridden by atom colours depending on bond style). (Default `127 127 127`, but can be edited individually in Objects > Bonds.)
 
 Block ends with four `0`'s.
