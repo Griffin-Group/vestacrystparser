@@ -1,5 +1,5 @@
 """
-Unit tests for test case with two phases
+Unit tests for loading a simple POSCAR
 """
 import os
 

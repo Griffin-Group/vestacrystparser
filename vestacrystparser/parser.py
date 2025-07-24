@@ -1042,26 +1042,36 @@ class VestaFile:
                 # Check if we already have a bond for this set of elements.
                 current_bonds = self.get_bonds()
                 found = False
-                for x in current_bonds:
-                    if ([symbol, A2] == [x["A1"], x["A2"]]
-                            or [A2, symbol] == [x["A1"], x["A2"]]) \
-                            and x["min_length"] == 0:
+                for b in current_bonds:
+                    if ([symbol, A2] == [b["A1"], b["A2"]]
+                            or [A2, symbol] == [b["A1"], b["A2"]]) \
+                            and b["min_length"] == 0:
                         found = True
                         break
                 if not found:
                     # If not, load it.
                     bond = load_default_bond_style(symbol, A2)
                     # Then check if we are under the maximum bond length.
+                    if bond is not None:
+                        structure = self.get_structure()
+                        found = False
+                        for site in structure:
+                            if site[1] == A2:
+                                if self.distance(x, y, z, site[3], site[4], site[5]) <= bond[4]:
+                                    found = True
+                                    break
+                    if not found:
+                        bond = None
                 else:
                     bond = None
                 # If there is a hydrogen bond, load it.
                 if symbol == "H" or A2 == "H":
                     # Check that we don't already have a hydrogen bond.
                     found = False
-                    for x in current_bonds:
-                        if ([symbol, A2] == [x["A1"], x["A2"]]
-                                or [A2, symbol] == [x["A1"], x["A2"]]) \
-                                and x["min_length"] > 0:
+                    for b in current_bonds:
+                        if ([symbol, A2] == [b["A1"], b["A2"]]
+                                or [A2, symbol] == [b["A1"], b["A2"]]) \
+                                and b["min_length"] > 0:
                             found = True
                             break
                     if not found:
@@ -1071,7 +1081,7 @@ class VestaFile:
                         # (Ooh, this will be tricky. Because I don't
                         # necessarily want the minimum lengths...)
                     else:
-                        hbond = False
+                        hbond = None
                 else:
                     hbond = None
                 if bond is not None:
@@ -1114,6 +1124,22 @@ class VestaFile:
                     not bond["search_by_label"] and (bond["A1"] == element or bond["A2"] == element):
                 self._reset_hidden()
                 break
+
+    def distance(self, x1: float, y1: float, z1: float,
+                 x2: float, y2: float, z2: float) -> float:
+        """
+        Calculate the Cartesian distances between two points,
+        expressed in fractional coordinates.
+        """
+        cell = self.get_cell_matrix()
+        # Difference vector, in fractional coordinates.
+        diff = [x1 - x2, y1 - y2, z1 - z2]
+        # Round to nearest integer for number of images
+        diff_min = [x - round(x) for x in diff]
+        # Convert from fractional to Cartesian.
+        diff_c = [sum(diff_min[i] * cell[i][j] for i in range(3)) for j in range(3)]
+        # Get the Euclidean distance
+        return math.sqrt(sum(x**2 for x in diff_c))
 
     def add_bond(self, A1: str, A2: str, min_length: float = 0.0,
                  max_length: float = 1.6, search_mode: int = 1,
