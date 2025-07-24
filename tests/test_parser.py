@@ -1023,3 +1023,29 @@ def test_set_vector_scale(sample_vestafile):
     sample_vestafile.set_vector_scale(2.3)
     assert compare_vesta_strings(str(sample_vestafile["VECTS"]), expected_vects), \
         """Did not set vector scale factor."""
+
+
+def test_delete_bond(sample_vestafile):
+    # Test deleting bonds that don't exist.
+    expected_sbond = """SBOND
+  0 0 0 0"""
+    with pytest.raises(IndexError):
+        sample_vestafile.delete_bond(1)
+    with pytest.raises(IndexError):
+        sample_vestafile.delete_bond(0)
+    assert compare_vesta_strings(str(sample_vestafile["SBOND"]), expected_sbond), \
+        "Deleting non-existent bonds changed things!"
+
+
+def test_edit_bond(sample_vestafile):
+    # Test editing bonds that don't exist.
+    expected_sbond = """SBOND
+  0 0 0 0"""
+    with pytest.raises(IndexError):
+        sample_vestafile.edit_bond(1)
+    with pytest.raises(IndexError):
+        sample_vestafile.edit_bond(0)
+    with pytest.raises(IndexError):
+        sample_vestafile.edit_bond(1, A1="Cu")
+    assert compare_vesta_strings(str(sample_vestafile["SBOND"]), expected_sbond), \
+        "Editing non-existent bonds changed things!"

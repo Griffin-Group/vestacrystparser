@@ -101,7 +101,7 @@ def load_elements_data(element: Union[int, str]) -> \
 
 
 def load_default_bond_style(A1: str, A2: str, hbond: bool = False) \
-      -> Union[list[int, str, str, float, float, int, int, int, int, int], None]:
+        -> Union[list[int, str, str, float, float, int, int, int, int, int], None]:
     """
     Loads default bond style for a pair of elements (if present).
 
@@ -168,6 +168,7 @@ def load_default_bond_length(A1: str, A2: str) -> Union[float, None]:
         return None
     else:
         return tokens[4]
+
 
 # Sections that have a blank line after them.
 # (So far, I've only found this to be important for IMPORT_DENSITY,
@@ -784,11 +785,11 @@ class VestaFile:
     def unhide_atoms(self):
         """Unhides all hidden atoms (DLATM)"""
         self["DLATM"].data = [[-1]]
-    
+
     def unhide_bonds(self):
         """Unhides all hidden bonds (DLBND)"""
         self["DLBND"].data = [[-1]]
-    
+
     def unhide_polyhedra(self):
         """Unhides all hidden polyhedra (DLPLY)"""
         self["DLPLY"].data = [[-1]]
@@ -1032,12 +1033,12 @@ class VestaFile:
             # Get the atomic symbols of the other elements.
             # Read from ATOMT
             other_symbols = [section.data[i][1]
-                                for i in range(len(section.data)-2)]
+                             for i in range(len(section.data)-2)]
             for A2 in other_symbols:
                 # TODO: It turns out, when VESTA loads a POSCAR, it only
                 # adds bonds that could be drawn. If no atoms satisfy the
                 # length requirements, it does not add the bond.
-                
+
                 # Check if we already have a bond for this set of elements.
                 current_bonds = self.get_bonds()
                 found = False
@@ -1075,24 +1076,24 @@ class VestaFile:
                     hbond = None
                 if bond is not None:
                     self.add_bond(bond[1], bond[2],
-                                    min_length=bond[3],
-                                    max_length=bond[4],
-                                    search_mode=bond[5]+1,
-                                    boundary_mode=bond[6]+1,
-                                    show_polyhedra=bool(bond[7]),
-                                    search_by_label=bool(bond[8]),
-                                    style=bond[9]+1,
-                    )
+                                  min_length=bond[3],
+                                  max_length=bond[4],
+                                  search_mode=bond[5]+1,
+                                  boundary_mode=bond[6]+1,
+                                  show_polyhedra=bool(bond[7]),
+                                  search_by_label=bool(bond[8]),
+                                  style=bond[9]+1,
+                                  )
                 if hbond is not None:
                     self.add_bond(hbond[1], hbond[2],
-                                min_length=hbond[3],
-                                max_length=hbond[4],
-                                search_mode=hbond[5]+1,
-                                boundary_mode=hbond[6]+1,
-                                show_polyhedra=bool(hbond[7]),
-                                search_by_label=bool(hbond[8]),
-                                style=hbond[9]+1,
-                    )
+                                  min_length=hbond[3],
+                                  max_length=hbond[4],
+                                  search_mode=hbond[5]+1,
+                                  boundary_mode=hbond[6]+1,
+                                  show_polyhedra=bool(hbond[7]),
+                                  search_by_label=bool(hbond[8]),
+                                  style=hbond[9]+1,
+                                  )
         # Use found data to set-up a new site
         params = element[2:10]  # Radius, RGB, RGB, 204
         section = self["SITET"]
@@ -1110,7 +1111,7 @@ class VestaFile:
                 self._reset_hidden()
                 break
             elif bond["search_by_label"] and (bond["A1"] == label or bond["A2"] == label) or \
-                 not bond["search_by_label"] and (bond["A1"] == element or bond["A2"] == element):
+                    not bond["search_by_label"] and (bond["A1"] == element or bond["A2"] == element):
                 self._reset_hidden()
                 break
 
@@ -1181,13 +1182,132 @@ class VestaFile:
             # but they should be anyway.
             self._reset_hidden()
 
+    def edit_bond(self, index: int,
+                  A1: str = None,
+                  A2: str = None,
+                  min_length: float = None,
+                  max_length: float = None,
+                  search_mode: int = None,
+                  boundary_mode: Union[int, None] = None,
+                  show_polyhedra: bool = None,
+                  search_by_label: bool = None,
+                  style: int = None,
+                  radius: float = None,
+                  width: float = None,
+                  r: int = None,
+                  g: int = None,
+                  b: int = None,
+                  ):
+        """
+        Edits an existing bond (Edit > Bonds)
+
+        Accepts negative indices, counting from the end.
+
+        All arguments after index are optional. Unset arguments are left 
+        unchanged.
+
+        N.B. If you are reducing search mode, remember to set A2 or A1,
+        otherwise they'll be left at 'XX'.
+
+        search_mode:
+            1 = Search A2 bonded to A1 (default)
+            2 = Search atoms bonded to A1. (Overwrites A2 to be 'XX'.)
+            3 = Search molecules. (Overwrites A1 and A2 to be 'XX'.)
+        boundary_mode:
+            1 = Do not search atoms beyond the boundary.
+            2 = Search additional atoms if A1 is included in the boundary.
+                (default for search_mode = 1 or 2)
+            3 = Search additional atoms recursively if either A1 or A2 is
+                visible. (default for search_mode = 3)
+        style:
+            1 = Unicolor cylinder
+            2 = Bicolor cylinder (default for standard bonds)
+            3 = Color line
+            4 = Gradient line
+            5 = Dotted line
+            6 = Dashed line (default for hydrogen bonds)
+
+        SBOND
+        """
+        if index == 0:
+            raise IndexError("VESTA indices are 1-based; 0 is invalid index.")
+        section = self["SBOND"]
+        # Process the index.
+        if index < 0:
+            # Note that length of section includes the empty 0-line.
+            index = len(section) + index
+        if index <= 0 or index >= len(section):
+            raise IndexError("Index is out of range.")
+        # Update values
+        if A1 is not None:
+            section.data[index - 1][1] = A1
+        if A2 is not None:
+            section.data[index - 1][2] = A2
+        if min_length is not None:
+            section.data[index - 1][3] = min_length
+        if max_length is not None:
+            section.data[index - 1][4] = max_length
+        if search_mode is not None:
+            section.data[index - 1][5] = search_mode - 1
+            if search_mode >= 2:
+                section.data[index - 1][2] = 'XX'  # A2
+            if search_mode == 3:
+                section.data[index - 1][1] = 'XX'  # A1
+        if boundary_mode is not None:
+            section.data[index - 1][6] = boundary_mode - 1
+        if show_polyhedra is not None:
+            section.data[index - 1][7] = int(show_polyhedra)
+        if search_by_label is not None:
+            section.data[index - 1][8] = int(search_by_label)
+        if style is not None:
+            section.data[index - 1][9] = style - 1
+        if radius is not None:
+            section.data[index - 1][10] = radius
+        if width is not None:
+            section.data[index - 1][11] = width
+        if r is not None:
+            section.data[index - 1][12] = r
+        if g is not None:
+            section.data[index - 1][13] = g
+        if b is not None:
+            section.data[index - 1][14] = b
+        # Reset view, if anything other than style changed.
+        if A1 is not None or A2 is not None or min_length is not None or \
+                max_length is not None or search_mode is not None or \
+                boundary_mode is not None or show_polyhedra is not None or \
+                search_by_label is not None:
+            self._reset_hidden()
+
+    def delete_bond(self, index: int):
+        """
+        Deletes the specified bond type
+
+        SBOND
+        """
+        if index == 0:
+            raise IndexError("VESTA indices are 1-based; 0 is invalid index.")
+        section = self["SBOND"]
+        # Process the index.
+        if index < 0:
+            # Note that length of section includes the empty 0-line.
+            index = len(section) + index
+        if index <= 0 or index >= len(section):
+            raise IndexError("Index is out of range.")
+        # Delete the row.
+        del section.data[index - 1]
+        # Re-index remaining entries.
+        for i in range(index - 1, len(section) - 1):
+            section.data[i][0] = i + 1
+        # Reset view.
+        self._reset_hidden()
+
     def get_bonds(self) -> list[dict]:
         """
         Gets a list of what bond types exist.
 
         Each element is a dictionary, which can be used directly as keyword
         arguments for self.add_bond.
-        
+
         Data is a copy.
 
         SBOND
@@ -1197,15 +1317,15 @@ class VestaFile:
         for row in section.data[:-1]:
             # Unpack each row, converting data type if requried.
             bonds.append(dict(
-                A1 = row[1],
-                A2 = row[2],
-                min_length = row[3],
-                max_length = row[4],
-                search_mode = row[5] + 1,
-                boundary_mode = row[6] + 1,
-                show_polyhedra = bool(row[7]),
-                search_by_label = bool(row[8]),
-                style = row[9] + 1,
+                A1=row[1],
+                A2=row[2],
+                min_length=row[3],
+                max_length=row[4],
+                search_mode=row[5] + 1,
+                boundary_mode=row[6] + 1,
+                show_polyhedra=bool(row[7]),
+                search_by_label=bool(row[8]),
+                style=row[9] + 1,
             ))
         return bonds
 
@@ -1753,7 +1873,7 @@ class VestaFile:
     #             # which might be as a wild-card ('XX'), by element (if bond[8] == 0),
     #             # or by site label (if bond[8] == 1).
     #             bonds.append(bond)
-    #     # Count all the visible atoms 
+    #     # Count all the visible atoms
     #     # (N.B. "Hide non-bonding atoms" is tracked separately.)
     #     # It is the bond boundary mode which makes a difference here.
     #     natoms = 0
@@ -1761,6 +1881,6 @@ class VestaFile:
     #         # Count the number of visible atoms for each site.
     #         # First, find the coordinates of all elements within the boundary.
     #         # Next, find the bonding distances with all atoms
-    #         # Finally, count the atoms of this site outside the boundary which 
+    #         # Finally, count the atoms of this site outside the boundary which
     #         # would be bonded to atoms within the boundary.
     #         pass

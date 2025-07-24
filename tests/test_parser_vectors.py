@@ -342,6 +342,7 @@ def test_set_boundary(sample_vestafile):
     assert compare_vesta_strings(str(sample_vestafile["DLATM"]), expected_dlatm), \
         "On changing the boundary, DLATM should have reset. But it didn't."
 
+
 def test_add_site(sample_vestafile):
     # Mostly to see DLATM get reset.
     # It also draws in a H-bond.
@@ -351,3 +352,67 @@ def test_add_site(sample_vestafile):
     assert compare_vesta_strings(str(sample_vestafile["DLATM"]), expected_dlatm), \
         "On adding a site, DLATM should have reset. But it didn't."
 
+
+def test_edit_bond(sample_vestafile):
+    sample_vestafile.edit_bond(1, A2="O")
+    expected_sbond = """SBOND
+  1    Dy    O     0.00000    3.60000  0  0  1  0  1  0.250  2.000 127 127 127
+  0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["SBOND"]), expected_sbond), \
+        "Failed to edit A2 of bond 1."
+    # We also expect DLATM to change.
+    expected_dlatm = """DLATM
+ -1"""
+    assert compare_vesta_strings(str(sample_vestafile["DLATM"]), expected_dlatm), \
+        "On editing a bond, DLATM should have reset. But it didn't."
+    sample_vestafile.edit_bond(1, search_mode=3, min_length=0.1)
+    expected_sbond = """SBOND
+  1    XX    XX    0.10000    3.60000  2  0  1  0  1  0.250  2.000 127 127 127
+  0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["SBOND"]), expected_sbond), \
+        "Failed to set search_mode=3, min_length."
+    sample_vestafile.edit_bond(-1, A1='Dy', search_mode=2, max_length=3.2)
+    expected_sbond = """SBOND
+  1    Dy    XX    0.10000    3.20000  1  0  1  0  1  0.250  2.000 127 127 127
+  0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["SBOND"]), expected_sbond), \
+        "Failed to set search_mode=2, max_length, A1 for negative bond index."
+    sample_vestafile.edit_bond(
+        1, boundary_mode=2, show_polyhedra=False, style=4)
+    expected_sbond = """SBOND
+  1    Dy    XX    0.10000    3.20000  1  1  0  0  3  0.250  2.000 127 127 127
+  0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["SBOND"]), expected_sbond), \
+        "Failed to set boundary_mode, show_polyhedra, style."
+    sample_vestafile.edit_bond(1, radius=0.12, width=3, r=150, g=160, b=170)
+    expected_sbond = """SBOND
+  1    Dy    XX    0.10000    3.20000  1  1  0  0  3  0.120  3.000 150 160 170
+  0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["SBOND"]), expected_sbond), \
+        "Failed to set radius, width, r, g, b."
+    sample_vestafile.edit_bond(1, search_by_label=True, A1='Dy1')
+    expected_sbond = """SBOND
+  1    Dy1   XX    0.10000    3.20000  1  1  0  1  3  0.120  3.000 150 160 170
+  0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["SBOND"]), expected_sbond), \
+        "Failed to set search_by_label, A1."
+    with pytest.raises(IndexError):
+        sample_vestafile.edit_bond(2, A1="Dy2")
+    assert compare_vesta_strings(str(sample_vestafile["SBOND"]), expected_sbond), \
+        "Editing a bond that didn't exist changed things!"
+
+
+def test_delete_bond(sample_vestafile):
+    with pytest.raises(IndexError):
+        sample_vestafile.delete_bond(2)
+    expected_sbond = """SBOND
+  1    Dy    Dy    0.00000    3.60000  0  0  1  0  1  0.250  2.000 127 127 127
+  0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["SBOND"]), expected_sbond), \
+        "Deleting a bond that didn't exist changed things!"
+    # I've only got one bond, so do the negative index for more coverage.
+    sample_vestafile.delete_bond(-1)
+    expected_sbond = """SBOND
+  0 0 0 0"""
+    assert compare_vesta_strings(str(sample_vestafile["SBOND"]), expected_sbond), \
+        "Failed to delete bond -1."
