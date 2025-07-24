@@ -1135,7 +1135,8 @@ class VestaFile:
         # Round to nearest integer for number of images
         diff_min = [x - round(x) for x in diff]
         # Convert from fractional to Cartesian.
-        diff_c = [sum(diff_min[i] * cell[i][j] for i in range(3)) for j in range(3)]
+        diff_c = [sum(diff_min[i] * cell[i][j] for i in range(3))
+                  for j in range(3)]
         # Get the Euclidean distance
         return math.sqrt(sum(x**2 for x in diff_c))
 
@@ -1324,6 +1325,59 @@ class VestaFile:
             section.data[i][0] = i + 1
         # Reset view.
         self._reset_hidden()
+
+    def sort_bonds(self, unmatching_bonds: str = "before"):
+        """
+        Rearranges the list of bonds to be in the order provided in style.ini
+
+        Because when VESTA loads a POSCAR, it has SBOND in this order,
+        rather than the order that sites appear.
+        (Which suggests is generates SBOND after generating all the sites,
+        but whatever, as long as the result is the same.)
+
+        Input:
+            unmatching_bands - "before" or "after". Where to put bonds
+                that don't appear in style.ini.
+        """
+        if unmatching_bonds == "before":
+            NAVALUE = 0
+        elif unmatching_bonds == "after":
+            NAVALUE = 1000000
+        else:
+            raise ValueError(
+                f"unmatching_bonds should be 'before' or 'after', not {unmatching_bonds}")
+        # Go over all the element pairs that appear in bonds.
+        all_bonds = self.get_bonds()
+        style_index = []
+        for bond in all_bonds:
+            A1, A2 = bond["A1"], bond["A2"]
+            # Find the matching bond.
+            style_bond = load_default_bond_style(A1, A2)
+            if style_bond is None:
+                style_index.append(NAVALUE)
+                continue
+            if A1 != style_bond[1]:
+                # We may have a hydrogen bond, which will be evident if it's
+                # back-to-front.
+                # (load_default_bond_length check both orderings of A1 and A2.)
+                style_bond = load_default_bond_style(A1, A2, hbond=True)
+                if style_bond is None:
+                    style_index.append(NAVALUE)
+                    continue
+            # Append the index in style.ini
+            style_index.append(style_bond[0])
+        # Now we perform an indirect sort.
+        # Use Decorate-Sort-Undecorate idiom
+        section = self["SBOND"]
+        sortable = [(idx, row)
+                    for idx, row in zip(style_index, section.data[:-1])]
+        sortable.sort()
+        new_rows = [row for idx, row in sortable]
+        # Re-index
+        for i, row in enumerate(new_rows):
+            row[0] = i + 1
+        # Re-write the bonds.
+        section.data[:-1] = new_rows
 
     def get_bonds(self) -> list[dict]:
         """

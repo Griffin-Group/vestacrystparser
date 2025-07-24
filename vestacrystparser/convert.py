@@ -28,7 +28,8 @@ def vesta_from_structure(stru: Structure) -> VestaFile:
         vfile.add_site(element, element+str(counts[element]),
                        *site.frac_coords,
                        add_bonds=True)
-    # TODO Sort SBOND
+    # Sort SBOND
+    vfile.sort_bonds()
     # Done
     return vfile
 
