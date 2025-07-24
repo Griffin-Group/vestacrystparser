@@ -11,6 +11,7 @@ from vestacrystparser.parser import VestaFile
 
 def vesta_from_structure(stru: Structure) -> VestaFile:
     """From pymatgen.core.Structure, create a VestaFile"""
+    # TODO Convert numpy floats to regular floats.
     # Initialise an empty Vesta file
     vfile = VestaFile()
     # Set the lattice parameters.
@@ -27,6 +28,7 @@ def vesta_from_structure(stru: Structure) -> VestaFile:
         vfile.add_site(element, element+str(counts[element]),
                        *site.frac_coords,
                        add_bonds=True)
+    # TODO Sort SBOND
     # Done
     return vfile
 

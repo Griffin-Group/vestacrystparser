@@ -1031,14 +1031,11 @@ class VestaFile:
             # If requested, create new bonds.
         if add_bonds:
             # Get the atomic symbols of the other elements.
+            # (Also this element.)
             # Read from ATOMT
             other_symbols = [section.data[i][1]
-                             for i in range(len(section.data)-2)]
+                             for i in range(len(section.data)-1)]
             for A2 in other_symbols:
-                # TODO: It turns out, when VESTA loads a POSCAR, it only
-                # adds bonds that could be drawn. If no atoms satisfy the
-                # length requirements, it does not add the bond.
-
                 # Check if we already have a bond for this set of elements.
                 current_bonds = self.get_bonds()
                 found = False
@@ -1055,13 +1052,14 @@ class VestaFile:
                     if bond is not None:
                         structure = self.get_structure()
                         found = False
-                        for site in structure:
+                        # Look over all by the last site (which we just added)
+                        for site in structure[:-1]:
                             if site[1] == A2:
                                 if self.distance(x, y, z, site[3], site[4], site[5]) <= bond[4]:
                                     found = True
                                     break
-                    if not found:
-                        bond = None
+                        if not found:
+                            bond = None
                 else:
                     bond = None
                 # If there is a hydrogen bond, load it.
