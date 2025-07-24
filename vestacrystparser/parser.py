@@ -1028,43 +1028,71 @@ class VestaFile:
                 element_data[5:] + element_data[5:] + [204]
             section.data.insert(-1, element)
             # If requested, create new bonds.
-            if add_bonds:
-                # Get the atomic symbols of the other elements.
-                # Read from ATOMT
-                other_symbols = [section.data[i][1]
-                                 for i in range(len(section.data)-2)]
-                for A2 in other_symbols:
-                    # TODO: It turns out, when VESTA loads a POSCAR, it only
-                    # adds bonds that could be drawn. If no atoms satisfy the
-                    # length requirements, it does not add the bond.
-                    
-                    # If there is a bond length, add a new bond.
+        if add_bonds:
+            # Get the atomic symbols of the other elements.
+            # Read from ATOMT
+            other_symbols = [section.data[i][1]
+                                for i in range(len(section.data)-2)]
+            for A2 in other_symbols:
+                # TODO: It turns out, when VESTA loads a POSCAR, it only
+                # adds bonds that could be drawn. If no atoms satisfy the
+                # length requirements, it does not add the bond.
+                
+                # Check if we already have a bond for this set of elements.
+                current_bonds = self.get_bonds()
+                found = False
+                for x in current_bonds:
+                    if ([symbol, A2] == [x["A1"], x["A2"]]
+                            or [A2, symbol] == [x["A1"], x["A2"]]) \
+                            and x["min_length"] == 0:
+                        found = True
+                        break
+                if not found:
+                    # If not, load it.
                     bond = load_default_bond_style(symbol, A2)
-                    # If there is a hydrogen bond, load it.
-                    if symbol == "H" or A2 == "H":
+                    # Then check if we are under the maximum bond length.
+                else:
+                    bond = None
+                # If there is a hydrogen bond, load it.
+                if symbol == "H" or A2 == "H":
+                    # Check that we don't already have a hydrogen bond.
+                    found = False
+                    for x in current_bonds:
+                        if ([symbol, A2] == [x["A1"], x["A2"]]
+                                or [A2, symbol] == [x["A1"], x["A2"]]) \
+                                and x["min_length"] > 0:
+                            found = True
+                            break
+                    if not found:
+                        # If not, load it.
                         hbond = load_default_bond_style(symbol, A2, hbond=True)
+                        # Then check if we are at the right bond length.
+                        # (Ooh, this will be tricky. Because I don't
+                        # necessarily want the minimum lengths...)
                     else:
-                        hbond = None
-                    if bond is not None:
-                        self.add_bond(bond[1], bond[2],
-                                      min_length=bond[3],
-                                      max_length=bond[4],
-                                      search_mode=bond[5]+1,
-                                      boundary_mode=bond[6]+1,
-                                      show_polyhedra=bool(bond[7]),
-                                      search_by_label=bool(bond[8]),
-                                      style=bond[9]+1,
-                        )
-                    if hbond is not None:
-                        self.add_bond(hbond[1], hbond[2],
-                                    min_length=hbond[3],
-                                    max_length=hbond[4],
-                                    search_mode=hbond[5]+1,
-                                    boundary_mode=hbond[6]+1,
-                                    show_polyhedra=bool(hbond[7]),
-                                    search_by_label=bool(hbond[8]),
-                                    style=hbond[9]+1,
-                        )
+                        hbond = False
+                else:
+                    hbond = None
+                if bond is not None:
+                    self.add_bond(bond[1], bond[2],
+                                    min_length=bond[3],
+                                    max_length=bond[4],
+                                    search_mode=bond[5]+1,
+                                    boundary_mode=bond[6]+1,
+                                    show_polyhedra=bool(bond[7]),
+                                    search_by_label=bool(bond[8]),
+                                    style=bond[9]+1,
+                    )
+                if hbond is not None:
+                    self.add_bond(hbond[1], hbond[2],
+                                min_length=hbond[3],
+                                max_length=hbond[4],
+                                search_mode=hbond[5]+1,
+                                boundary_mode=hbond[6]+1,
+                                show_polyhedra=bool(hbond[7]),
+                                search_by_label=bool(hbond[8]),
+                                style=hbond[9]+1,
+                    )
         # Use found data to set-up a new site
         params = element[2:10]  # Radius, RGB, RGB, 204
         section = self["SITET"]
