@@ -36,6 +36,7 @@ dev = [
     "flake8",
     "autopep8",
     "pytest-cov",
+    "sphinx",
 ]
 
 [project.urls]

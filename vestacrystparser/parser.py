@@ -1,3 +1,6 @@
+"""
+vestacrystparser
+"""
 import logging
 import math
 from typing import Union, Iterator
@@ -232,6 +235,9 @@ sections_that_are_global = [
 
 
 class VestaSection:
+    """
+    Section of a VestaFile
+    """
     def __init__(self, header_line):
         """
         Initialize a VESTA section from a header line.
@@ -347,6 +353,9 @@ class VestaPhase:
 
 
 class VestaFile:
+    """
+    Representation of a VESTA file, with methods to manipulate it.
+    """
     def __init__(self, filename: Union[str, None] = None):
         """
         Initialize a VESTA file instance.
