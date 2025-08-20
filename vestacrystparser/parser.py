@@ -238,6 +238,7 @@ class VestaSection:
     """
     Section of a VestaFile
     """
+
     def __init__(self, header_line):
         """
         Initialize a VESTA section from a header line.
@@ -359,6 +360,7 @@ class VestaFile:
         sections (dict): Maps section headers to VestaSection objects.
         order (list): The order in which sections appear in the file.
     """
+
     def __init__(self, filename: Union[str, None] = None):
         """Initialize a VESTA file instance."""
         self._phases = []
@@ -435,7 +437,7 @@ class VestaFile:
                 and the phase (int) (0-based).
                 Some sections are global rather than tied to a phase. In such
                 cases, the phase is ignored.
-        
+
         Raises:
             IndexError: Invalid phase given.
             KeyError: Invalid name given.
@@ -518,7 +520,7 @@ class VestaFile:
 
         Args:
             phase: Index to set the current phase to.
-        
+
         Raises:
             IndexError: Out-of-bounds `phase` given.
         """
@@ -577,7 +579,7 @@ class VestaFile:
             r (int): Red value (0-255).
             g (int): Green value (0-255).
             b (int): Blue value (0-255).
-        
+
         Related sections: SITET.
         """
         changed = False
@@ -667,7 +669,7 @@ class VestaFile:
             h,k,l: Miller indices of the plane.
             distance: distance from origin (Angstrom)
             r,g,b,a: colour values (0-255) of section. Default is magenta.
-        
+
         Related section: SPLAN.
         """
         section = self["SPLAN"]
@@ -676,7 +678,7 @@ class VestaFile:
 
     def delete_lattice_plane(self, index: int):
         """Deletes a lattice plane, specified by index.
-        
+
         Args:
             index: 1-based index. Accepts negative indices, counting from the
                 end.
@@ -726,7 +728,7 @@ class VestaFile:
 
     def set_section_color_scheme(self, scheme: Union[int, str]):
         """Sets the colour scheme of volumetric sections.
-        
+
         Mimics Properties > Sections > Sections and slices, from the drop-down
         menu.
 
@@ -750,7 +752,7 @@ class VestaFile:
             "Cyclic: Inverted Ostwald",
             "Cyclic: W-R-K-B-W",
             "Cyclic: K-R-W-B-K".
-        
+
         Related sections: SECCL, SECTP, SECTS
         """
         section_color_scheme_names = [
@@ -806,7 +808,7 @@ class VestaFile:
                                   isosurface_max: float = None,
                                   isosurface_auto: bool = None):
         """Sets cutoff levels for volumetric sections
-        
+
         Mimics Properties > Sections > Cutoff levels
 
         Unset keyword arguments are left unchanged.
@@ -1019,7 +1021,7 @@ class VestaFile:
 
     def set_scene_zoom(self, zoom: float):
         """Set zoom of the view.
-        
+
         Args:
             zoom: 1 is VESTA default.
 
@@ -1302,7 +1304,7 @@ class VestaFile:
                   b: int = None,
                   ):
         """Edits an existing bond.
-        
+
         Mimics Edit > Bonds.
 
         All arguments after index are optional. Unset arguments are left 
@@ -1426,7 +1428,7 @@ class VestaFile:
         Args:
             unmatching_bands: "before" or "after". Where to put bonds
                 that don't appear in style.ini.
-        
+
         Related sections: SBOND
         """
         if unmatching_bonds == "before":
@@ -1532,7 +1534,7 @@ class VestaFile:
 
     def get_cell(self) -> list[float, float, float, float, float, float]:
         """Return a copy of the cell parameters: a,b,c,alpha,beta,gamma
-        
+
         Related sections: CELLP"""
         section = self["CELLP"]
         return section.data[0].copy()
@@ -1738,7 +1740,7 @@ class VestaFile:
                         add_atom_radius: bool = False,
                         coord_type: str = "xyz"):
         """Create a new type of vector.
-        
+
         Mimics Edit > Vectors > New.
 
         Args:
@@ -1790,7 +1792,7 @@ class VestaFile:
                          add_atom_radius: bool = None,
                          coord_type: str = "xyz"):
         """Edits an existing type of vector.
-        
+
         Mimics Edit > Vectors > Edit.
 
         Accepts negative indices, counting from the end.
