@@ -512,8 +512,8 @@ class VestaFile:
     def set_current_phase(self, phase: int):
         """Sets the currently active phase by 0-based index.
 
-        __getitem__ calls, along with all set and get functions, will default
-        to this phase.
+        :meth:`__getitem__` calls, along with all set and get functions, will
+        default to this phase.
 
         Accepts negative indices in the Pythonic manner, but it is recorded as a
         positive index.
