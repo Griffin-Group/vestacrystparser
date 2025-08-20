@@ -1,6 +1,7 @@
 .DS_Store
 *.swp
-tests/data/tmp.vesta
+tmp.*
+docs/source/generated
 
 .vscode/
 
