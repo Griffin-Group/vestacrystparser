@@ -353,17 +353,14 @@ class VestaPhase:
 
 
 class VestaFile:
-    """
-    Representation of a VESTA file, with methods to manipulate it.
+    """Representation of a VESTA file, with methods to manipulate it.
+
+    Attributes:
+        sections (dict): Maps section headers to VestaSection objects.
+        order (list): The order in which sections appear in the file.
     """
     def __init__(self, filename: Union[str, None] = None):
-        """
-        Initialize a VESTA file instance.
-
-        Attributes:
-            sections (dict): Maps section headers to VestaSection objects.
-            order (list): The order in which sections appear in the file.
-        """
+        """Initialize a VESTA file instance."""
         self._phases = []
         self._globalsections = VestaPhase()
         self.current_phase = 0
@@ -377,8 +374,7 @@ class VestaFile:
             self.load(filename)
 
     def load(self, filename):
-        """
-        Load and parse a VESTA file.
+        """Load and parse a VESTA file into this instance.
 
         Args:
             filename (str): Path to the VESTA file.
@@ -428,13 +424,21 @@ class VestaFile:
 
     def __getitem__(self, name: Union[str, tuple[str, int]]) \
             -> VestaSection:
-        """
-        Gets the section with the given name, from the given or current phase
+        """Returns the section with the given name (and optionally phase)
 
-        self[name]
-        self[name, phase]
+        Called as either `self[name]` or `self[name, phase]`.
 
-        phase defaults to self.current_phase
+        phase defaults to `self.current_phase`.
+
+        Args:
+            name: Either the section name (str), or a tuple of the name (str)
+                and the phase (int) (0-based).
+                Some sections are global rather than tied to a phase. In such
+                cases, the phase is ignored.
+        
+        Raises:
+            IndexError: Invalid phase given.
+            KeyError: Invalid name given.
         """
         # Parse a multi-argument call, because getitem is special.
         if isinstance(name, tuple):
@@ -453,11 +457,14 @@ class VestaFile:
             return self._phases[phase][name]
 
     def __contains__(self, name: Union[str, tuple[str, int]]) -> bool:
-        """
-        name
-        (name, phase)
+        """Contains the specified Section?
 
-        phase defaults to self.current_phase
+        Args:
+            name: either `name` (str) or tuple `(name, phase)` (str, int).
+                phase defaults to `self.current_phase`.
+
+        Returns:
+            True or False.       
         """
         try:
             # Why copy the __getitem__ logic when I can just do this?
@@ -468,7 +475,7 @@ class VestaFile:
             return True
 
     def __len__(self) -> int:
-        """Number of sections"""
+        """Returns total number of sections."""
         length = 0
         if self._vesta_format_version is not None:
             length += 1
@@ -485,8 +492,7 @@ class VestaFile:
         yield from self._globalsections
 
     def save(self, filename):
-        """
-        Write the current VESTA data to disk.
+        """Write the current VESTA data to disk.
 
         Args:
             filename (str): Output file path.
@@ -495,21 +501,26 @@ class VestaFile:
             f.write(str(self))
 
     def __str__(self) -> str:
-        """Entire VestaFile as multi-line string"""
+        """Return entire VestaFile as multi-line string"""
         mystr = ""
         for section in self:
             mystr += str(section)
         return mystr
 
     def set_current_phase(self, phase: int):
-        """
-        Sets the currently active phase by 0-based index.
+        """Sets the currently active phase by 0-based index.
 
         __getitem__ calls, along with all set and get functions, will default
         to this phase.
 
         Accepts negative indices in the Pythonic manner, but it is recorded as a
         positive index.
+
+        Args:
+            phase: Index to set the current phase to.
+        
+        Raises:
+            IndexError: Out-of-bounds `phase` given.
         """
         if not isinstance(phase, int):
             raise TypeError(f"phase must be an integer, not {type(phase)}.")
@@ -521,9 +532,7 @@ class VestaFile:
         self.current_phase = phase
 
     def __repr__(self) -> str:
-        """
-        Compact representation. Titles and number of sites of each phase.
-        """
+        """Compact representation. Titles and number of sites of each phase."""
         mystr = "<VestaFile: "
         data = []
         for phase in self._phases:
@@ -559,15 +568,17 @@ class VestaFile:
     # Methods for modifying the system.
     def set_site_color(self, index: Union[int, list[int]],
                        r: int, g: int, b: int):
-        """
-        Set the RGB site colour for sites with index (1-based).
+        """Set the RGB site colour for sites with index (1-based).
+
         Supports setting multiple sites at once.
 
         Args:
-            index : indices or list of indices
+            index : site index or list of site indices.
             r (int): Red value (0-255).
             g (int): Green value (0-255).
             b (int): Blue value (0-255).
+        
+        Related sections: SITET.
         """
         changed = False
         # Convert single-index to list.
@@ -598,10 +609,17 @@ class VestaFile:
 
     def set_atom_color(self, element: Union[str, int], r: int, g: int, b: int,
                        overwrite_site_colors: bool = True):
-        """
-        Sets the colour of all atoms of an element.
+        """Sets the colour of all atoms of an element.
 
-        ATOMT, SITET
+        Args:
+            element: Element (by index or symbol) to modify.
+            r: Red value (0-255)
+            g: Green value (0-255)
+            b: Blue value (0-255)
+            overwrite_site_colors: Set existing sites of `element` to this
+                colour (otherwise, only changes sites added later).
+
+        Related sections: ATOMT, SITET.
         """
         section = self["ATOMT"]
         # Are we matching by index or symbol?
@@ -641,27 +659,29 @@ class VestaFile:
     def add_lattice_plane(self, h: float, k: float, l: float, distance: float,
                           r: int = 255, g: int = 0, b: int = 255,
                           a: int = 192):
-        """
-        Adds a lattice plane, sectioning the volumetric data.
+        """Adds a lattice plane, sectioning the volumetric data.
 
-        Sets SPLAN.
         Mimics Edit Data > Lattice Planes > Add lattice planes.
 
         Args:
-            h,k,l - Miller indices of the plane.
-            distance - distance from origin (Angstrom)
-            r,g,b,a - colour (0-255) of section. Default is magenta.
+            h,k,l: Miller indices of the plane.
+            distance: distance from origin (Angstrom)
+            r,g,b,a: colour values (0-255) of section. Default is magenta.
+        
+        Related section: SPLAN.
         """
         section = self["SPLAN"]
         new_plane = [len(section.data), h, k, l, distance, r, g, b, a]
         section.data.insert(-1, new_plane)
 
     def delete_lattice_plane(self, index: int):
-        """
-        SPLAN
+        """Deletes a lattice plane, specified by index.
+        
+        Args:
+            index: 1-based index. Accepts negative indices, counting from the
+                end.
 
-        Index (1-based).
-        Accepts negative indices, counting from the end.
+        Related section: SPLAN.
         """
         if index == 0:
             raise IndexError("VESTA indices are 1-based; 0 is invalid index.")
@@ -680,10 +700,13 @@ class VestaFile:
                 line[0] = i + 1
 
     def delete_isosurface(self, index: int):
-        """
-        ISURF
+        """Deletes an isosurface, specified by index.
 
-        Index (1-based)
+        Args:
+            index: 1-based index. Accepts negative indices, counting from the
+                end.
+
+        Related section: ISURF.
         """
         if index == 0:
             raise IndexError("VESTA indices are 1-based; 0 is invalid index.")
@@ -702,15 +725,33 @@ class VestaFile:
                 line[0] = i + 1
 
     def set_section_color_scheme(self, scheme: Union[int, str]):
-        """
-        Sets the section colour scheme, as in
-        Properties > Sections > Sections and slices,
-        from the drop-down menu.
+        """Sets the colour scheme of volumetric sections.
+        
+        Mimics Properties > Sections > Sections and slices, from the drop-down
+        menu.
 
-        scheme - either a string with the exact name of the colour scheme, or
-            an integer (0-based) indexing the item's position in the list.
+        Args:
+            scheme: either a string with the exact name of the colour scheme,
+                or an integer (0-based) indexing the item's position in the
+                list.
 
-        SECCL, SECTP, SECTS
+        Colour schemes:
+            "B-G-R",
+            "R-G-B",
+            "C-M-Y",
+            "Y-M-C",
+            "Gray scale",
+            "Inverted gray scale",
+            "Rainbow+",
+            "Inverted Rainbow+",
+            "Cyclic: B-G-R-B",
+            "Cyclic: R-G-B-R",
+            "Cyclic: Ostwald",
+            "Cyclic: Inverted Ostwald",
+            "Cyclic: W-R-K-B-W",
+            "Cyclic: K-R-W-B-K".
+        
+        Related sections: SECCL, SECTP, SECTS
         """
         section_color_scheme_names = [
             "B-G-R",
@@ -764,12 +805,13 @@ class VestaFile:
                                   isosurface_min: float = None,
                                   isosurface_max: float = None,
                                   isosurface_auto: bool = None):
-        """
-        Sets cutoff levels for sections (Properties > Sections > Cutoff levels)
+        """Sets cutoff levels for volumetric sections
+        
+        Mimics Properties > Sections > Cutoff levels
 
         Unset keyword arguments are left unchanged.
 
-        SECTP, SECTS
+        Related sections: SECTP, SECTS
         """
         section = self["SECTP"]
         # Set cut-off levels.
@@ -804,13 +846,15 @@ class VestaFile:
         self["DLPLY"].data = [[-1]]
 
     def _reset_hidden(self):
-        """
-        Handles DLATM, DLBND, and DLPLY, reverting them to null if not null.
+        """Handles DLATM, DLBND, and DLPLY, reverting them to null if not null.
+
         You should call this when your function potentially changes the number
         of visible atoms or bonds or polyhedra, because I don't support 
         modifying those via this API yet.
         Although, you're probably safe if you just add atoms and they don't
         add bonds that can connect to older atoms.
+        But I also note that VESTA's default behaviour seems to be to reset
+        hidden flags as well if the visible atoms change.
         """
         if self["DLATM"].data != [[-1]]:
             logger.warning(
@@ -828,12 +872,11 @@ class VestaFile:
     def set_boundary(self, xmin: float = None, xmax: float = None,
                      ymin: float = None, ymax: float = None,
                      zmin: float = None, zmax: float = None):
-        """
-        Sets Boundary.
+        """Sets viewing Boundary.
 
         Unset arguments are left unchanged.
 
-        BOUND
+        Related sections: BOUND
         """
         section = self["BOUND"]
         for i, x in enumerate([xmin, xmax, ymin, ymax, zmin, zmax]):
@@ -844,18 +887,20 @@ class VestaFile:
 
     def set_unit_cell_line_visibility(self, show: bool = None,
                                       all: bool = False) -> int:
-        """
-        Sets whether to show the unit cell or whether to show all cells
-        (vs just single)
+        """Sets the visibility of the unit cell(s).
 
-        Returns the value of the flag that was set.
+        Args:
+            show: If False, hide the unit cell. If True, show the unit cell.
+            all: If True, show all unit cells. `show=False` takes precedence,
+                but also throws a warning if you try setting both.
+                Setting `all=False` without specifying `show` changes nothing
+                and throws a warning.
 
-        Avoid setting both at once. But currently, if you do,
-        show=False takes precedent over all=True, but don't count on it.
-        Note also that setting all=False without setting show
-        is undefined (and leaves it unchanged).
+        Returns:
+            Value of the flag that was set.
+            0: hidden. 1: show single cell. 2: show all cells.
 
-        UCOLP
+        Related sections: UCOLP
         """
         # Validate input
         if (show is False) and (all is True):
@@ -875,12 +920,17 @@ class VestaFile:
         return section.data[0][1]
 
     def set_compass_visibility(self, show: bool, axes: bool = True) -> int:
-        """
-        Set compass and axes label visibility.
+        """Set compass and axes label visibility.
 
-        Returns the value of the flag that was set.
+        Args:
+            show: Show the compass.
+            axes: Show the axes labels on the compass.
 
-        COMPS
+        Returns:
+            Value of the flag that was set.
+            0: hidden. 1: compass only. 2: compass and labels.
+
+        Related sections: COMPS
         """
         section = self["COMPS"]
         if not show:
@@ -893,10 +943,12 @@ class VestaFile:
         return section.inline[0]
 
     def set_scene_view_matrix(self, matrix):
-        """
-        Set the 3x3 rotation matrix describing viewing angle.
+        """Set the 3x3 rotation matrix describing viewing angle.
 
-        SCENE
+        Args:
+            matrix (list[list] or array-like): 3x3 rotation matrix.
+
+        Related sections: SCENE
         """
         if (len(matrix) != 3 or len(matrix[0]) != 3 or len(matrix[1]) != 3
                 or len(matrix[2]) != 3):
@@ -907,14 +959,16 @@ class VestaFile:
                 section.data[i][j] = matrix[i][j]
 
     def set_scene_view_direction(self, view: str) -> list[list[float]]:
-        """
-        Set view direction to a preset viewing direction.
+        """Set view direction to a preset viewing direction.
 
-        Valid presets: "c"
+        Args:
+            view: Preset viewing direction.
+                Valid presets: "c".
 
-        Returns the matrix that was set.
+        Returns:
+            The 3x3 matrix that was set.
 
-        SCENE
+        Related sections: SCENE
         """
         # Get the unit cell parameters
         a, b, c, alpha, beta, gamma = self.get_cell()
@@ -964,10 +1018,12 @@ class VestaFile:
         return matrix
 
     def set_scene_zoom(self, zoom: float):
-        """
-        Set zoom of the view. (1 is VESTA default)
+        """Set zoom of the view.
+        
+        Args:
+            zoom: 1 is VESTA default.
 
-        SCENE
+        Related sections: SCENE
         """
         section = self["SCENE"]
         section.data[6] = [zoom]
@@ -979,12 +1035,15 @@ class VestaFile:
                  alpha: float = None,
                  beta: float = None,
                  gamma: float = None):
-        """
-        Set unit cell parameters
+        """Set unit cell parameters.
 
-        Unset values left unchanged.
+        Unset keyword arguments left unchanged.
 
-        CELLP
+        Args:
+            a,b,c: Lattice vector lengths (Angstrom).
+            alpha, beta, gamma: Lattice vector angles (degrees).
+
+        Related sections: CELLP
         """
         section = self["CELLP"]
         for i, x in enumerate([a, b, c, alpha, beta, gamma]):
@@ -995,14 +1054,21 @@ class VestaFile:
                  dx: float = 0.0, dy: float = 0.0, dz: float = 0.0,
                  occupation: float = 1.0, charge: float = 0.0, U: float = 0.0,
                  add_bonds: bool = False):
-        """
-        Adds a new site.
+        """Adds a new site.
 
-        If requested, will create new bonds if this is a new element.
-        While not the default behaviour in VESTA, this is provided as a
-        convenience function.
+        Args:
+            symbol: Element symbol.
+            label: Name of site.
+            x,y,z: Coordinates of position (fraction of lattice vectors).
+            dx,dy,dz: Uncertainty in coordinates.
+            occupation: Site occupation (0-1).
+            charge: Charge on site.
+            U: ??? Something to do with thermal uncertainty in position.
+            add_bonds: Create new bonds if applicable.
+                While not the default behaviour in VESTA, this is provided as a
+                convenience function.
 
-        STRUC, THERI, THERM, ATOMT, SITET, (ATOMS)
+        Related sections: STRUC, THERI, THERM, ATOMT, SITET, ATOMS, SBOND
         """
         # Add to structure parameters.
         section = self["STRUC"]
@@ -1134,10 +1200,7 @@ class VestaFile:
 
     def distance(self, x1: float, y1: float, z1: float,
                  x2: float, y2: float, z2: float) -> float:
-        """
-        Calculate the Cartesian distances between two points,
-        expressed in fractional coordinates.
-        """
+        """Return the Cartesian distance between two points (frac coords)."""
         cell = self.get_cell_matrix()
         # Difference vector, in fractional coordinates.
         diff = [x1 - x2, y1 - y2, z1 - z2]
@@ -1153,30 +1216,36 @@ class VestaFile:
                  max_length: float = 1.6, search_mode: int = 1,
                  boundary_mode: Union[int, None] = None, show_polyhedra: bool = True,
                  search_by_label: bool = False, style: int = 2):
-        """
-        Add a new bond type.
+        """Add a new bond type.
 
-        Edit > Bonds
+        Mimics Edit > Bonds.
 
-        search_mode:
-            1 = Search A2 bonded to A1 (default)
-            2 = Search atoms bonded to A1. (Overwrites A2 to be 'XX'.)
-            3 = Search molecules. (Overwrites A1 and A2 to be 'XX'.)
-        boundary_mode:
-            1 = Do not search atoms beyond the boundary.
-            2 = Search additional atoms if A1 is included in the boundary.
-                (default for search_mode = 1 or 2)
-            3 = Search additional atoms recursively if either A1 or A2 is
-                visible. (default for search_mode = 3)
-        style:
-            1 = Unicolor cylinder
-            2 = Bicolor cylinder (default for standard bonds)
-            3 = Color line
-            4 = Gradient line
-            5 = Dotted line
-            6 = Dashed line (default for hydrogen bonds)
+        Args:
+            A1, A2: Atoms to bond.
+            min_length: Minimum bond length (Angstrom).
+            max_length: Maximum bond length (Angstrom).
+            search_mode:
+                - 1 = Search A2 bonded to A1 (default)
+                - 2 = Search atoms bonded to A1. (Overwrites A2 to be 'XX'.)
+                - 3 = Search molecules. (Overwrites A1 and A2 to be 'XX'.)
+            boundary_mode:
+                - 1 = Do not search atoms beyond the boundary.
+                - 2 = Search additional atoms if A1 is included in the boundary.
+                  (default for search_mode = 1 or 2)
+                - 3 = Search additional atoms recursively if either A1 or A2 is
+                  visible. (default for search_mode = 3)
+            show_polyhedra: Draw polyhedra using this bond.
+            search_by_label: If True, interpret A1 and A2 as site labels.
+                If False, interpret A1 and A2 as element symbols.
+            style:
+                - 1 = Unicolor cylinder
+                - 2 = Bicolor cylinder (default for standard bonds)
+                - 3 = Color line
+                - 4 = Gradient line
+                - 5 = Dotted line
+                - 6 = Dashed line (default for hydrogen bonds)
 
-        SBOND
+        Related sections: SBOND
         """
         # Validate search_mode and boundary_mode inputs
         if search_mode not in [1, 2, 3]:
@@ -1232,10 +1301,9 @@ class VestaFile:
                   g: int = None,
                   b: int = None,
                   ):
-        """
-        Edits an existing bond (Edit > Bonds)
-
-        Accepts negative indices, counting from the end.
+        """Edits an existing bond.
+        
+        Mimics Edit > Bonds.
 
         All arguments after index are optional. Unset arguments are left 
         unchanged.
@@ -1243,25 +1311,34 @@ class VestaFile:
         N.B. If you are reducing search mode, remember to set A2 or A1,
         otherwise they'll be left at 'XX'.
 
-        search_mode:
-            1 = Search A2 bonded to A1 (default)
-            2 = Search atoms bonded to A1. (Overwrites A2 to be 'XX'.)
-            3 = Search molecules. (Overwrites A1 and A2 to be 'XX'.)
-        boundary_mode:
-            1 = Do not search atoms beyond the boundary.
-            2 = Search additional atoms if A1 is included in the boundary.
-                (default for search_mode = 1 or 2)
-            3 = Search additional atoms recursively if either A1 or A2 is
-                visible. (default for search_mode = 3)
-        style:
-            1 = Unicolor cylinder
-            2 = Bicolor cylinder (default for standard bonds)
-            3 = Color line
-            4 = Gradient line
-            5 = Dotted line
-            6 = Dashed line (default for hydrogen bonds)
+        Args:
+            index: Index of bond (1-based).
+                Accepts negative indices, counting from the end.
+            A1, A2: Atoms to bond.
+            min_length: Minimum bond length (Angstrom).
+            max_length: Maximum bond length (Angstrom).
+            search_mode:
+                - 1 = Search A2 bonded to A1 (default)
+                - 2 = Search atoms bonded to A1. (Overwrites A2 to be 'XX'.)
+                - 3 = Search molecules. (Overwrites A1 and A2 to be 'XX'.)
+            boundary_mode:
+                - 1 = Do not search atoms beyond the boundary.
+                - 2 = Search additional atoms if A1 is included in the boundary.
+                  (default for search_mode = 1 or 2)
+                - 3 = Search additional atoms recursively if either A1 or A2 is
+                  visible. (default for search_mode = 3)
+            show_polyhedra: Draw polyhedra using this bond.
+            search_by_label: If True, interpret A1 and A2 as site labels.
+                If False, interpret A1 and A2 as element symbols.
+            style:
+                - 1 = Unicolor cylinder
+                - 2 = Bicolor cylinder (default for standard bonds)
+                - 3 = Color line
+                - 4 = Gradient line
+                - 5 = Dotted line
+                - 6 = Dashed line (default for hydrogen bonds)
 
-        SBOND
+        Related sections: SBOND
         """
         if index == 0:
             raise IndexError("VESTA indices are 1-based; 0 is invalid index.")
@@ -1313,10 +1390,13 @@ class VestaFile:
             self._reset_hidden()
 
     def delete_bond(self, index: int):
-        """
-        Deletes the specified bond type
+        """Deletes the specified bond type.
 
-        SBOND
+        Args:
+            index: Index of bond (1-based).
+                Accepts negative indices, counting from the end.
+
+        Related sections: SBOND
         """
         if index == 0:
             raise IndexError("VESTA indices are 1-based; 0 is invalid index.")
@@ -1336,17 +1416,18 @@ class VestaFile:
         self._reset_hidden()
 
     def sort_bonds(self, unmatching_bonds: str = "before"):
-        """
-        Rearranges the list of bonds to be in the order provided in style.ini
+        """Rearranges the list of bonds to be in the order provided in style.ini.
 
         Because when VESTA loads a POSCAR, it has SBOND in this order,
         rather than the order that sites appear.
         (Which suggests is generates SBOND after generating all the sites,
         but whatever, as long as the result is the same.)
 
-        Input:
-            unmatching_bands - "before" or "after". Where to put bonds
+        Args:
+            unmatching_bands: "before" or "after". Where to put bonds
                 that don't appear in style.ini.
+        
+        Related sections: SBOND
         """
         if unmatching_bonds == "before":
             NAVALUE = 0
@@ -1389,15 +1470,28 @@ class VestaFile:
         section.data[:-1] = new_rows
 
     def get_bonds(self) -> list[dict]:
-        """
-        Gets a list of what bond types exist.
+        """Return a list of what bond types exist.
 
         Each element is a dictionary, which can be used directly as keyword
-        arguments for self.add_bond.
+        arguments for :meth:`add_bond`.
 
         Data is a copy.
 
-        SBOND
+        Returns:
+            List of dictionaries.
+            Each dict represents a bond type and has the following keys:
+
+            A1:str,
+            A2:str,
+            min_length:float,
+            max_length:float,
+            search_mode:int,
+            boundary_mode:int,
+            show_polyhedra:bool,
+            search_by_label:bool,
+            style:int.
+
+        Related sections: SBOND
         """
         section = self["SBOND"]
         bonds = []
@@ -1417,13 +1511,17 @@ class VestaFile:
         return bonds
 
     def get_structure(self) -> list[list]:
-        """
-        Gets a list of the key site structure parameters
-        (index, element, label, x, y, z)
+        """Return a list of the key site structure parameters.
 
         Returned data is a copy.
 
-        STRUC
+        Returns:
+            List of lists, with each sub-list being a site.
+            It has the following properties:
+            index (int), element (str), label (str),
+            x (float), y (float), z (float).
+
+        Related sections: STRUC
         """
         section = self["STRUC"]
         my_list = []
@@ -1433,20 +1531,19 @@ class VestaFile:
         return my_list
 
     def get_cell(self) -> list[float, float, float, float, float, float]:
-        """
-        Gets the cell parameters: a,b,c,alpha,beta,gamma
-
-        Is a copy.
-        """
+        """Return a copy of the cell parameters: a,b,c,alpha,beta,gamma
+        
+        Related sections: CELLP"""
         section = self["CELLP"]
         return section.data[0].copy()
 
     def get_cell_matrix(self) -> list[list[float]]:
-        """
-        Gets the lattice vectors as a 3x3 matrix.
+        """Return the lattice vectors as a 3x3 matrix.
 
         VESTA aligns the 1st lattice vectors with the x axis, and the 2nd in
         the x-y plane.
+
+        Related sections: CELLP.
         """
         a, b, c, alpha, beta, gamma = self.get_cell()
         alpha = math.radians(alpha)
@@ -1467,15 +1564,15 @@ class VestaFile:
 
     def set_atom_material(self, r: int = None, g: int = None, b: int = None,
                           shininess: float = None):
-        """
-        Sets the atom material for lighting purposes.
+        """Sets the atom material for lighting purposes.
 
         Unset parameters are left unchanged.
 
-        r,g,b - integers from 0 to 255.
-        shininess - float from 1 to 100; percentage.
+        Args:
+            r,g,b: Colour values (0-255).
+            shininess: percentage (1-100).
 
-        ATOMM
+        Related sections: ATOMM
         """
         section = self["ATOMM"]
         # Set the colours
@@ -1488,28 +1585,25 @@ class VestaFile:
             section.data[1][0] = 1.28 * shininess
 
     def set_background_color(self, r: int, g: int, b: int):
-        """
-        Sets the background colour (RGB).
+        """Sets the background colour (RGB, 0-255).
 
-        BKGRC
+        Related sections: BKGRC
         """
         section = self["BKGRC"]
         section.data[0] = [r, g, b]
 
     def set_enable_lighting(self, enable: bool):
-        """
-        Sets whether or not to Enable Lighting.
+        """Sets whether or not to Enable Lighting.
 
-        LIGHT0
+        Related sections: LIGHT0
         """
         section = self["LIGHT0"]
         section.inline[0] = int(enable)
 
-    def set_lighting_angle(self, matrix: list):
-        """
-        Sets the angle for lighting, using a 3x3 rotation matrix.
+    def set_lighting_angle(self, matrix: list[list[float]]):
+        """Sets the angle for lighting, using a 3x3 rotation matrix.
 
-        LIGHT0
+        Related sections: LIGHT0
         """
         section = self["LIGHT0"]
         for i in range(3):
@@ -1517,20 +1611,18 @@ class VestaFile:
                 section.data[i][j] = matrix[i][j]
 
     def reset_lighting_angle(self):
-        """
-        Resets the lighting angle to directly overhead.
+        """Resets the lighting angle to directly overhead.
 
-        LIGHT0
+        Related sections: LIGHT0
         """
         self.set_lighting_angle([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
 
     def set_lighting(self, ambient: int = None, diffuse: int = None):
-        """
-        Sets the ambient and diffuse character of lighting, in percent.
+        """Sets the ambient and diffuse character of lighting, in percent.
 
         Unset properties are left unchanged.
 
-        LIGHT0
+        Related sections: LIGHT0
         """
         section = self["LIGHT0"]
         # N.B. VESTA internally converts the percentages to 0-255 scale.
@@ -1543,12 +1635,16 @@ class VestaFile:
 
     def set_depth_cueing(self, enable: bool = None, start: float = None,
                          end: float = None):
-        """
-        Sets depth cueing settings.
+        """Sets depth cueing settings.
 
         Unset properties are left unchanged.
 
-        DPTHQ
+        Args:
+            enable: Whether to use depth cueing.
+            start: Depth at which depth cueing begins.
+            end: Depth at which depth cueing ends.
+
+        Related properties: DPTHQ
         """
         section = self["DPTHQ"]
         if enable is not None:
@@ -1562,12 +1658,15 @@ class VestaFile:
                    xmin: float = 0, xmax: float = 1,
                    ymin: float = 0, ymax: float = 1,
                    zmin: float = 0, zmax: float = 1) -> list[int]:
-        """
-        Obtains the site indices (1-based) matching the provided list of
-        elements (if applicable) and with (fractional) coordinates within
-        the specified bounding box.
+        """Return the site indices of matching element in the given box.
 
-        Fractional coordinates are probably in the interval [0,1).
+        Args:
+            elements: Optional. Element symbol(s) of the sites to find.
+                If not provided, find all elements.
+            xmin, xmax, ymin, ymax, zmin, zmax: Extent of the bounding box
+                for the search (fractional coordinates).
+
+        Fractional coordinates of sites are probably in the interval [0,1).
         """
         stru = self.get_structure()  # List of (index, element, label, x, y, z)
         # Configure the elements list.
@@ -1638,27 +1737,29 @@ class VestaFile:
                         penetrate_atoms: bool = True,
                         add_atom_radius: bool = False,
                         coord_type: str = "xyz"):
-        """
-        Create a new type of vector (Edit > Vectors > New)
+        """Create a new type of vector.
+        
+        Mimics Edit > Vectors > New.
 
-        Arguments:
-            - x, y, z: floats, coordinates of vector.
-            - polar: bool, whether this is a polar vector (rather than axial).
+        Args:
+            x, y, z (float): Coordinates of vector.
+            polar (bool): Whether this is a polar vector (rather than axial).
                 Default False.
-            - radius: float (positive), radius of rendered arrow. Default 0.5.
-            - r, g, b: int (0-255). RGB colour of vector. Default 255, 0, 0.
-            - penetrate_atoms: bool. Whether the vector penetrates the atom,
+            radius (float (positive)): Radius of rendered arrow. Default 0.5.
+            r, g, b (int): 0-255. RGB colour of vector. Default 255, 0, 0.
+            penetrate_atoms (bool): Whether the vector penetrates the atom,
                 such that it sticks out on both sides. Default True.
-            - add_atom_radius: bool. Whether to add the atomic radius to the
+            add_atom_radius (bool): Whether to add the atomic radius to the
                 length of the vector. Default False.
-            - coord_type: {"xyz", "uvw", "modulus"}. Coordinate basis for
+            coord_type ("xyz", "uvw", "modulus"): Coordinate basis for
                 x, y, z arguments.
+
                 - "xyz": Cartesian vector notation. (Default)
                 - "uvw": Lattice vector notation.
                 - "modulus": Modulus along crystallographic axes. (This is the
-                    internal representation.)
+                  internal representation.)
 
-        VECTR, VECTT.
+        Related sections: VECTR, VECTT.
         """
         # Convert input coordinates.
         x, y, z = self._convert_vector_coords(x, y, z, coord_type)
@@ -1688,8 +1789,9 @@ class VestaFile:
                          penetrate_atoms: bool = None,
                          add_atom_radius: bool = None,
                          coord_type: str = "xyz"):
-        """
-        Edits an existing type of vector (Edit > Vectors > Edit)
+        """Edits an existing type of vector.
+        
+        Mimics Edit > Vectors > Edit.
 
         Accepts negative indices, counting from the end.
 
@@ -1697,24 +1799,26 @@ class VestaFile:
         unchanged.
         If x, y, or z are provided, all of x, y, and z need to be provided.
 
-        Arguments:
-            - index: int, index (1-based) of the vector.
-            - x, y, z: floats, coordinates of vector.
-            - polar: bool, whether this is a polar vector (rather than axial).
-            - radius: float (positive), radius of rendered arrow.
-            - r, g, b: int (0-255). RGB colour of vector.
-            - penetrate_atoms: bool. Whether the vector penetrates the atom,
-                such that it sticks out on both sides.
-            - add_atom_radius: bool. Whether to add the atomic radius to the
-                length of the vector.
-            - coord_type: {"xyz", "uvw", "modulus"}. Coordinate basis for
+        Args:
+            index (int): Index (1-based) of the vector.
+            x, y, z (float): Coordinates of vector.
+            polar (bool): Whether this is a polar vector (rather than axial).
+                Default False.
+            radius (float (positive)): Radius of rendered arrow. Default 0.5.
+            r, g, b (int): 0-255. RGB colour of vector. Default 255, 0, 0.
+            penetrate_atoms (bool): Whether the vector penetrates the atom,
+                such that it sticks out on both sides. Default True.
+            add_atom_radius (bool): Whether to add the atomic radius to the
+                length of the vector. Default False.
+            coord_type ("xyz", "uvw", "modulus"): Coordinate basis for
                 x, y, z arguments.
-                - "xyz": Cartesian vector notation.
+
+                - "xyz": Cartesian vector notation. (Default)
                 - "uvw": Lattice vector notation.
                 - "modulus": Modulus along crystallographic axes. (This is the
-                    internal representation.)
+                  internal representation.)
 
-        VECTR, VECTT.
+        Related sections: VECTR, VECTT.
         """
         if index == 0:
             raise IndexError("VESTA indices are 1-based; 0 is invalid index.")
@@ -1771,12 +1875,12 @@ class VestaFile:
             section.data[idx][4] = int(polar)
 
     def delete_vector_type(self, index: int):
-        """
-        Delete the given vector type
+        """Delete the given vector type.
 
-        VECTT, VECTR
+        Args:
+            index: Index of vector, 1-based. Negative indices accepted.
 
-        Index (1-based)
+        Related sections: VECTT, VECTR
         """
         if index == 0:
             raise IndexError("VESTA indices are 1-based; 0 is invalid index.")
@@ -1819,14 +1923,21 @@ class VestaFile:
                     idx += 1
 
     def set_vector_to_site(self, type: int, site: int):
-        """
-        Attach a vector of type `type` to atomic `site`.
+        """Attach a vector of type `type` to atomic `site`.
 
         Currently, we attach to all symmetrically equivalent sites based on
-        the current space group.
+        the current space group. We do not have an option to attach to specific
+        atoms.
         Also, no duplicate checking is performed.
 
-        VECTR
+        Args:
+            type: Index (1-based) of vector.
+            site: Index (1-based) of site.
+
+        Raises:
+            IndexError: `type` or `site` are out of bounds.
+
+        Related sections: VECTR
         """
         # Validate inputs
         if type <= 0:
@@ -1857,15 +1968,19 @@ class VestaFile:
         section.data.insert(idx, [site, 0, 0, 0, 0])
 
     def remove_vector_from_site(self, type: int, site: int):
-        """
-        Removes vectors of type `type` from atomic site `site`.
+        """Removes vectors of type `type` from atomic site `site`.
 
         Will remove multiple matching sites if there are duplicates.
 
-        Silent does nothing if `site` not found, but will raise an error if
-        `type` is not valid.
+        Args:
+            type: Index (1-based) of vector.
+            site: Index (1-based) of site.
+                Silently does nothing if `site` note found.
 
-        VECTR
+        Raises:
+            IndexError: `type` is out of bounds.
+
+        Related sections: VECTR
         """
         # Validate inputs
         if type <= 0:
