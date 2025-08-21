@@ -66,3 +66,32 @@ Phase 1 (phase indices are 0-based).
 
     section = vfile["COMPS", 1]
     section.inline[0] = 0
+
+Finally, the VestaFile may be written back to file with :meth:`.VestaFile.save`.
+
+Importing structure files to VESTA
+----------------------------------
+
+Often, you may have structure data which you could open in VESTA, but not yet
+a VESTA file.
+In these cases, the :mod:`.convert` module allows reading in structure data and
+outputing a :class:`.VestaFile` object (which can be written to a VESTA file).
+Currently, POSCAR files and generic :class:`pymatgen.core.Structure` objects are
+supported.
+
+The :mod:`.convert` module requires `pymatgen`_ to be installed.
+
+.. _pymatgen: https://pymatgen.org/
+
+.. code-block:: python
+
+    import vestacrystparser.convert
+
+    # Load directly from POSCAR file.
+    vfile = vestacrystparser.convert.vesta_from_poscar("POSCAR")
+
+    from pymatgen.core import Structure
+
+    # Create VestaFile from Structure object (which may be parsed from anything)
+    stru = Structure.from_file("POSCAR")
+    vfile = vestacrystparser.convert.vesta_from_structure(stru)

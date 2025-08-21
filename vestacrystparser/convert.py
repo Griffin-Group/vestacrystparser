@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Create VESTA file from pymatgen object
+"""Create VESTA files from structural data files (POSCAR, etc.).
 """
 
 from pymatgen.core import Structure
@@ -43,3 +42,11 @@ def vesta_from_poscar(fname: str) -> VestaFile:
     # Set the title
     vfile.title = pos.comment
     return vfile
+
+# Thoughts...
+# CIF will be tricky, because it contains symmetry and precision
+# information and is variable in the data it contains, so I can't simply
+# convert to Structure then use that.
+# pymatgen.io.cif supports reading CIF files with all data.
+# If pymatgen proves unreliable, could also attempt PyCifRW https://pypi.org/project/PyCifRW/
+# In any case, CIF is hard, and I don't have much experience with CIF's.

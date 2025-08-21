@@ -1,5 +1,7 @@
-"""
-vestacrystparser
+"""Parse, modify, and write VESTA files, for visualisation of crystals.
+
+VestaFile is the core class, while all other objects here support it.
+VestaSection are the low-level building blocks of VestaFile.
 """
 import logging
 import math
@@ -19,7 +21,7 @@ def parse_token(token: str) -> Union[int, float, str]:
     
     Returns:
         `token` converted to :type:`int` if possible,
-        or else :type:`float` is possible, or else returned
+        or else :type:`float` if possible, or else returned
         as-is.
     """
     try:
