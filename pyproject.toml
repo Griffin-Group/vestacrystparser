@@ -37,6 +37,7 @@ dev = [
     "autopep8",
     "pytest-cov",
     "sphinx",
+    "myst-parser",
 ]
 
 [project.urls]
