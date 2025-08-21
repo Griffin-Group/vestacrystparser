@@ -26,6 +26,12 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 myst_heading_anchors = 3
 
+autodoc_default_options = {
+    'members': True,
+    'special-members': True,
+    'exclude-members': '__weakref__',
+}
+
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 

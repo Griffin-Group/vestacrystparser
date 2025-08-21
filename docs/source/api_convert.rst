@@ -1,7 +1,5 @@
-convert
-=======
-
-Functions for converting structure data (e.g. POSCAR files) into VESTA files.
+:mod:`vestacrystparser.convert`
+===============================
 
 .. automodule:: vestacrystparser.convert
     :members:

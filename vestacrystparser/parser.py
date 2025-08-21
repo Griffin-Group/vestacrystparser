@@ -1,7 +1,13 @@
 """Parse, modify, and write VESTA files, for visualisation of crystals.
 
-VestaFile is the core class, while all other objects here support it.
-VestaSection are the low-level building blocks of VestaFile.
+:class:`.VestaFile` is the core class, while all other objects here support it.
+(VestaFile may also be imported from the top level, :class:`vestacrystparser.VestaFile`.)
+Most functions can be completed using just this class's methods.
+
+:class:`.VestaSection` are the low-level building blocks of VestaFile,
+used when making low-level API calls.
+
+The other functions and methods are primarily of use to developers.
 """
 import logging
 import math
