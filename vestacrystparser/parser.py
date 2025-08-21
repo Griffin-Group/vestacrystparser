@@ -647,7 +647,7 @@ class VestaFile:
             g (int): Green value (0-255).
             b (int): Blue value (0-255).
 
-        Related sections: SITET.
+        Related sections: :ref:`SITET`.
         """
         changed = False
         # Convert single-index to list.
@@ -688,7 +688,7 @@ class VestaFile:
             overwrite_site_colors: Set existing sites of `element` to this
                 colour (otherwise, only changes sites added later).
 
-        Related sections: ATOMT, SITET.
+        Related sections: :ref:`ATOMT`, :ref:`SITET`.
         """
         section = self["ATOMT"]
         # Are we matching by index or symbol?
@@ -737,7 +737,7 @@ class VestaFile:
             distance: distance from origin (Angstrom)
             r,g,b,a: colour values (0-255) of section. Default is magenta.
 
-        Related section: SPLAN.
+        Related sections: :ref:`SPLAN`
         """
         section = self["SPLAN"]
         new_plane = [len(section.data), h, k, l, distance, r, g, b, a]
@@ -750,7 +750,7 @@ class VestaFile:
             index: 1-based index. Accepts negative indices, counting from the
                 end.
 
-        Related section: SPLAN.
+        Related sections: :ref:`SPLAN`
         """
         if index == 0:
             raise IndexError("VESTA indices are 1-based; 0 is invalid index.")
@@ -820,7 +820,7 @@ class VestaFile:
             "Cyclic: W-R-K-B-W",
             "Cyclic: K-R-W-B-K".
 
-        Related sections: SECCL, SECTP, SECTS
+        Related sections: :ref:`SECCL`, :ref:`SECTP`, :ref:`SECTS`
         """
         section_color_scheme_names = [
             "B-G-R",
@@ -880,7 +880,7 @@ class VestaFile:
 
         Unset keyword arguments are left unchanged.
 
-        Related sections: SECTP, SECTS
+        Related sections: :ref:`SECTP`, :ref:`SECTS`
         """
         section = self["SECTP"]
         # Set cut-off levels.
@@ -945,7 +945,7 @@ class VestaFile:
 
         Unset arguments are left unchanged.
 
-        Related sections: BOUND
+        Related sections: :ref:`BOUND`
         """
         section = self["BOUND"]
         for i, x in enumerate([xmin, xmax, ymin, ymax, zmin, zmax]):
@@ -969,7 +969,7 @@ class VestaFile:
             Value of the flag that was set.
             0: hidden. 1: show single cell. 2: show all cells.
 
-        Related sections: UCOLP
+        Related sections: :ref:`UCOLP`
         """
         # Validate input
         if (show is False) and (all is True):
@@ -999,7 +999,7 @@ class VestaFile:
             Value of the flag that was set.
             0: hidden. 1: compass only. 2: compass and labels.
 
-        Related sections: COMPS
+        Related sections: :ref:`COMPS`
         """
         section = self["COMPS"]
         if not show:
@@ -1017,7 +1017,7 @@ class VestaFile:
         Args:
             matrix (list[list] or array-like): 3x3 rotation matrix.
 
-        Related sections: SCENE
+        Related sections: :ref:`SCENE`
         """
         if (len(matrix) != 3 or len(matrix[0]) != 3 or len(matrix[1]) != 3
                 or len(matrix[2]) != 3):
@@ -1037,7 +1037,7 @@ class VestaFile:
         Returns:
             The 3x3 matrix that was set.
 
-        Related sections: SCENE
+        Related sections: :ref:`SCENE`
         """
         # Get the unit cell parameters
         a, b, c, alpha, beta, gamma = self.get_cell()
@@ -1092,7 +1092,7 @@ class VestaFile:
         Args:
             zoom: 1 is VESTA default.
 
-        Related sections: SCENE
+        Related sections: :ref:`SCENE`
         """
         section = self["SCENE"]
         section.data[6] = [zoom]
@@ -1112,7 +1112,7 @@ class VestaFile:
             a,b,c: Lattice vector lengths (Angstrom).
             alpha, beta, gamma: Lattice vector angles (degrees).
 
-        Related sections: CELLP
+        Related sections: :ref:`CELLP`
         """
         section = self["CELLP"]
         for i, x in enumerate([a, b, c, alpha, beta, gamma]):
@@ -1137,7 +1137,8 @@ class VestaFile:
                 While not the default behaviour in VESTA, this is provided as a
                 convenience function.
 
-        Related sections: STRUC, THERI, THERM, ATOMT, SITET, ATOMS, SBOND
+        Related sections: :ref:`STRUC`, :ref:`THERI`, :ref:`THERM`, :ref:`ATOMT`,
+        :ref:`SITET`, :ref:`ATOMS`, :ref:`SBOND`
         """
         # Add to structure parameters.
         section = self["STRUC"]
@@ -1314,7 +1315,7 @@ class VestaFile:
                 - 5 = Dotted line
                 - 6 = Dashed line (default for hydrogen bonds)
 
-        Related sections: SBOND
+        Related sections: :ref:`SBOND`
         """
         # Validate search_mode and boundary_mode inputs
         if search_mode not in [1, 2, 3]:
@@ -1407,7 +1408,7 @@ class VestaFile:
                 - 5 = Dotted line
                 - 6 = Dashed line (default for hydrogen bonds)
 
-        Related sections: SBOND
+        Related sections: :ref:`SBOND`
         """
         if index == 0:
             raise IndexError("VESTA indices are 1-based; 0 is invalid index.")
@@ -1465,7 +1466,7 @@ class VestaFile:
             index: Index of bond (1-based).
                 Accepts negative indices, counting from the end.
 
-        Related sections: SBOND
+        Related sections: :ref:`SBOND`
         """
         if index == 0:
             raise IndexError("VESTA indices are 1-based; 0 is invalid index.")
@@ -1496,7 +1497,7 @@ class VestaFile:
             unmatching_bands: "before" or "after". Where to put bonds
                 that don't appear in style.ini.
 
-        Related sections: SBOND
+        Related sections: :ref:`SBOND`
         """
         if unmatching_bonds == "before":
             NAVALUE = 0
@@ -1560,7 +1561,7 @@ class VestaFile:
             search_by_label:bool,
             style:int.
 
-        Related sections: SBOND
+        Related sections: :ref:`SBOND`
         """
         section = self["SBOND"]
         bonds = []
@@ -1590,7 +1591,7 @@ class VestaFile:
             index (int), element (str), label (str),
             x (float), y (float), z (float).
 
-        Related sections: STRUC
+        Related sections: :ref:`STRUC`
         """
         section = self["STRUC"]
         my_list = []
@@ -1602,7 +1603,7 @@ class VestaFile:
     def get_cell(self) -> list[float, float, float, float, float, float]:
         """Return a copy of the cell parameters: a,b,c,alpha,beta,gamma
 
-        Related sections: CELLP"""
+        Related sections: :ref:`CELLP`"""
         section = self["CELLP"]
         return section.data[0].copy()
 
@@ -1612,7 +1613,7 @@ class VestaFile:
         VESTA aligns the 1st lattice vectors with the x axis, and the 2nd in
         the x-y plane.
 
-        Related sections: CELLP.
+        Related sections: :ref:`CELLP`.
         """
         a, b, c, alpha, beta, gamma = self.get_cell()
         alpha = math.radians(alpha)
@@ -1641,7 +1642,7 @@ class VestaFile:
             r,g,b: Colour values (0-255).
             shininess: percentage (1-100).
 
-        Related sections: ATOMM
+        Related sections: :ref:`ATOMM`
         """
         section = self["ATOMM"]
         # Set the colours
@@ -1656,7 +1657,7 @@ class VestaFile:
     def set_background_color(self, r: int, g: int, b: int):
         """Sets the background colour (RGB, 0-255).
 
-        Related sections: BKGRC
+        Related sections: :ref:`BKGRC`
         """
         section = self["BKGRC"]
         section.data[0] = [r, g, b]
@@ -1664,7 +1665,7 @@ class VestaFile:
     def set_enable_lighting(self, enable: bool):
         """Sets whether or not to Enable Lighting.
 
-        Related sections: LIGHT0
+        Related sections: :ref:`LIGHT0`
         """
         section = self["LIGHT0"]
         section.inline[0] = int(enable)
@@ -1672,7 +1673,7 @@ class VestaFile:
     def set_lighting_angle(self, matrix: list[list[float]]):
         """Sets the angle for lighting, using a 3x3 rotation matrix.
 
-        Related sections: LIGHT0
+        Related sections: :ref:`LIGHT0`
         """
         section = self["LIGHT0"]
         for i in range(3):
@@ -1682,7 +1683,7 @@ class VestaFile:
     def reset_lighting_angle(self):
         """Resets the lighting angle to directly overhead.
 
-        Related sections: LIGHT0
+        Related sections: :ref:`LIGHT0`
         """
         self.set_lighting_angle([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
 
@@ -1691,7 +1692,7 @@ class VestaFile:
 
         Unset properties are left unchanged.
 
-        Related sections: LIGHT0
+        Related sections: :ref:`LIGHT0`
         """
         section = self["LIGHT0"]
         # N.B. VESTA internally converts the percentages to 0-255 scale.
@@ -1756,7 +1757,7 @@ class VestaFile:
         return indices
 
     def set_title(self, title: str):
-        """Sets the TITLE field. No newlines allowed."""
+        """Sets the :ref:`TITLE` field. No newlines allowed."""
         # Verify that title is one line.
         lines = title.splitlines()  # This also strips off any trailing newlines
         if len(lines) > 1:
@@ -1828,7 +1829,7 @@ class VestaFile:
                 - "modulus": Modulus along crystallographic axes. (This is the
                   internal representation.)
 
-        Related sections: VECTR, VECTT.
+        Related sections: :ref:`VECTR`, :ref:`VECTT`.
         """
         # Convert input coordinates.
         x, y, z = self._convert_vector_coords(x, y, z, coord_type)
@@ -1887,7 +1888,7 @@ class VestaFile:
                 - "modulus": Modulus along crystallographic axes. (This is the
                   internal representation.)
 
-        Related sections: VECTR, VECTT.
+        Related sections: :ref:`VECTR`, :ref:`VECTT`.
         """
         if index == 0:
             raise IndexError("VESTA indices are 1-based; 0 is invalid index.")
@@ -1949,7 +1950,7 @@ class VestaFile:
         Args:
             index: Index of vector, 1-based. Negative indices accepted.
 
-        Related sections: VECTT, VECTR
+        Related sections: :ref:`VECTT`, :ref:`VECTR`
         """
         if index == 0:
             raise IndexError("VESTA indices are 1-based; 0 is invalid index.")
@@ -2006,7 +2007,7 @@ class VestaFile:
         Raises:
             IndexError: `type` or `site` are out of bounds.
 
-        Related sections: VECTR
+        Related sections: :ref:`VECTR`
         """
         # Validate inputs
         if type <= 0:
@@ -2049,7 +2050,7 @@ class VestaFile:
         Raises:
             IndexError: `type` is out of bounds.
 
-        Related sections: VECTR
+        Related sections: :ref:`VECTR`
         """
         # Validate inputs
         if type <= 0:

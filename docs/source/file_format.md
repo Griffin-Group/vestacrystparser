@@ -8,6 +8,7 @@ The amount of whitespace between entries on the same line does not seem to matte
 
 The file has sections marked in all-caps, followed by a series of space- and newline-separated values.
 
+(VESTA_FORMAT_VERSION)=
 ## #VESTA_FORMAT_VERSION
 
 Metadata tag: version of the VESTA file format.
@@ -21,6 +22,7 @@ e.g.
 
 ```
 
+(CRYSTAL)=
 ## CRYSTAL
 
 Superheader for each crystal Phase (Edit Data > Phases).
@@ -34,6 +36,7 @@ CRYSTAL
 
 ```
 
+(TITLE)=
 ## TITLE
 
 Name/title of the structure.
@@ -49,6 +52,7 @@ New structure
 
 ```
 
+(IMPORT_DENSITY)=
 ## IMPORT_DENSITY
 
 **Optional section.**
@@ -67,6 +71,7 @@ IMPORT_DENSITY 1
 
 ```
 
+(GROUP)=
 ## GROUP
 
 Space group; the symmetry group imposed on the crystal.
@@ -77,6 +82,7 @@ GROUP
 1 1 P 1
 ```
 
+(SYMOP)=
 ## SYMOP
 
 Symmetry operations associated with GROUP.
@@ -88,6 +94,7 @@ SYMOP
  -1.0 -1.0 -1.0  0 0 0  0 0 0  0 0 0
 ```
 
+(TRANM)=
 ## TRANM
 
 e.g.
@@ -96,6 +103,7 @@ TRANM 0
  0.000000  0.000000  0.000000  1  0  0   0  1  0   0  0  1
 ```
 
+(LTRANSL)=
 ## LTRANSL
 
 Translation of this phase with respect to another.
@@ -112,6 +120,7 @@ LTRANSL
  0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
 ```
 
+(LORIENT)=
 ## LORIENT
 
 e.g.
@@ -122,6 +131,7 @@ LORIENT
  0.000000  0.000000  1.000000  0.000000  0.000000  1.000000
 ```
 
+(LMATRIX)=
 ## LMATRIX
 
 Transformation matrix of this phase's coordinate system.
@@ -138,6 +148,7 @@ LMATRIX
  0.000000  0.000000  0.000000
 ```
 
+(CELLP)=
 ## CELLP
 
 Unit cell lattice parameters.
@@ -154,6 +165,7 @@ CELLP
   0.000000   0.000000   0.000000   0.000000   0.000000   0.000000
 ```
 
+(STRUC)=
 ## STRUC
 
 Structure parameters.
@@ -183,6 +195,7 @@ STRUC
   0 0 0 0 0 0 0
 ```
 
+(THERI)=
 ## THERI
 
 Isotropic U/B in Structure Parameters. (Isotropic thermal?)
@@ -207,6 +220,7 @@ THERI 1
   0 0 0
 ```
 
+(THERT)=
 ## THERT
 
 **Optional section.**
@@ -222,6 +236,7 @@ e.g.
 THERT 0
 ```
 
+(THERM)=
 ## THERM
 
 **Optional section.**
@@ -246,6 +261,7 @@ THERM
   0 0 0 0 0 0 0 0
 ```
 
+(SHAPE)=
 ## SHAPE
 
 e.g.
@@ -254,6 +270,7 @@ SHAPE
   0       0       0       0   0.000000  0   192   192   192   192
 ```
 
+(BOUND)=
 ## BOUND
 
 Boundary.
@@ -274,6 +291,7 @@ BOUND
   0   0   0   0  0
 ```
 
+(SBOND)=
 ## SBOND
 
 Bonding information.
@@ -327,6 +345,7 @@ SBOND
   0 0 0 0
 ```
 
+(SITET)=
 ## SITET
 
 Site-specific appearances.
@@ -351,6 +370,7 @@ SITET
   0 0 0 0 0 0
 ```
 
+(VECTR)=
 ## VECTR
 
 Vectors to draw on the atoms.
@@ -388,6 +408,7 @@ VECTR
     0 0 0 0 0
 ```
 
+(VECTT)=
 ## VECTT
 
 Vector formatting.
@@ -408,6 +429,7 @@ VECTT
  0 0 0 0 0
 ```
 
+(SPLAN)=
 ## SPLAN
 
 Section planes of volumetric data.
@@ -429,6 +451,7 @@ SPLAN
   0   0   0   0
 ```
 
+(LBLAT)=
 ## LBLAT
 
 e.g.
@@ -437,6 +460,7 @@ LBLAT
  -1
 ```
 
+(LBLSP)=
 ## LBLSP
 
 e.g.
@@ -445,6 +469,7 @@ LBLSP
  -1
 ```
 
+(DLATM)=
 ## DLATM
 
 Delete/hides the specified atoms. Objects > Atoms.
@@ -459,6 +484,7 @@ e.g.
 DLATM
  1 2 3  -1
 ```
+(DLBND)=
 ## DLBND
 
 Deletes/hides the specified bonds. Objects > Bonds.
@@ -472,12 +498,14 @@ e.g.
 DLBND
  -1
 ```
+(DLPLY)=
 ## DLPLY
 e.g.
 ```
 DLPLY
  -1
 ```
+(PLN2D)=
 ## PLN2D
 e.g.
 ```
@@ -485,6 +513,7 @@ PLN2D
   0   0   0   0
 ```
 
+(ATOMT)=
 ## ATOMT
 
 Atomic/elemental appearance information.
@@ -517,6 +546,7 @@ Default values are derived from `elements.ini`.
 - Columns 6-8: RGB colour (0-1)
 Which radius is used is based on the atomic radii type within ATOMS. Changing this setting through the UI overwrites all existing radii with the appropriate default values.
 
+(SCENE)=
 ## SCENE
 
 View of the structure.
@@ -540,12 +570,14 @@ SCENE
   1.000
 ```
 
+(HBOND)=
 ## HBOND
 e.g.
 ```
 HBOND 0 2
 ```
 
+(STYLE)=
 ## STYLE
 
 A newline precedes this section.
@@ -554,6 +586,7 @@ No data is directly connected to the STYLE header. However, it appears to serve 
 
 STYLE
 ```
+(DISPF)=
 ### DISPF
 
 Miscellaneous display flags, as binary bits.
@@ -571,6 +604,7 @@ e.g.
 ```
 DISPF 37753794
 ```
+(MODEL)=
 ### MODEL
 
 Structural model settings.
@@ -588,11 +622,13 @@ e.g.
 ```
 MODEL   0  1  0
 ```
+(SURFS)=
 ### SURFS
 e.g.
 ```
 SURFS   0  1  1
 ```
+(SECTS)=
 ### SECTS
 
 Flags for display of sections.
@@ -611,11 +647,13 @@ e.g.
 ```
 SECTS  32  1
 ```
+(FORMS)=
 ### FORMS
 e.g.
 ```
 FORMS   0  1
 ```
+(ATOMS)=
 ### ATOMS
 
 Atom display settings.
@@ -633,16 +671,19 @@ e.g.
 ```
 ATOMS   0  0  1
 ```
+(BONDS)=
 ### BONDS
 e.g.
 ```
 BONDS   1
 ```
+(POLYS)=
 ### POLYS
 e.g.
 ```
 POLYS   1
 ```
+(VECTS)=
 ### VECTS
 
 Global scaling factor for vectors.
@@ -653,12 +694,14 @@ e.g.
 ```
 VECTS 1.000000
 ```
+(FORMP)=
 ### FORMP
 e.g.
 ```
 FORMP
   1  1.0   0   0   0
 ```
+(ATOMP)=
 ### ATOMP
 
 Atom style properties.
@@ -675,6 +718,7 @@ e.g.
 ATOMP
  24  24   0  50  2.0   0
 ```
+(BONDP)=
 ### BONDP
 
 Bond style properties.
@@ -696,12 +740,14 @@ e.g.
 BONDP
   1  16  0.250  2.000 127 127 127
 ```
+(POLYP)=
 ### POLYP
 e.g.
 ```
 POLYP
  204 1  1.000 180 180 180
 ```
+(ISURF)=
 ### ISURF
 
 Isosurfaces.
@@ -723,12 +769,14 @@ ISURF
 1   1    0.55903 255 255   0 127 255
   0   0   0   0
 ```
+(TEX3P)=
 ### TEX3P
 e.g.
 ```
 TEX3P
   1  0.00000E+00  1.00000E+00
 ```
+(SECTP)=
 ### SECTP
 
 Section planes, properties.
@@ -750,6 +798,7 @@ e.g.
 SECTP
   1  0.00000E+00  1.00000E+00  0.00000E+00  0.00000E+00  0.00000E+00  0.00000E+00
 ```
+(CONTR)=
 ### CONTR
 e.g.
 ```
@@ -761,12 +810,14 @@ CONTR
    0   0   0
    0   0   0
 ```
+(HKLPP)=
 ### HKLPP
 e.g.
 ```
 HKLPP
  192 1  1.000 255   0 255
 ```
+(UCOLP)=
 ### UCOLP
 
 Unit cell line properties.
@@ -783,6 +834,7 @@ e.g.
 UCOLP
    0   1  1.000   0   0   0
 ```
+(COMPS)=
 ### COMPS
 
 Compass settings.
@@ -799,11 +851,13 @@ e.g.
 ```
 COMPS 1
 ```
+(LABEL)=
 ### LABEL
 e.g.
 ```
 LABEL 1    12  1.000 0
 ```
+(PROJT)=
 ### PROJT
 
 Projection.
@@ -817,6 +871,7 @@ e.g.
 ```
 PROJT 0  0.962
 ```
+(BKGRC)=
 ### BKGRC
 
 Background colour.
@@ -830,6 +885,7 @@ e.g.
 BKGRC
  255 255 255
 ```
+(DPTHQ)=
 ### DPTHQ
 
 Depth cueing.
@@ -844,6 +900,7 @@ e.g.
 ```
 DPTHQ 1 -0.5000  3.5000
 ```
+(LIGHT0)=
 ### LIGHT0
 
 Lighting.
@@ -871,6 +928,7 @@ LIGHT0 1
  179 179 179 255
  255 255 255 255
 ```
+(LIGHT1)=
 ### LIGHT1
 e.g.
 ```
@@ -885,6 +943,7 @@ LIGHT1
    0   0   0   0
    0   0   0   0
 ```
+(LIGHT2)=
 ### LIGHT2
 e.g.
 ```
@@ -899,6 +958,7 @@ LIGHT2
    0   0   0   0
    0   0   0   0
 ```
+(LIGHT3)=
 ### LIGHT3
 e.g.
 ```
@@ -913,6 +973,7 @@ LIGHT3
    0   0   0   0
    0   0   0   0
 ```
+(SECCL)=
 ### SECCL
 
 Section colour scheme.
@@ -940,6 +1001,7 @@ e.g.
 SECCL 0
 ```
 
+(TEXCL)=
 ## TEXCL
 
 A blank line precedes and follows this section.
@@ -951,6 +1013,7 @@ TEXCL 0
 
 ```
 
+(ATOMM)=
 ## ATOMM
 
 Atom material.
@@ -966,6 +1029,7 @@ ATOMM
  204 204 204 255
   25.600
 ```
+(BONDM)=
 ## BONDM
 e.g.
 ```
@@ -973,6 +1037,7 @@ BONDM
  255 255 255 255
  128.000
 ```
+(POLYM)=
 ## POLYM
 e.g.
 ```
@@ -980,6 +1045,7 @@ POLYM
  255 255 255 255
  128.000
 ```
+(SURFM)=
 ## SURFM
 e.g.
 ```
@@ -987,6 +1053,7 @@ SURFM
    0   0   0 255
  128.000
 ```
+(FORMM)=
 ## FORMM
 e.g.
 ```
@@ -994,6 +1061,7 @@ FORMM
  255 255 255 255
  128.000
 ```
+(HKLPM)=
 ## HKLPM
 e.g.
 ```
