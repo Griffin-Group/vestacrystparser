@@ -103,6 +103,17 @@ def load_elements_data(element: Union[int, str]) -> \
         - Green colour value (int, 0-255).
         - Blue colour value (int, 0-255).
     """
+    # If I can't receive permission to redistribute this configuration file,
+    # I'll instead need to find a way to read it from an external source,
+    # i.e. a VESTA installation on the system.
+    # Location of VESTA is OS dependent.
+    # import platform; platform.system() == 'Darwin' (Mac), 'Windows', 'Linux'
+    # Also need to confirm it's existence.
+    # On MacOS:
+    # os.path.isdir('/Applications/VESTA/VESTA.app/Contents/Resources/')
+    # I should permit specifying the location by an environment variable or
+    # something, because my unit tests on GitHub will require me to manually
+    # store these files, but in a Secret to avoid distributing the files.
     fn = importlib.resources.files(vestacrystparser.resources) / "elements.ini"
     with open(fn, 'r') as f:
         for line in f.readlines():
