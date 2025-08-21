@@ -12,9 +12,15 @@ logger = logging.getLogger(__name__)
 
 
 def parse_token(token: str) -> Union[int, float, str]:
-    """
-    Convert a token to int or float if possible.
-    Otherwise, return it as a string.
+    """Convert a token to int or float if possible (or leave as a string).
+    
+    Args:
+        token: A string.
+    
+    Returns:
+        `token` converted to :type:`int` if possible,
+        or else :type:`float` is possible, or else returned
+        as-is.
     """
     try:
         return int(token)
@@ -26,16 +32,20 @@ def parse_token(token: str) -> Union[int, float, str]:
 
 
 def parse_line(line: str) -> list[Union[int, float, str]]:
-    """
-    Split a line into tokens and convert each token.
-    Returns a list of tokens.
+    """Split a line into tokens and convert each token.
+
+    Args:
+        line: String with data separated by spaces.
+    
+    Returns:
+        A list of tokens (int, float, or string, as appropriate).
     """
     tokens = line.split()
     return [parse_token(tok) for tok in tokens]
 
 
 def invert_matrix(mat: list[list[float]]) -> list[list[float]]:
-    """Inverts a 3x3 matrix"""
+    """Inverts a 3x3 matrix."""
     # Implementation using raw Python; importing numpy is overkill.
     # https://mathworld.wolfram.com/MatrixInverse.html
     assert len(mat) == 3, "mat must be 3x3"
@@ -74,6 +84,23 @@ def invert_matrix(mat: list[list[float]]) -> list[list[float]]:
 
 def load_elements_data(element: Union[int, str]) -> \
         list[int, str, float, float, float, int, int, int]:
+    """Load default data for a specific element from elements.ini.
+    
+    Args:
+        element: Elemental symbol (str) or atomic number (int).
+            If element is not present, falls back to "XX" (and logs it at INFO
+            level).
+    
+    Returns:
+        - Atomic number (int).
+        - Elemental symbol (str).
+        - Atomic radius (float, Angstrom).
+        - van der Waals radius (float, Angstrom).
+        - Ionic radius (float, Angstrom).
+        - Red colour value (int, 0-255).
+        - Green colour value (int, 0-255).
+        - Blue colour value (int, 0-255).
+    """
     fn = importlib.resources.files(vestacrystparser.resources) / "elements.ini"
     with open(fn, 'r') as f:
         for line in f.readlines():
@@ -105,25 +132,31 @@ def load_elements_data(element: Union[int, str]) -> \
 
 def load_default_bond_style(A1: str, A2: str, hbond: bool = False) \
         -> Union[list[int, str, str, float, float, int, int, int, int, int], None]:
-    """
-    Loads default bond style for a pair of elements (if present).
+    """Loads default bond style for a pair of elements (if present).
 
-    hbond - if True, grab the hydrogen bond, if present.
-    This is the second matching entry in style.ini
+    Loads data from style.ini.
 
-    returns: [index (ignore),
-              A1,
-              A2,
-              minimum length,
-              maximum length,
-              search mode,
-              boundary mode,
-              show polyhedra,
-              0 (search by label = False),
-              normal (1) or H-bond (5)]
-
-    May be None. Not every element pair has default bonds in style.ini.
     (N.B. If adding bonds manually, VESTA GUI defaults to 1.6.)
+
+    Args:
+        A1, A2: Pair of element symbols. Order does not matter.
+        hbond: If True, grab the hydrogen bond, if present.
+            This is the second matching entry in style.ini
+
+    Returns:
+        May be None. Not every element pair has default bonds in style.ini.
+        If the element pair does have a bond, a list is returned:
+
+            - index in style.ini,
+            - A1,
+            - A2,
+            - minimum length,
+            - maximum length,
+            - search mode,
+            - boundary mode,
+            - show polyhedra,
+            - 0 (search by label = False),
+            - style (normal (1) or H-bond (5))
     """
     # Load style.ini file.
     fn = importlib.resources.files(vestacrystparser.resources) / "style.ini"
@@ -160,11 +193,17 @@ def load_default_bond_style(A1: str, A2: str, hbond: bool = False) \
 
 
 def load_default_bond_length(A1: str, A2: str) -> Union[float, None]:
-    """
-    Loads default maximum bond length for a pair of elements (if present).
+    """Returns default maximum bond length for a pair of elements (if present).
 
-    May be None. Not every element pair has default bonds in style.ini.
     (N.B. If adding bonds manually, VESTA GUI defaults to 1.6.)
+
+    Args:
+        A1, A2: Pair of elements.
+
+    Returns:
+        Maximum bond length in Angstrom, if present.
+
+        May be None. Not every element pair has default bonds in style.ini.
     """
     tokens = load_default_bond_style(A1, A2)
     if tokens is None:
@@ -235,13 +274,25 @@ sections_that_are_global = [
 
 
 class VestaSection:
-    """
-    Section of a VestaFile
+    """Section of a VestaFile.
+
+    To create it, initialise with the header line (including in-line data).
+    Then add subsequent lines with :meth:`add_line`.
+
+    Attributes:
+        header (str): Name of the section.
+        inline (list): List of in-line data (i.e. data that appears in the same
+            line as the header, space-separated).
+        data (list[list]): All other data, with one list for each line.
+            Most data, when parsed, is split at whitespace.
+            The exception is the TITLE, which is kept as a single string
+            (e.g. [["New structure"]]).
+        raw_header (str): Unformatted and unsplit header line. Just in case you
+            need it.
     """
 
-    def __init__(self, header_line):
-        """
-        Initialize a VESTA section from a header line.
+    def __init__(self, header_line:str):
+        """Initialize a VESTA section from a header line.
 
         For the TITLE section:
           - Inline data is not preserved on the header, but moved to the
@@ -269,12 +320,14 @@ class VestaSection:
         self.inline = parse_line(inline_text) if inline_text else []
         self.data = []  # Extra lines will be stored here.
 
-    def add_line(self, line):
-        """
-        Add a continuation line to the section.
+    def add_line(self, line:str):
+        """Append a line to the section.
 
         For TITLE, store the entire line as a string.
         For other sections, split the line into tokens and convert them.
+
+        Args:
+            line: raw string of the line.
         """
         if self.header == "TITLE":
             self.data.append([line])
@@ -282,8 +335,7 @@ class VestaSection:
             self.data.append(parse_line(line))
 
     def __str__(self) -> str:
-        """
-        Convert the section back to text.
+        """Return the section as valid VESTA text.
 
           - If inline data exists, it is written on the header line.
           - Then, any extra lines are written one per line.
@@ -308,7 +360,7 @@ class VestaSection:
         return text
 
     def __len__(self) -> int:
-        """Number of lines (besides the header line)"""
+        """Return number of lines (besides the header line)"""
         return len(self.data)
 
 
@@ -320,12 +372,24 @@ class VestaPhase:
         self._order = []
 
     def __getitem__(self, name: str) -> VestaSection:
+        """Return item by name of section. Raise KeyError if not present."""
         return self._sections[name]
 
-    def __contains__(self, item: str) -> bool:
-        return item in self._sections
+    def __contains__(self, name: str) -> bool:
+        """Return True if VestaPhase contains a section with `name`."""
+        return name in self._sections
 
     def append(self, section: VestaSection):
+        """Add a new section to the phase.
+        
+        VestaSection is added by reference, so you can keep modifying it.
+
+        Args:
+            section: :class:`VestaSection` not already present.
+        
+        Raises:
+            KeyError: section with the same header is already present.
+        """
         header = section.header
         if header in self:
             raise KeyError(
@@ -337,14 +401,17 @@ class VestaPhase:
             self._order.append(header)
 
     def __len__(self) -> int:
+        """Number of sections."""
         return len(self._sections)
 
     def __iter__(self) -> Iterator[VestaSection]:
+        """Iterate over each section."""
         for header in self._order:
             yield self._sections[header]
 
     @property
     def title(self) -> str:
+        """Title of the phase (read-only)"""
         return self["TITLE"].data[0][0]
 
     @property
