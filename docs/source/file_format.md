@@ -587,7 +587,7 @@ No data is directly connected to the STYLE header. However, it appears to serve 
 STYLE
 ```
 (DISPF)=
-### DISPF
+## DISPF
 
 Miscellaneous display flags, as binary bits.
 
@@ -605,7 +605,7 @@ e.g.
 DISPF 37753794
 ```
 (MODEL)=
-### MODEL
+## MODEL
 
 Structural model settings.
 
@@ -623,13 +623,13 @@ e.g.
 MODEL   0  1  0
 ```
 (SURFS)=
-### SURFS
+## SURFS
 e.g.
 ```
 SURFS   0  1  1
 ```
 (SECTS)=
-### SECTS
+## SECTS
 
 Flags for display of sections.
 
@@ -648,13 +648,13 @@ e.g.
 SECTS  32  1
 ```
 (FORMS)=
-### FORMS
+## FORMS
 e.g.
 ```
 FORMS   0  1
 ```
 (ATOMS)=
-### ATOMS
+## ATOMS
 
 Atom display settings.
 
@@ -672,19 +672,19 @@ e.g.
 ATOMS   0  0  1
 ```
 (BONDS)=
-### BONDS
+## BONDS
 e.g.
 ```
 BONDS   1
 ```
 (POLYS)=
-### POLYS
+## POLYS
 e.g.
 ```
 POLYS   1
 ```
 (VECTS)=
-### VECTS
+## VECTS
 
 Global scaling factor for vectors.
 
@@ -695,14 +695,14 @@ e.g.
 VECTS 1.000000
 ```
 (FORMP)=
-### FORMP
+## FORMP
 e.g.
 ```
 FORMP
   1  1.0   0   0   0
 ```
 (ATOMP)=
-### ATOMP
+## ATOMP
 
 Atom style properties.
 
@@ -719,7 +719,7 @@ ATOMP
  24  24   0  50  2.0   0
 ```
 (BONDP)=
-### BONDP
+## BONDP
 
 Bond style properties.
 
@@ -741,14 +741,14 @@ BONDP
   1  16  0.250  2.000 127 127 127
 ```
 (POLYP)=
-### POLYP
+## POLYP
 e.g.
 ```
 POLYP
  204 1  1.000 180 180 180
 ```
 (ISURF)=
-### ISURF
+## ISURF
 
 Isosurfaces.
 
@@ -770,14 +770,14 @@ ISURF
   0   0   0   0
 ```
 (TEX3P)=
-### TEX3P
+## TEX3P
 e.g.
 ```
 TEX3P
   1  0.00000E+00  1.00000E+00
 ```
 (SECTP)=
-### SECTP
+## SECTP
 
 Section planes, properties.
 
@@ -799,7 +799,7 @@ SECTP
   1  0.00000E+00  1.00000E+00  0.00000E+00  0.00000E+00  0.00000E+00  0.00000E+00
 ```
 (CONTR)=
-### CONTR
+## CONTR
 e.g.
 ```
 CONTR
@@ -811,14 +811,14 @@ CONTR
    0   0   0
 ```
 (HKLPP)=
-### HKLPP
+## HKLPP
 e.g.
 ```
 HKLPP
  192 1  1.000 255   0 255
 ```
 (UCOLP)=
-### UCOLP
+## UCOLP
 
 Unit cell line properties.
 
@@ -835,7 +835,7 @@ UCOLP
    0   1  1.000   0   0   0
 ```
 (COMPS)=
-### COMPS
+## COMPS
 
 Compass settings.
 
@@ -852,13 +852,13 @@ e.g.
 COMPS 1
 ```
 (LABEL)=
-### LABEL
+## LABEL
 e.g.
 ```
 LABEL 1    12  1.000 0
 ```
 (PROJT)=
-### PROJT
+## PROJT
 
 Projection.
 
@@ -872,7 +872,7 @@ e.g.
 PROJT 0  0.962
 ```
 (BKGRC)=
-### BKGRC
+## BKGRC
 
 Background colour.
 
@@ -886,7 +886,7 @@ BKGRC
  255 255 255
 ```
 (DPTHQ)=
-### DPTHQ
+## DPTHQ
 
 Depth cueing.
 
@@ -901,7 +901,7 @@ e.g.
 DPTHQ 1 -0.5000  3.5000
 ```
 (LIGHT0)=
-### LIGHT0
+## LIGHT0
 
 Lighting.
 
@@ -929,7 +929,7 @@ LIGHT0 1
  255 255 255 255
 ```
 (LIGHT1)=
-### LIGHT1
+## LIGHT1
 e.g.
 ```
 LIGHT1
@@ -944,7 +944,7 @@ LIGHT1
    0   0   0   0
 ```
 (LIGHT2)=
-### LIGHT2
+## LIGHT2
 e.g.
 ```
 LIGHT2
@@ -959,7 +959,7 @@ LIGHT2
    0   0   0   0
 ```
 (LIGHT3)=
-### LIGHT3
+## LIGHT3
 e.g.
 ```
 LIGHT3
@@ -974,7 +974,7 @@ LIGHT3
    0   0   0   0
 ```
 (SECCL)=
-### SECCL
+## SECCL
 
 Section colour scheme.
 
