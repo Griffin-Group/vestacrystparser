@@ -10,7 +10,7 @@ from vestacrystparser.parser import VestaFile
 
 
 def vesta_from_structure(stru: Structure) -> VestaFile:
-    """From pymatgen.core.Structure, create a VestaFile"""
+    """Return a VestaFile from pymatgen.core.Structure"""
     # TODO Convert numpy floats to regular floats.
     # Initialise an empty Vesta file
     vfile = VestaFile()
@@ -35,7 +35,7 @@ def vesta_from_structure(stru: Structure) -> VestaFile:
 
 
 def vesta_from_poscar(fname: str) -> VestaFile:
-    """From a POSCAR file a fname, create a VestaFile"""
+    """Return a VestaFile from a POSCAR file at fname"""
     # Load the POSCAR
     pos = Poscar.from_file(fname)
     # Create a VestaFile from the structure
