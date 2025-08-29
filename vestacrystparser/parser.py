@@ -92,8 +92,10 @@ def invert_matrix(mat: list[list[float]]) -> list[list[float]]:
 
 def load_elements_data(element: Union[int, str]) -> \
         list[int, str, float, float, float, int, int, int]:
-    """Load default data for a specific element from elements.ini.
+    """Load default data for a specific element.
     
+    Loads data from elements.csv.
+
     Args:
         element: Elemental symbol (str) or atomic number (int).
             If element is not present, falls back to "XX" (and logs it at INFO
@@ -109,21 +111,11 @@ def load_elements_data(element: Union[int, str]) -> \
         - Green colour value (int, 0-255).
         - Blue colour value (int, 0-255).
     """
-    # If I can't receive permission to redistribute this configuration file,
-    # I'll instead need to find a way to read it from an external source,
-    # i.e. a VESTA installation on the system.
-    # Location of VESTA is OS dependent.
-    # import platform; platform.system() == 'Darwin' (Mac), 'Windows', 'Linux'
-    # Also need to confirm it's existence.
-    # On MacOS:
-    # os.path.isdir('/Applications/VESTA/VESTA.app/Contents/Resources/')
-    # I should permit specifying the location by an environment variable or
-    # something, because my unit tests on GitHub will require me to manually
-    # store these files, but in a Secret to avoid distributing the files.
-    fn = importlib.resources.files(vestacrystparser.resources) / "elements.ini"
+    fn = importlib.resources.files(vestacrystparser.resources) / "elements.csv"
     with open(fn, 'r') as f:
+        # Parse this comma-separated-values file.
         for line in f.readlines():
-            tokens = parse_line(line)
+            tokens = [parse_token(x) for x in line.split(',')]
             if tokens[0] == element or tokens[1] == element:
                 # Convert float RGB to int RGB
                 for i in [5, 6, 7]:
@@ -131,42 +123,42 @@ def load_elements_data(element: Union[int, str]) -> \
                 return tokens
     # For other elements, load the default.
     if element != 'XX':
-        logger.info(f"Element {element} not in elements.ini. Using defaults.")
+        logger.info(f"Element {element} not in elements.csv. Using defaults.")
         try:
             tokens = load_elements_data('XX')
         except ValueError:
             # Return a more useful error message.
             raise ValueError(
-                f"Element {element} not in elements.ini and unable to load \
+                f"Element {element} not in elements.csv and unable to load \
                     default! (This shouldn't happen.)")
         # Change the atomic symbol to the one provided.
         if isinstance(element, str):
             tokens[1] = element
         return tokens
     else:
-        # 'XX' is not in elements.ini. Break before we hit an infinite loop.
+        # 'XX' is not in elements.csv. Break before we hit an infinite loop.
         # This shouldn't happen.
-        raise ValueError("Unable to load default element from elements.ini.")
+        raise ValueError("Unable to load default element from elements.csv.")
 
 
 def load_default_bond_style(A1: str, A2: str, hbond: bool = False) \
         -> Union[list[int, str, str, float, float, int, int, int, int, int], None]:
     """Loads default bond style for a pair of elements (if present).
 
-    Loads data from style.ini.
+    Loads data from sbond.csv.
 
     (N.B. If adding bonds manually, VESTA GUI defaults to 1.6.)
 
     Args:
         A1, A2: Pair of element symbols. Order does not matter.
         hbond: If True, grab the hydrogen bond, if present.
-            This is the second matching entry in style.ini
+            This is the second matching entry in sbond.csv
 
     Returns:
-        May be None. Not every element pair has default bonds in style.ini.
+        May be None. Not every element pair has default bonds.
         If the element pair does have a bond, a list is returned:
 
-            - index in style.ini,
+            - index in sbond.csv,
             - A1,
             - A2,
             - minimum length,
@@ -177,38 +169,23 @@ def load_default_bond_style(A1: str, A2: str, hbond: bool = False) \
             - 0 (search by label = False),
             - style (normal (1) or H-bond (5))
     """
-    # Load style.ini file.
-    fn = importlib.resources.files(vestacrystparser.resources) / "style.ini"
+    # Load sbond.csv file.
+    fn = importlib.resources.files(vestacrystparser.resources) / "sbond.csv"
     first = True
     with open(fn, 'r') as f:
-        # Find and parse the SBOND block.
-        in_sbond = False
+        # Parse this comma-separated-values file.
         for line in f.readlines():
-            if not in_sbond:
-                if line.strip() == "SBOND":
-                    in_sbond = True
-            else:
-                if line.split() == ["0"]*4:
-                    # End of SBOND section
-                    # No match found.
-                    return None
-                # Parse line
-                tokens = parse_line(line)
-                if ((tokens[1] == A1 and tokens[2] == A2) or
-                        (tokens[1] == A2 and tokens[2] == A1)):
-                    # A1 and A2 are interchangeable.
-                    # We've found our match.
-                    if not hbond or (hbond and not first):
-                        return tokens
-                    else:
-                        first = False
-    # We shouldn't have gotten here.
-    if in_sbond:
-        raise RuntimeError("SBOND section in style.ini not properly terminated!"
-                           "(Your installation's resources are broken.)")
-    else:
-        raise RuntimeError("SBOND section missing from style.ini!"
-                           "(Your installation's resources are broken.)")
+            tokens = [parse_token(x) for x in line.split(',')]
+            if ((tokens[1] == A1 and tokens[2] == A2) or
+                    (tokens[1] == A2 and tokens[2] == A1)):
+                # A1 and A2 are interchangeable.
+                # We've found our match.
+                if not hbond or (hbond and not first):
+                    return tokens
+                else:
+                    first = False
+    # No match found.
+    return None
 
 
 def load_default_bond_length(A1: str, A2: str) -> Union[float, None]:
@@ -222,7 +199,7 @@ def load_default_bond_length(A1: str, A2: str) -> Union[float, None]:
     Returns:
         Maximum bond length in Angstrom, if present.
 
-        May be None. Not every element pair has default bonds in style.ini.
+        May be None. Not every element pair has default bonds.
     """
     tokens = load_default_bond_style(A1, A2)
     if tokens is None:
@@ -1182,7 +1159,6 @@ class VestaFile:
                 break
         if not found:
             # Create a new element
-            # Load data from elements.ini
             element_data = load_elements_data(symbol)
             # Figure out which radius to use
             radii_type = self["ATOMS"].inline[0]
@@ -1505,7 +1481,7 @@ class VestaFile:
         self._reset_hidden()
 
     def sort_bonds(self, unmatching_bonds: str = "before"):
-        """Rearranges the list of bonds to be in the order provided in style.ini.
+        """Rearranges the list of bonds to be in the order provided in sbond.csv.
 
         Because when VESTA loads a POSCAR, it has SBOND in this order,
         rather than the order that sites appear.
@@ -1514,7 +1490,7 @@ class VestaFile:
 
         Args:
             unmatching_bands: "before" or "after". Where to put bonds
-                that don't appear in style.ini.
+                that don't appear in sbond.csv.
 
         Related sections: :ref:`SBOND`
         """
@@ -1543,7 +1519,7 @@ class VestaFile:
                 if style_bond is None:
                     style_index.append(NAVALUE)
                     continue
-            # Append the index in style.ini
+            # Append the index in sbond.csv
             style_index.append(style_bond[0])
         # Now we perform an indirect sort.
         # Use Decorate-Sort-Undecorate idiom
