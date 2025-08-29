@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Open VESTA and export images.
 
-Opens VESTA and 
-Obviously, this requires a working VESTA installation on your system.
+:func:`export_image_from_file` is the core function,
+which directly opens a VESTA file then exports an image file
+using VESTA's (rather sparse) command line interface.
+
+This requires a working VESTA installation on your system.
 """
 
 import platform
@@ -10,14 +13,12 @@ import os
 import subprocess
 import time
 
-from vestacrystparser.parser import VestaFile
-
 class NoVestaError(OSError):
     """VESTA does not exist or cannot be found."""
     pass
 
 def export_image_from_file(input:str, output:str, scale:int=1,
-                           close:bool=True, block:bool=False,
+                           close:bool=True, block:bool=True,
                            timeout:float=None):
     """Opens a file in VESTA and saves it as an image.
 
@@ -27,11 +28,15 @@ def export_image_from_file(input:str, output:str, scale:int=1,
     Runs ASYNCHRONOUSLY. May be subject to race conditions.
     Modifying the files while running this command will
     cause unexpected behaviour. I do not know how to retrieve an exit call,
-    besides checking if `output` has been written (which is what `block` does.)
+    besides checking if `output` has been written (which is what `block` does).
 
     Note that, even with the `close` argument, VESTA will remain open after
     this call. (`close` just closes the tab within VESTA.) You are 
     responsible for closing it yourself when you're done.
+
+    `block` is strongly recommended if you are doing more than a couple
+    at once, because I've found VESTA will max-out on processes if it
+    tries to open too many files simultaneously.
 
     VESTA has a command line interface:
     https://jp-minerals.org/vesta/en/doc/VESTAch17.html
@@ -47,6 +52,8 @@ def export_image_from_file(input:str, output:str, scale:int=1,
         close: Whether to close the VESTA tab afterward.
         block: Whether to block the main process until the file is written.
             If the export process fails on VESTA's end, then this will hang!
+            However, it is recommended to reduce race conditions or system
+            overload.
         timeout: Number of seconds to block for until we raise TimeoutError.
             If None, will count indefinitely.
             Note, though, that VESTA will still be running if we hit the
