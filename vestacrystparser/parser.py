@@ -21,10 +21,10 @@ logger = logging.getLogger(__name__)
 
 def parse_token(token: str) -> Union[int, float, str]:
     """Convert a token to int or float if possible (or leave as a string).
-    
+
     Args:
         token: A string.
-    
+
     Returns:
         `token` converted to :type:`int` if possible,
         or else :type:`float` if possible, or else returned
@@ -44,7 +44,7 @@ def parse_line(line: str) -> list[Union[int, float, str]]:
 
     Args:
         line: String with data separated by spaces.
-    
+
     Returns:
         A list of tokens (int, float, or string, as appropriate).
     """
@@ -93,14 +93,14 @@ def invert_matrix(mat: list[list[float]]) -> list[list[float]]:
 def load_elements_data(element: Union[int, str]) -> \
         list[int, str, float, float, float, int, int, int]:
     """Load default data for a specific element.
-    
+
     Loads data from elements.csv.
 
     Args:
         element: Elemental symbol (str) or atomic number (int).
             If element is not present, falls back to "XX" (and logs it at INFO
             level).
-    
+
     Returns:
         - Atomic number (int).
         - Elemental symbol (str).
@@ -287,7 +287,7 @@ class VestaSection:
             need it.
     """
 
-    def __init__(self, header_line:str):
+    def __init__(self, header_line: str):
         """Initialize a VESTA section from a header line.
 
         For the TITLE section:
@@ -316,7 +316,7 @@ class VestaSection:
         self.inline = parse_line(inline_text) if inline_text else []
         self.data = []  # Extra lines will be stored here.
 
-    def add_line(self, line:str):
+    def add_line(self, line: str):
         """Append a line to the section.
 
         For TITLE, store the entire line as a string.
@@ -377,12 +377,12 @@ class VestaPhase:
 
     def append(self, section: VestaSection):
         """Add a new section to the phase.
-        
+
         VestaSection is added by reference, so you can keep modifying it.
 
         Args:
             section: :class:`VestaSection` not already present.
-        
+
         Raises:
             KeyError: section with the same header is already present.
         """

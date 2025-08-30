@@ -17,12 +17,13 @@ import vestacrystparser.export
 
 from test_parser import DATA_DIR
 
+
 @pytest.mark.vesta
 def test_export_image():
     with tempfile.NamedTemporaryFile('w+b', suffix=".png") as f:
         try:
             vestacrystparser.export.export_image_from_file(
-                os.path.join(DATA_DIR,"Cu_primitive_plain.vesta"),
+                os.path.join(DATA_DIR, "Cu_primitive_plain.vesta"),
                 f.name,
                 block=False,
             )
@@ -50,7 +51,7 @@ def test_export_image_block():
         outfile = os.path.join(td, "tmp.png")
         try:
             vestacrystparser.export.export_image_from_file(
-                os.path.join(DATA_DIR,"Cu_primitive_plain.vesta"),
+                os.path.join(DATA_DIR, "Cu_primitive_plain.vesta"),
                 outfile,
                 block=True,
                 timeout=2,
@@ -62,7 +63,8 @@ def test_export_image_block():
             try:
                 # I find we need to sleep a bit just to let the OS catch up.
                 time.sleep(0.1)
-                assert os.path.getsize(outfile) > 60, "PNG file too small to be a PNG."
+                assert os.path.getsize(outfile) > 60, \
+                    "PNG file too small to be a PNG."
             except FileNotFoundError:
                 pytest.fail("Image file was not written!")
 

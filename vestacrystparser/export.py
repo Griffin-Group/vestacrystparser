@@ -13,13 +13,15 @@ import os
 import subprocess
 import time
 
+
 class NoVestaError(OSError):
     """VESTA does not exist or cannot be found."""
     pass
 
-def export_image_from_file(input:str, output:str, scale:int=1,
-                           close:bool=True, block:bool=True,
-                           timeout:float=None):
+
+def export_image_from_file(input: str, output: str, scale: int = 1,
+                           close: bool = True, block: bool = True,
+                           timeout: float = None):
     """Opens a file in VESTA and saves it as an image.
 
     You can open VESTA before running this command to set the size of the
@@ -58,7 +60,7 @@ def export_image_from_file(input:str, output:str, scale:int=1,
             If None, will count indefinitely.
             Note, though, that VESTA will still be running if we hit the
             Timeout. We just hand the focus back to Python.
-    
+
     Raises:
         NoVestaError: If fails to run VESTA.
         OSError: If run on an unsupport OS.
@@ -103,7 +105,8 @@ def export_image_from_file(input:str, output:str, scale:int=1,
             # Otherwise, we'll check when it gets written.
             old_time = None
     # Form the command to execute.
-    cmd = vesta_cmd + ["-open", abs_input, "-export_img", f"scale={scale}", str(output)]
+    cmd = vesta_cmd + ["-open", abs_input,
+                       "-export_img", f"scale={scale}", str(output)]
     if close:
         cmd += ["-close"]
     # Run
@@ -135,4 +138,5 @@ def export_image_from_file(input:str, output:str, scale:int=1,
                 time.sleep(increment)
                 elapsed += increment
         if timeout is not None and elapsed >= timeout:
-            raise TimeoutError(f"export_image_from_file timed out after {elapsed} seconds.")
+            raise TimeoutError(
+                f"export_image_from_file timed out after {elapsed} seconds.")

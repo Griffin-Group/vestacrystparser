@@ -118,13 +118,15 @@ def test_save(tmp_path, sample_vestafile, sample_vesta_filename):
 def test_repr(sample_vestafile):
     assert repr(sample_vestafile) == "<VestaFile: New structure [1 site]>"
 
+
 def test_load_default_bond_length():
     assert vestacrystparser.parser.load_default_bond_length('C', 'C') == 1.89002, \
         "Failed to load correct same-atom bond length."
-    assert vestacrystparser.parser.load_default_bond_length('F','Ac') == 2.58646, \
+    assert vestacrystparser.parser.load_default_bond_length('F', 'Ac') == 2.58646, \
         "Failed to load bond length for swapped A2 and A1."
-    assert vestacrystparser.parser.load_default_bond_length('Fe','Mg') is None, \
+    assert vestacrystparser.parser.load_default_bond_length('Fe', 'Mg') is None, \
         "Failed to handle case where no bond length was present."
+
 
 def test_set_site_color(sample_vestafile):
     """Tests set_site_color"""
