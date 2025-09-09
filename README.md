@@ -1,6 +1,15 @@
 # vestacrystparser
 
-General-purpose parser for VESTA crystal visualisation files.
+**vestacrystparser** is an unofficial general-purpose Python parser for
+[VESTA](https://jp-minerals.org/vesta/) crystal visualisation files.
+It provides a programmatic API for creating and modifying VESTA files.
+It is intended to enable creating consistent visualisation states in bulk,
+removing the tedium of manually adjusting settings via the GUI.
 
-The initial bones of this project (namely, the basic read-write functionality) were generated using OpenAI's ChatGPT o3-mini as part of an AI Jam, with prompts and testing by Bernard Field and Musa Hussein.
-But further development of the class and reverse-engineering of the file type was performed manually.
+This project is functional, but feature-incomplete.
+High-level API for modifying specific parts of the file in specific ways are
+implemented as needed or requested.
+Pull requests adding more methods are welcome.
+However, the low-level API can cover all cases, albeit requiring more care.
+
+See the documentation for instructions for installation and usage.
