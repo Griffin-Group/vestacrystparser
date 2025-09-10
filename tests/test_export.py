@@ -5,6 +5,10 @@ Needs to accept both the cases where VESTA does or does not exist.
 And to only run when requested (because it litters).
 
 Complicated further by asynchronicity.
+
+Call pytest with --vesta to test these functions.
+If VESTA is not found during execution (or we believe we don't find VESTA),
+then these tests will be flagged as an expected failure.
 """
 
 import os

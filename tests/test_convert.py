@@ -8,6 +8,7 @@ import pytest
 from vestacrystparser.parser import VestaFile
 from vestacrystparser.convert import vesta_from_structure, vesta_from_poscar, \
     Structure
+# TODO: Skip if cannot find pymatgen.
 
 from test_parser import compare_vesta_strings, DATA_DIR
 
