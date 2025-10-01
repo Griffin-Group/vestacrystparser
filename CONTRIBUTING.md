@@ -8,8 +8,8 @@ Additionally, any new discoveries on VESTA's file format should be added to
 Extensions to `vestacrystparser.convert` to allow reading other file formats
 are also wanted.
 
-If you spot an issue or have a feature request, open a report
-[here](https://github.com/Griffin-Group/vestacrystparser/issues).
+If you spot an issue or have a feature request, open a report using
+[GitHub Issues](https://github.com/Griffin-Group/vestacrystparser/issues).
 
 Contributions are managed through
 [GitHub](https://github.com/Griffin-Group/vestacrystparser).
@@ -18,6 +18,8 @@ your changes, then make a
 [pull request](https://github.com/Griffin-Group/vestacrystparser/pulls).
 There, a code maintainer shall review your request and, if appropriate, merge
 it into the repository.
+(No guarantees are given for the timeliness of code reviews or maintenance,
+as this is a project managed in spare time.)
 
 By contributing code to this repository, you agree to license all contributions
 under the license attached to this repository.

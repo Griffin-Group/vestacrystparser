@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright 2025 Bernard Field
 """Open VESTA and export images.
 
 :func:`export_image_from_file` is the core function,

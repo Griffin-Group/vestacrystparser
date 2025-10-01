@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright 2025 Bernard Field
 """Create VESTA files from structural data files (POSCAR, etc.).
 """
 
