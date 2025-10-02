@@ -12,7 +12,8 @@ implemented as needed or requested.
 Pull requests adding more methods are welcome.
 However, the low-level API can cover all cases, albeit requiring more care.
 
-See the documentation for instructions for installation and usage.
+See the [documentation](https://griffin-group.github.io/vestacrystparser/)
+for instructions for installation and usage.
 
 **vestacrystparser** is made available under the MIT License (see `LICENSE`
 file).
