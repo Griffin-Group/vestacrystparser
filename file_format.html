@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>The .vesta file format &#8212; vestacrystparser  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Contributing guidelines" href="contributing.html" />
+    <link rel="prev" title="vestacrystparser.export" href="api_export.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="the-vesta-file-format">
+<h1>The .vesta file format<a class="headerlink" href="#the-vesta-file-format" title="Link to this heading">¶</a></h1>
+<p>Herein I have manually reverse-engineered the key features of VESTA’s file format.
+The specification here is UNOFFICIAL, likely INCOMPLETE, and may contain INACCURACIES. Use with caution. Contributions welcome.</p>
+<p>VESTA is a plain-text file.
+The amount of whitespace between entries on the same line does not seem to matter, neither does the number of decimal places in floating-point values.</p>
+<p>The file has sections marked in all-caps, followed by a series of space- and newline-separated values.</p>
+<section id="vesta-format-version">
+<span id="id1"></span><h2>#VESTA_FORMAT_VERSION<a class="headerlink" href="#vesta-format-version" title="Link to this heading">¶</a></h2>
+<p>Metadata tag: version of the VESTA file format.
+The files I’m working with are in version 3.5.4.</p>
+<p>A blank line follows it.</p>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#VESTA_FORMAT_VERSION 3.5.4</span>
+
+</pre></div>
+</div>
+</section>
+<section id="crystal">
+<span id="id2"></span><h2>CRYSTAL<a class="headerlink" href="#crystal" title="Link to this heading">¶</a></h2>
+<p>Superheader for each crystal Phase (Edit Data &gt; Phases).</p>
+<p>No data is associated with this field. However, it can appear multiple times. Following CRYSTAL are the sections from TITLE through to PLN2D inclusive, which contain the data specific to each crystal phase. (This means those sections are not unique.) Additional phases begin with another CRYSTAL header.</p>
+<p>Has a blank line before and after it.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>
+<span class="n">CRYSTAL</span>
+
+</pre></div>
+</div>
+</section>
+<section id="title">
+<span id="id3"></span><h2>TITLE<a class="headerlink" href="#title" title="Link to this heading">¶</a></h2>
+<p>Name/title of the structure.</p>
+<p>One-line string.
+Defaults to “New structure”.
+Has a blank line after it.</p>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">TITLE</span>
+<span class="n">New</span> <span class="n">structure</span>
+
+</pre></div>
+</div>
+</section>
+<section id="import-density">
+<span id="id4"></span><h2>IMPORT_DENSITY<a class="headerlink" href="#import-density" title="Link to this heading">¶</a></h2>
+<p><strong>Optional section.</strong></p>
+<p>Where to import volumetric density data from.</p>
+<p>Has a flag <code class="docutils literal notranslate"><span class="pre">1</span></code> after the title (units??).
+Each line is a file path (2nd item, string) and how to add it to the existing data (signed float, 1st item).</p>
+<p>Has an empty line after it.</p>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">IMPORT_DENSITY</span> <span class="mi">1</span>
+<span class="o">+</span><span class="mf">1.000000</span> <span class="n">CHGCAR</span>
+
+</pre></div>
+</div>
+</section>
+<section id="group">
+<span id="id5"></span><h2>GROUP<a class="headerlink" href="#group" title="Link to this heading">¶</a></h2>
+<p>Space group; the symmetry group imposed on the crystal.</p>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GROUP</span>
+<span class="mi">1</span> <span class="mi">1</span> <span class="n">P</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</section>
+<section id="symop">
+<span id="id6"></span><h2>SYMOP<a class="headerlink" href="#symop" title="Link to this heading">¶</a></h2>
+<p>Symmetry operations associated with GROUP.</p>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SYMOP</span>
+ <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mi">1</span>  <span class="mi">0</span>  <span class="mi">0</span>   <span class="mi">0</span>  <span class="mi">1</span>  <span class="mi">0</span>   <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">1</span>   <span class="mi">1</span>
+ <span class="o">-</span><span class="mf">1.0</span> <span class="o">-</span><span class="mf">1.0</span> <span class="o">-</span><span class="mf">1.0</span>  <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span>  <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span>  <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="tranm">
+<span id="id7"></span><h2>TRANM<a class="headerlink" href="#tranm" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">TRANM</span> <span class="mi">0</span>
+ <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mi">1</span>  <span class="mi">0</span>  <span class="mi">0</span>   <span class="mi">0</span>  <span class="mi">1</span>  <span class="mi">0</span>   <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">1</span>
+</pre></div>
+</div>
+</section>
+<section id="ltransl">
+<span id="id8"></span><h2>LTRANSL<a class="headerlink" href="#ltransl" title="Link to this heading">¶</a></h2>
+<p>Translation of this phase with respect to another.</p>
+<p>Edit Data &gt; Phase &gt; Positioning</p>
+<ul class="simple">
+<li><p>1st row: Reference phase (0-indexed). The number in “Place (x,y,z) of this layer at (x,y,z) of layer…” minus 1. If <code class="docutils literal notranslate"><span class="pre">-1</span></code>, is the global coordinate system.</p></li>
+<li><p>2nd row: x,y,z of this layer; x,y,z of reference layer.</p></li>
+</ul>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">LTRANSL</span>
+ <span class="o">-</span><span class="mi">1</span>
+ <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>
+</pre></div>
+</div>
+</section>
+<section id="lorient">
+<span id="id9"></span><h2>LORIENT<a class="headerlink" href="#lorient" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">LORIENT</span>
+ <span class="o">-</span><span class="mi">1</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>
+ <span class="mf">1.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">1.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">1.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">1.000000</span>
+</pre></div>
+</div>
+</section>
+<section id="lmatrix">
+<span id="id10"></span><h2>LMATRIX<a class="headerlink" href="#lmatrix" title="Link to this heading">¶</a></h2>
+<p>Transformation matrix of this phase’s coordinate system.</p>
+<ul class="simple">
+<li><p>5th row: 3 floats, translation. Is the (x,y,z) of the global coordinates minus the (x,y,z) of this phase, as specified in <code class="docutils literal notranslate"><span class="pre">LSTRANSL</span></code>. Actually, that’s only true in orthorhombic coordinates. Reality is actually rather complicated.</p></li>
+</ul>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">LMATRIX</span>
+ <span class="mf">1.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">1.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">1.000000</span>  <span class="mf">0.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">1.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>
+</pre></div>
+</div>
+</section>
+<section id="cellp">
+<span id="id11"></span><h2>CELLP<a class="headerlink" href="#cellp" title="Link to this heading">¶</a></h2>
+<p>Unit cell lattice parameters.
+This data appears in Edit Data &gt; Unit Cell &gt; Lattice parameters.</p>
+<p>Two lines of 6 floats each.
+The first line is a, b, c, alpha, beta, gamma.
+The second line is the s.u.: entries.</p>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CELLP</span>
+  <span class="mf">2.530000</span>   <span class="mf">2.530000</span>   <span class="mf">2.530000</span>  <span class="mf">60.000000</span>  <span class="mf">60.000000</span>  <span class="mf">60.000000</span>
+  <span class="mf">0.000000</span>   <span class="mf">0.000000</span>   <span class="mf">0.000000</span>   <span class="mf">0.000000</span>   <span class="mf">0.000000</span>   <span class="mf">0.000000</span>
+</pre></div>
+</div>
+</section>
+<section id="struc">
+<span id="id12"></span><h2>STRUC<a class="headerlink" href="#struc" title="Link to this heading">¶</a></h2>
+<p>Structure parameters.</p>
+<p>Editable via Edit &gt; Edit Data &gt; Structure Parameters.</p>
+<p>Has an entry for each (symmetrically-distinct) atom.
+Each atom gets two lines.</p>
+<ul class="simple">
+<li><p>Row 1, item 1: No. / index (integer). Increments from 1. Not manually set.</p></li>
+<li><p>Row 1, item 2: Elemental symbol (string)</p></li>
+<li><p>Row 1, item 3: Site label (string)</p></li>
+<li><p>Row 1, item 4: Occupation (default <code class="docutils literal notranslate"><span class="pre">1.0000</span></code>).</p></li>
+<li><p>Row 1, items 5-7: x,y,z coordinates (fractional)</p></li>
+<li><p>Row 1, item 8: Wyckoff position/site? (default <code class="docutils literal notranslate"><span class="pre">1a</span></code>)</p></li>
+<li><p>Row 1, item 9: ? (default <code class="docutils literal notranslate"><span class="pre">1</span></code>)</p></li>
+<li><p>Row 2, items 1-3 (beneath row 1 items 5-7): x,y,z standard uncertainties (s.u.)</p></li>
+<li><p>Row 2, item 4 (beneath row 1 item 8): Charge (default <code class="docutils literal notranslate"><span class="pre">0.00</span></code>)</p></li>
+</ul>
+<p>Block ends with seven <code class="docutils literal notranslate"><span class="pre">0</span></code>’s.</p>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">STRUC</span>
+  <span class="mi">1</span> <span class="n">Cu</span>         <span class="n">Cu</span>  <span class="mf">1.0000</span>   <span class="mf">0.000000</span>   <span class="mf">0.000000</span>   <span class="mf">0.000000</span>    <span class="mi">1</span><span class="n">a</span>       <span class="mi">1</span>
+                            <span class="mf">0.000000</span>   <span class="mf">0.000000</span>   <span class="mf">0.000000</span>  <span class="mf">0.00</span>
+  <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="theri">
+<span id="id13"></span><h2>THERI<a class="headerlink" href="#theri" title="Link to this heading">¶</a></h2>
+<p>Isotropic U/B in Structure Parameters. (Isotropic thermal?)</p>
+<p>In-line with the header is an integer flag defining whether we are using units of U or B.
+<code class="docutils literal notranslate"><span class="pre">0</span></code> if B, <code class="docutils literal notranslate"><span class="pre">1</span></code> if U. Default <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+<p>One row for each site in STRUC.</p>
+<ul class="simple">
+<li><p>Item 1: Site number/index.</p></li>
+<li><p>Item 2: Site label.</p></li>
+<li><p>Item 3: U or B value (float).</p></li>
+</ul>
+<p>Block ends with three <code class="docutils literal notranslate"><span class="pre">0</span></code>’s.</p>
+<p>N.B. if THERM is non-zero, it changes the value here.</p>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">THERI</span> <span class="mi">1</span>
+  <span class="mi">1</span>         <span class="n">Cu</span>  <span class="mf">0.050000</span>
+  <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="thert">
+<span id="id14"></span><h2>THERT<a class="headerlink" href="#thert" title="Link to this heading">¶</a></h2>
+<p><strong>Optional section.</strong></p>
+<p>Anisotropic thermal type.</p>
+<p>Appears when Structure Parameters &gt; Anisotropic is not None.</p>
+<p>Single integer flag. <code class="docutils literal notranslate"><span class="pre">0</span></code> if units of U, <code class="docutils literal notranslate"><span class="pre">1</span></code> if units of beta.</p>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">THERT</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="therm">
+<span id="id15"></span><h2>THERM<a class="headerlink" href="#therm" title="Link to this heading">¶</a></h2>
+<p><strong>Optional section.</strong></p>
+<p>Appears when Structure Parameters &gt; Anisotropic is not None.</p>
+<p>One row for each site.</p>
+<ul class="simple">
+<li><p>Item 1: Site index.</p></li>
+<li><p>Item 2: Site label.</p></li>
+<li><p>Items 3-8: U11, U22, U33, U12, U13, U23.</p></li>
+</ul>
+<p>Ends in eight <code class="docutils literal notranslate"><span class="pre">0</span></code>’s.</p>
+<p>Overwrites THERI if non-zero.</p>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">THERM</span>
+  <span class="mi">1</span>        <span class="n">Cu1</span>    <span class="mf">0.11000</span>    <span class="mf">0.22000</span>    <span class="mf">0.33000</span>    <span class="mf">0.12000</span>    <span class="mf">0.13000</span>    <span class="mf">0.23000</span>
+  <span class="mi">2</span>         <span class="n">Cu</span>    <span class="mf">0.00000</span>    <span class="mf">0.00000</span>    <span class="mf">0.00000</span>    <span class="mf">0.00000</span>    <span class="mf">0.00000</span>    <span class="mf">0.00000</span>
+  <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="shape">
+<span id="id16"></span><h2>SHAPE<a class="headerlink" href="#shape" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SHAPE</span>
+  <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span>   <span class="mf">0.000000</span>  <span class="mi">0</span>   <span class="mi">192</span>   <span class="mi">192</span>   <span class="mi">192</span>   <span class="mi">192</span>
+</pre></div>
+</div>
+</section>
+<section id="bound">
+<span id="id17"></span><h2>BOUND<a class="headerlink" href="#bound" title="Link to this heading">¶</a></h2>
+<p>Boundary.</p>
+<ul class="simple">
+<li><p>1st item: x min</p></li>
+<li><p>2nd item: x max</p></li>
+<li><p>3rd item: y min</p></li>
+<li><p>4th item: y max</p></li>
+<li><p>5th item: z min</p></li>
+<li><p>6th item: z max</p></li>
+</ul>
+<p>Block ends with five <code class="docutils literal notranslate"><span class="pre">0</span></code>’s.</p>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">BOUND</span>
+       <span class="mi">0</span>        <span class="mi">1</span>         <span class="mi">0</span>        <span class="mi">1</span>         <span class="mi">0</span>        <span class="mi">1</span>
+  <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>  <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="sbond">
+<span id="id18"></span><h2>SBOND<a class="headerlink" href="#sbond" title="Link to this heading">¶</a></h2>
+<p>Bonding information.
+Lists pairs of elements and specifications for when and how to draw bonds between them.</p>
+<p>Geometry edited in Edit &gt; Bonds.</p>
+<p>Appearance edited in Properties &gt; Bonds &gt; Radius and color. Edits all existing bonds at once, but not any new ones strangely enough.</p>
+<p>Also Objects &gt; Bonds.</p>
+<p>Search mode:</p>
+<ol class="arabic simple">
+<li><p>Search A2 bonded to A1 (boundary mode defaults to 2)</p></li>
+<li><p>Search atoms bonded to A1 (sets A2 to <code class="docutils literal notranslate"><span class="pre">XX</span></code>) (boundary mode defaults to 2)</p></li>
+<li><p>Search molecules (sets A1 and A2 to <code class="docutils literal notranslate"><span class="pre">XX</span></code>) (boundary mode defaults to 3)</p></li>
+</ol>
+<p>Boundary mode:</p>
+<ol class="arabic simple">
+<li><p>Do not search atoms beyond the boundary.</p></li>
+<li><p>Search additional atoms if A1 is included in the boundary.</p></li>
+<li><p>Search additional atoms recursively if either A1 or A2 is visible.</p></li>
+</ol>
+<p>Style:</p>
+<ol class="arabic simple">
+<li><p>Unicolor cylinder</p></li>
+<li><p>Bicolor cylinder (default for standard bonds)</p></li>
+<li><p>Color line</p></li>
+<li><p>Gradient line</p></li>
+<li><p>Dotted line</p></li>
+<li><p>Dashed line (default for hydrogen bonds)</p></li>
+</ol>
+<p>Each row:</p>
+<ul class="simple">
+<li><p>1st item: Index.</p></li>
+<li><p>2nd item: A1 (Atom 1).</p></li>
+<li><p>3rd item: A2 (Atom 2).</p></li>
+<li><p>4th item: Minimum length.</p></li>
+<li><p>5th item: Maximum length.</p></li>
+<li><p>6th item: Search mode - 1.</p></li>
+<li><p>7th item: Boundary mode - 1.</p></li>
+<li><p>8th item: Show polyhedra, 0/1.</p></li>
+<li><p>9th item: Search by label, 0/1. If 1, A1 and A2 are site labels rather than element symbols.</p></li>
+<li><p>10th item: Style - 1.</p></li>
+<li><p>11th item: Radius (cylinder). Default <code class="docutils literal notranslate"><span class="pre">0.250</span></code>.</p></li>
+<li><p>12th item: Width (line). Default <code class="docutils literal notranslate"><span class="pre">2.000</span></code>. Units px.</p></li>
+<li><p>13th-15th items: Bond color (RGB) (may be overridden by atom colours depending on bond style). (Default <code class="docutils literal notranslate"><span class="pre">127</span> <span class="pre">127</span> <span class="pre">127</span></code>, but can be edited individually in Objects &gt; Bonds.)</p></li>
+</ul>
+<p>Block ends with four <code class="docutils literal notranslate"><span class="pre">0</span></code>’s.</p>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SBOND</span>
+  <span class="mi">1</span>     <span class="n">B</span>     <span class="n">N</span>    <span class="mf">0.00000</span>    <span class="mf">1.93846</span>  <span class="mi">0</span>  <span class="mi">1</span>  <span class="mi">1</span>  <span class="mi">0</span>  <span class="mi">1</span>  <span class="mf">0.250</span>  <span class="mf">2.000</span> <span class="mi">127</span> <span class="mi">127</span> <span class="mi">127</span>
+  <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="sitet">
+<span id="id19"></span><h2>SITET<a class="headerlink" href="#sitet" title="Link to this heading">¶</a></h2>
+<p>Site-specific appearances.</p>
+<p>Each row:</p>
+<ul class="simple">
+<li><p>1st item: Site index (see STRUC)</p></li>
+<li><p>2nd item: Site label (see STRUC).</p></li>
+<li><p>3rd item: Atomic radius (Objects &gt; Properties &gt; Atoms &gt; Radius and color)</p></li>
+<li><p>4-6th item: RGB of atom colour (Objects &gt; Properties &gt; Atoms &gt; Radius and color)</p></li>
+<li><p>7-9th item: Default atom colour (RGB)?</p></li>
+<li><p>10th item: ?</p></li>
+<li><p>11th item: ?</p></li>
+</ul>
+<p>Ends with a row of 6 zero’s.</p>
+<p>See ATOMT for global atomic properties. SITET overrides appearances set by ATOMT. New sites inherit from ATOMT.</p>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SITET</span>
+  <span class="mi">1</span>         <span class="n">Cu</span>  <span class="mf">1.2800</span>  <span class="mi">34</span>  <span class="mi">71</span> <span class="mi">220</span>  <span class="mi">34</span>  <span class="mi">71</span> <span class="mi">220</span> <span class="mi">204</span>  <span class="mi">0</span>
+  <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="vectr">
+<span id="id20"></span><h2>VECTR<a class="headerlink" href="#vectr" title="Link to this heading">¶</a></h2>
+<p>Vectors to draw on the atoms.</p>
+<p>There are multiple blocks, one for each vector specification, which may be attached to multiple atoms. Each block is terminated by five <code class="docutils literal notranslate"><span class="pre">0</span></code>’s.
+The whole section is terminated by another row of five <code class="docutils literal notranslate"><span class="pre">0</span></code>’s.</p>
+<p>In each block:</p>
+<ul class="simple">
+<li><p>1st row:</p>
+<ul>
+<li><p>1st item: vector index.</p></li>
+<li><p>2nd-4th items: vector coordinates, modulus along crystallographic axes (i.e. a basis of unit vectors parallel to the lattice vectors). (default 0 0 c-axis-length)</p></li>
+<li><p>5th item: 0/1 axial/polar vector. (default 0)</p></li>
+</ul>
+</li>
+<li><p>2nd+ rows (optional):</p>
+<ul>
+<li><p>1st item: site index to attach this vector to.</p></li>
+<li><p>2nd item: 0 if crystallographic site, 1+ if individual site (default 0). Values &gt;1 occur for symmetric images under symmetry group transformation (e.g. If you have P2, and a site with structure parameter (0.2,0,0), then you have an image at (-0.2,0,0); that site would have a value of 2 here.).</p></li>
+<li><p>3rd-5th items: Number of unit cells/lattice vectors away from the original site, in x, y, and z directions (default 0,0,0).</p></li>
+</ul>
+</li>
+</ul>
+<p>Files lacking vectors have an empty VECTR block with just <code class="docutils literal notranslate"> <span class="pre">0</span> <span class="pre">0</span> <span class="pre">0</span> <span class="pre">0</span> <span class="pre">0</span></code>.</p>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">VECTR</span>
+    <span class="mi">1</span>    <span class="mf">0.40825</span>    <span class="mf">0.40825</span>    <span class="mf">0.40825</span> <span class="mi">0</span>
+    <span class="mi">1</span>   <span class="mi">0</span>    <span class="mi">0</span>    <span class="mi">0</span>    <span class="mi">0</span>
+    <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span>
+    <span class="mi">2</span>    <span class="mf">0.40825</span>    <span class="mf">0.40825</span>   <span class="o">-</span><span class="mf">1.22474</span> <span class="mi">0</span>
+    <span class="mi">2</span>   <span class="mi">0</span>    <span class="mi">0</span>    <span class="mi">0</span>    <span class="mi">0</span>
+    <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span>
+    <span class="mi">3</span>   <span class="o">-</span><span class="mf">0.40825</span>    <span class="mf">1.22474</span>   <span class="o">-</span><span class="mf">0.40825</span> <span class="mi">0</span>
+    <span class="mi">3</span>   <span class="mi">0</span>    <span class="mi">0</span>    <span class="mi">0</span>    <span class="mi">0</span>
+    <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span>
+    <span class="mi">4</span>    <span class="mf">1.22474</span>   <span class="o">-</span><span class="mf">0.40825</span>   <span class="o">-</span><span class="mf">0.40825</span> <span class="mi">0</span>
+    <span class="mi">4</span>   <span class="mi">0</span>    <span class="mi">0</span>    <span class="mi">0</span>    <span class="mi">0</span>
+    <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span>
+    <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="vectt">
+<span id="id21"></span><h2>VECTT<a class="headerlink" href="#vectt" title="Link to this heading">¶</a></h2>
+<p>Vector formatting.</p>
+<ul class="simple">
+<li><p>1st item: vector index (see VECTR).</p></li>
+<li><p>2nd item: Radius (0.5 is default)</p></li>
+<li><p>3-5 items: RGB (0-255). (255 0 0 is default)</p></li>
+<li><p>6th item: +1 if vector penetrates atom (end goes out both sides); +2 if we add
+atom radius to vector length. 1 is default.</p></li>
+</ul>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">VECTT</span>
+   <span class="mi">1</span>  <span class="mf">0.350</span> <span class="mi">255</span>   <span class="mi">0</span>   <span class="mi">0</span> <span class="mi">1</span>
+   <span class="mi">2</span>  <span class="mf">0.350</span> <span class="mi">255</span>   <span class="mi">0</span>   <span class="mi">0</span> <span class="mi">1</span>
+   <span class="mi">3</span>  <span class="mf">0.350</span> <span class="mi">255</span>   <span class="mi">0</span>   <span class="mi">0</span> <span class="mi">1</span>
+   <span class="mi">4</span>  <span class="mf">0.350</span> <span class="mi">255</span>   <span class="mi">0</span>   <span class="mi">0</span> <span class="mi">1</span>
+ <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="splan">
+<span id="id22"></span><h2>SPLAN<a class="headerlink" href="#splan" title="Link to this heading">¶</a></h2>
+<p>Section planes of volumetric data.</p>
+<p>Edit Data &gt; Lattice Planes &gt; Add lattice planes</p>
+<p>For each row,</p>
+<ul class="simple">
+<li><p>1st item: Number/index?</p></li>
+<li><p>2-4th items: hkl Miller indices</p></li>
+<li><p>5th item: Distance from origin (Angstrom)</p></li>
+<li><p>6-9th items: Color (RGBA).</p></li>
+</ul>
+<p>Section ends with four <code class="docutils literal notranslate"><span class="pre">0</span></code>’s.</p>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SPLAN</span>
+  <span class="mi">1</span> <span class="mf">1.509013E+00</span> <span class="o">-</span><span class="mf">1.000000E+00</span> <span class="mf">1.014961E+02</span> <span class="mf">5.35356</span> <span class="mi">255</span>   <span class="mi">0</span> <span class="mi">255</span> <span class="mi">192</span>
+  <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="lblat">
+<span id="id23"></span><h2>LBLAT<a class="headerlink" href="#lblat" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">LBLAT</span>
+ <span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+</section>
+<section id="lblsp">
+<span id="id24"></span><h2>LBLSP<a class="headerlink" href="#lblsp" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">LBLSP</span>
+ <span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+</section>
+<section id="dlatm">
+<span id="id25"></span><h2>DLATM<a class="headerlink" href="#dlatm" title="Link to this heading">¶</a></h2>
+<p>Delete/hides the specified atoms. Objects &gt; Atoms.</p>
+<p>However, the atoms are not indexed by the expected indices. Instead, they are indexed by an internal index, which has a unique 0-based index for every single atom, including those in adjacent unit cells.
+It seems to be sorted by site. So first the index exhausts all atoms of the first site type, then the second, and so on. So a single site has a continuous set of indices.</p>
+<p>Format: a list of integers (indices), terminated with a <code class="docutils literal notranslate"><span class="pre">-1</span></code>.</p>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DLATM</span>
+ <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span>  <span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+</section>
+<section id="dlbnd">
+<span id="id26"></span><h2>DLBND<a class="headerlink" href="#dlbnd" title="Link to this heading">¶</a></h2>
+<p>Deletes/hides the specified bonds. Objects &gt; Bonds.</p>
+<p>However, as for DLATM, the indices are different to the usual indices, instead with each drawn object being given a different 0-based index.</p>
+<p>Format: a list of integers (indices), terminated with a <code class="docutils literal notranslate"><span class="pre">-1</span></code>.</p>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DLBND</span>
+ <span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+</section>
+<section id="dlply">
+<span id="id27"></span><h2>DLPLY<a class="headerlink" href="#dlply" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DLPLY</span>
+ <span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+</section>
+<section id="pln2d">
+<span id="id28"></span><h2>PLN2D<a class="headerlink" href="#pln2d" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PLN2D</span>
+  <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="atomt">
+<span id="id29"></span><h2>ATOMT<a class="headerlink" href="#atomt" title="Link to this heading">¶</a></h2>
+<p>Atomic/elemental appearance information.</p>
+<p>Each row:</p>
+<ul class="simple">
+<li><p>1st item: Index/number of element.</p></li>
+<li><p>2nd item: Element symbol (see STRUC).</p></li>
+<li><p>3rd item: Atomic radius (Objects &gt; Properties &gt; Atoms &gt; Radius and color)</p></li>
+<li><p>4-6th item: RGB of atom colour (Objects &gt; Properties &gt; Atoms &gt; Radius and color)</p></li>
+<li><p>7-9th item: RGB of something else? Default atom colour?</p></li>
+<li><p>10th item: ?</p></li>
+</ul>
+<p>Ends with a row of 6 zero’s.</p>
+<p>See SITET. New sites inherit from ATOMT, although SITET overrides the appearance of individual sites.</p>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ATOMT</span>
+  <span class="mi">1</span>         <span class="n">Cu</span>  <span class="mf">1.2800</span>  <span class="mi">34</span>  <span class="mi">71</span> <span class="mi">220</span>  <span class="mi">34</span>  <span class="mi">71</span> <span class="mi">220</span> <span class="mi">204</span>
+  <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>Default values are derived from <code class="docutils literal notranslate"><span class="pre">elements.ini</span></code>.</p>
+<ul class="simple">
+<li><p>Column 1: atomic number</p></li>
+<li><p>Column 2: Elemental symbol</p></li>
+<li><p>Column 3: Atomic radius</p></li>
+<li><p>Column 4: van der Waals radius</p></li>
+<li><p>Column 5: Ionic radius</p></li>
+<li><p>Columns 6-8: RGB colour (0-1)
+Which radius is used is based on the atomic radii type within ATOMS. Changing this setting through the UI overwrites all existing radii with the appropriate default values.</p></li>
+</ul>
+</section>
+<section id="scene">
+<span id="id30"></span><h2>SCENE<a class="headerlink" href="#scene" title="Link to this heading">¶</a></h2>
+<p>View of the structure.</p>
+<p>This parameter is modified by the view control bar at the top of the GUI window.</p>
+<ul class="simple">
+<li><p>First 4 lines: affine matrix describing the camera angle. Only the first 3x3 elements seem to be used; no translation component appears to be added here via the GUI.</p></li>
+<li><p>5th line: Horizontal and vertical displacement, in units of half the screen width. Default <code class="docutils literal notranslate"><span class="pre">0.000</span> <span class="pre">0.000</span></code>.</p></li>
+<li><p>6th line: Zero. <code class="docutils literal notranslate"><span class="pre">0.000</span></code>.</p></li>
+<li><p>7th line: Zoom, as a multiplier (default <code class="docutils literal notranslate"><span class="pre">1.000</span></code>). (Can also be set indirectly through View &gt; Overall Appearance &gt; Scale.)</p></li>
+</ul>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SCENE</span>
+ <span class="mf">0.000000</span>  <span class="mf">1.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">1.000000</span>  <span class="mf">0.000000</span>
+ <span class="mf">1.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">1.000000</span>
+  <span class="mf">0.000</span>   <span class="mf">0.000</span>
+  <span class="mf">0.000</span>
+  <span class="mf">1.000</span>
+</pre></div>
+</div>
+</section>
+<section id="hbond">
+<span id="id31"></span><h2>HBOND<a class="headerlink" href="#hbond" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">HBOND</span> <span class="mi">0</span> <span class="mi">2</span>
+</pre></div>
+</div>
+</section>
+<section id="style">
+<span id="id32"></span><h2>STYLE<a class="headerlink" href="#style" title="Link to this heading">¶</a></h2>
+<p>A newline precedes this section.
+No data is directly connected to the STYLE header. However, it appears to serve as a top-level header for various style-related tags.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>
+<span class="n">STYLE</span>
+</pre></div>
+</div>
+</section>
+<section id="dispf">
+<span id="id33"></span><h2>DISPF<a class="headerlink" href="#dispf" title="Link to this heading">¶</a></h2>
+<p>Miscellaneous display flags, as binary bits.</p>
+<ul class="simple">
+<li><p>+2: “Show models” is true.</p></li>
+<li><p>+2048: “Hide non-bonding atoms” is true (Properties &gt; Atoms &gt; Atom style)</p></li>
+<li><p>+4096: Enable depth-cueing (View &gt; Overall Appearance &gt; Depth-cueing)</p></li>
+<li><p>+8192: Isosurface render from front-to-back (Properties &gt; Isosurfaces).</p></li>
+<li><p>+66536: “Show dot surface” is true.</p></li>
+<li><p>+131072: “Show as displacement ellispoids” instead of “Show as balls” (Properties &gt; Atoms &gt; Atom style)</p></li>
+<li><p>+2097152: Perspective projection (View &gt; Overall Appearance &gt; Projection)</p></li>
+<li><p>+33554432: “Scale isotropic atoms by Uiso” (Properties &gt; Atoms &gt; Atom style)</p></li>
+</ul>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DISPF</span> <span class="mi">37753794</span>
+</pre></div>
+</div>
+</section>
+<section id="model">
+<span id="id34"></span><h2>MODEL<a class="headerlink" href="#model" title="Link to this heading">¶</a></h2>
+<p>Structural model settings.</p>
+<ul class="simple">
+<li><p>1st item: Style (integer flag)</p>
+<ul>
+<li><p>0: Ball-and-stick</p></li>
+<li><p>1: Space-filling</p></li>
+<li><p>2: Polyhedral</p></li>
+<li><p>3: Wireframe</p></li>
+<li><p>4: Stick</p></li>
+</ul>
+</li>
+<li><p>2nd item: 1 if Show models, 0 if not.</p></li>
+<li><p>3rd item: 1 if Show dot surface, 0 if not.</p></li>
+</ul>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MODEL</span>   <span class="mi">0</span>  <span class="mi">1</span>  <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="surfs">
+<span id="id35"></span><h2>SURFS<a class="headerlink" href="#surfs" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SURFS</span>   <span class="mi">0</span>  <span class="mi">1</span>  <span class="mi">1</span>
+</pre></div>
+</div>
+</section>
+<section id="sects">
+<span id="id36"></span><h2>SECTS<a class="headerlink" href="#sects" title="Link to this heading">¶</a></h2>
+<p>Flags for display of sections.</p>
+<p>Properties &gt; Sections.</p>
+<ul class="simple">
+<li><p>1st item: Binary flag of properties. Default <code class="docutils literal notranslate"><span class="pre">32</span></code>.</p>
+<ul>
+<li><p>+1 if using “Absolute values” in Sections and slices.</p></li>
+<li><p>+2 if using “Assign colors recursively” in Sections and slices.</p></li>
+<li><p>+8 if SECCL is Y-M-C or C-M-Y.</p></li>
+<li><p>+16 if SECCL is gray scale or rainbow+ or cyclic.</p></li>
+<li><p>+128 if isosurfaces’ sections is set to Manual instead of Auto.</p></li>
+</ul>
+</li>
+<li><p>2nd item: ? Default <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></li>
+</ul>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SECTS</span>  <span class="mi">32</span>  <span class="mi">1</span>
+</pre></div>
+</div>
+</section>
+<section id="forms">
+<span id="id37"></span><h2>FORMS<a class="headerlink" href="#forms" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FORMS</span>   <span class="mi">0</span>  <span class="mi">1</span>
+</pre></div>
+</div>
+</section>
+<section id="atoms">
+<span id="id38"></span><h2>ATOMS<a class="headerlink" href="#atoms" title="Link to this heading">¶</a></h2>
+<p>Atom display settings.</p>
+<p>Properties &gt; Atoms &gt; Atom style</p>
+<ul class="simple">
+<li><p>1st item: Atom radii type. Default 0.</p>
+<ul>
+<li><p>0: Atomic (default)</p></li>
+<li><p>1: Ionic</p></li>
+<li><p>2: van der Waals</p></li>
+</ul>
+</li>
+<li><p>2nd item: 0 if “Show as balls”. 1 if “Show as displacement ellipsoids”.</p></li>
+<li><p>3rd item: 1: “Scale isotropic atoms by Uiso”. 0: “Set radii of isotropic atoms as specified below”.</p></li>
+</ul>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ATOMS</span>   <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">1</span>
+</pre></div>
+</div>
+</section>
+<section id="bonds">
+<span id="id39"></span><h2>BONDS<a class="headerlink" href="#bonds" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">BONDS</span>   <span class="mi">1</span>
+</pre></div>
+</div>
+</section>
+<section id="polys">
+<span id="id40"></span><h2>POLYS<a class="headerlink" href="#polys" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">POLYS</span>   <span class="mi">1</span>
+</pre></div>
+</div>
+</section>
+<section id="vects">
+<span id="id41"></span><h2>VECTS<a class="headerlink" href="#vects" title="Link to this heading">¶</a></h2>
+<p>Global scaling factor for vectors.</p>
+<p>Edit &gt; Vectors &gt; Scale factor for modulus</p>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">VECTS</span> <span class="mf">1.000000</span>
+</pre></div>
+</div>
+</section>
+<section id="formp">
+<span id="id42"></span><h2>FORMP<a class="headerlink" href="#formp" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FORMP</span>
+  <span class="mi">1</span>  <span class="mf">1.0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="atomp">
+<span id="id43"></span><h2>ATOMP<a class="headerlink" href="#atomp" title="Link to this heading">¶</a></h2>
+<p>Atom style properties.</p>
+<p>Properties &gt; Atoms &gt; Atom style.</p>
+<ul class="simple">
+<li><p>3rd item: True/false 1/0 flag. “Show principal ellipses.”</p></li>
+<li><p>4th item: Displacement ellipsoids probability.</p></li>
+<li><p>5th item: Outline width (of principal ellipses).</p></li>
+<li><p>6th item: True/false 1/0 flag. “Hide non-bonding atoms”.</p></li>
+</ul>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ATOMP</span>
+ <span class="mi">24</span>  <span class="mi">24</span>   <span class="mi">0</span>  <span class="mi">50</span>  <span class="mf">2.0</span>   <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="bondp">
+<span id="id44"></span><h2>BONDP<a class="headerlink" href="#bondp" title="Link to this heading">¶</a></h2>
+<p>Bond style properties.</p>
+<p>Properties &gt; Bonds &gt; Resolution</p>
+<p>Properties &gt; Bonds &gt; Radius and color</p>
+<p>Strangely, the radius and color data seem to be ignored when creating new bonds in favour of the defaults in style.ini.</p>
+<ul class="simple">
+<li><p>1st item: Resolution &gt; Stacks</p></li>
+<li><p>2nd item: Resolution &gt; Slices</p></li>
+<li><p>3rd item: Radius and color &gt; Radius (cylinder)</p></li>
+<li><p>4th item: Radius and color &gt; Width (line)</p></li>
+<li><p>5-7th items: Radius and color &gt; Color; RGB.</p></li>
+</ul>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">BONDP</span>
+  <span class="mi">1</span>  <span class="mi">16</span>  <span class="mf">0.250</span>  <span class="mf">2.000</span> <span class="mi">127</span> <span class="mi">127</span> <span class="mi">127</span>
+</pre></div>
+</div>
+</section>
+<section id="polyp">
+<span id="id45"></span><h2>POLYP<a class="headerlink" href="#polyp" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">POLYP</span>
+ <span class="mi">204</span> <span class="mi">1</span>  <span class="mf">1.000</span> <span class="mi">180</span> <span class="mi">180</span> <span class="mi">180</span>
+</pre></div>
+</div>
+</section>
+<section id="isurf">
+<span id="id46"></span><h2>ISURF<a class="headerlink" href="#isurf" title="Link to this heading">¶</a></h2>
+<p>Isosurfaces.</p>
+<p>From Properties &gt; Isosurfaces &gt; Isosurfaces, the table there.</p>
+<p>Each row is an isosurface.</p>
+<ul class="simple">
+<li><p>1st item: index/number?</p></li>
+<li><p>2nd item: mode flag?</p></li>
+<li><p>3rd item: isosurface level.</p></li>
+<li><p>4-6th item: RGB colour of isosurface.</p></li>
+<li><p>7th item: Opacity 1 (0-255)</p></li>
+<li><p>8th item: Opacity 2 (0-255)</p></li>
+</ul>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ISURF</span>
+<span class="mi">1</span>   <span class="mi">1</span>    <span class="mf">0.55903</span> <span class="mi">255</span> <span class="mi">255</span>   <span class="mi">0</span> <span class="mi">127</span> <span class="mi">255</span>
+  <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="tex3p">
+<span id="id47"></span><h2>TEX3P<a class="headerlink" href="#tex3p" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">TEX3P</span>
+  <span class="mi">1</span>  <span class="mf">0.00000E+00</span>  <span class="mf">1.00000E+00</span>
+</pre></div>
+</div>
+</section>
+<section id="sectp">
+<span id="id48"></span><h2>SECTP<a class="headerlink" href="#sectp" title="Link to this heading">¶</a></h2>
+<p>Section planes, properties.</p>
+<p>Objects &gt; Properties &gt; Sections</p>
+<ul class="simple">
+<li><p>1st item: Whether colour scale is forwards (<code class="docutils literal notranslate"><span class="pre">1</span></code>) or inverted (<code class="docutils literal notranslate"><span class="pre">-1</span></code>) (depends on SECCL).</p></li>
+<li><p>2nd item: Saturation levels minimum</p></li>
+<li><p>3rd item: Saturation levels maximum</p></li>
+<li><p>4th item: Cutoff level, for lattice planes, minimum</p></li>
+<li><p>5th item: Cutoff level, for lattice planes, maximum</p></li>
+<li><p>6th item: Cutoff level, for isosurfaces’s sections, minimum</p></li>
+<li><p>7th item: Cutoff level, for isosurfaces’s sections, maximum</p></li>
+</ul>
+<p>Reversed colour scales are: R-G-B, Y-M-C, cyclic R-G-B-R, and scales labelled as inverted.</p>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SECTP</span>
+  <span class="mi">1</span>  <span class="mf">0.00000E+00</span>  <span class="mf">1.00000E+00</span>  <span class="mf">0.00000E+00</span>  <span class="mf">0.00000E+00</span>  <span class="mf">0.00000E+00</span>  <span class="mf">0.00000E+00</span>
+</pre></div>
+</div>
+</section>
+<section id="contr">
+<span id="id49"></span><h2>CONTR<a class="headerlink" href="#contr" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CONTR</span>
+ <span class="mf">0.1</span> <span class="o">-</span><span class="mi">1</span> <span class="mi">1</span> <span class="mi">1</span> <span class="mi">10</span> <span class="o">-</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">5</span>
+ <span class="mi">2</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">1</span>
+   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>
+   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>
+   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>
+   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="hklpp">
+<span id="id50"></span><h2>HKLPP<a class="headerlink" href="#hklpp" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">HKLPP</span>
+ <span class="mi">192</span> <span class="mi">1</span>  <span class="mf">1.000</span> <span class="mi">255</span>   <span class="mi">0</span> <span class="mi">255</span>
+</pre></div>
+</div>
+</section>
+<section id="ucolp">
+<span id="id51"></span><h2>UCOLP<a class="headerlink" href="#ucolp" title="Link to this heading">¶</a></h2>
+<p>Unit cell line properties.</p>
+<p>Properties &gt; General &gt; Unit cell</p>
+<ul class="simple">
+<li><p>1st item: Line style flag. <code class="docutils literal notranslate"><span class="pre">0</span></code> if solid lines (default). <code class="docutils literal notranslate"><span class="pre">1</span></code> if dotted lines. <code class="docutils literal notranslate"><span class="pre">2</span></code> if dashed lines.</p></li>
+<li><p>2nd item: Line visibility flag. <code class="docutils literal notranslate"><span class="pre">0</span></code> if do not show. <code class="docutils literal notranslate"><span class="pre">1</span></code> single unit cell (default). <code class="docutils literal notranslate"><span class="pre">2</span></code> if show all.</p></li>
+<li><p>3rd item: Line width (float), default 1.000.</p></li>
+<li><p>4-6th item: RGB line colour.</p></li>
+</ul>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">UCOLP</span>
+   <span class="mi">0</span>   <span class="mi">1</span>  <span class="mf">1.000</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="comps">
+<span id="id52"></span><h2>COMPS<a class="headerlink" href="#comps" title="Link to this heading">¶</a></h2>
+<p>Compass settings.</p>
+<p>Properties &gt; General &gt; Axes.</p>
+<p>Single integer flag.</p>
+<ul class="simple">
+<li><p>0 : Do not show compass.</p></li>
+<li><p>1 : Show compass and show axes. (Default)</p></li>
+<li><p>2 : Show compass, do not show axes.</p></li>
+</ul>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">COMPS</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</section>
+<section id="label">
+<span id="id53"></span><h2>LABEL<a class="headerlink" href="#label" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">LABEL</span> <span class="mi">1</span>    <span class="mi">12</span>  <span class="mf">1.000</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="projt">
+<span id="id54"></span><h2>PROJT<a class="headerlink" href="#projt" title="Link to this heading">¶</a></h2>
+<p>Projection.</p>
+<p>View &gt; Overall Appearance &gt; Projection</p>
+<ul class="simple">
+<li><p>1st item: Flag. 0: Parallel. 1: Perspective. See also DISPF.</p></li>
+<li><p>2nd item: Viewpoint (for perspective). Ranges from 0.5 (far) to 2.0 (close).</p></li>
+</ul>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PROJT</span> <span class="mi">0</span>  <span class="mf">0.962</span>
+</pre></div>
+</div>
+</section>
+<section id="bkgrc">
+<span id="id55"></span><h2>BKGRC<a class="headerlink" href="#bkgrc" title="Link to this heading">¶</a></h2>
+<p>Background colour.</p>
+<p>View &gt; Overall Appearance &gt; Background Color</p>
+<p>R G B</p>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">BKGRC</span>
+ <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span>
+</pre></div>
+</div>
+</section>
+<section id="dpthq">
+<span id="id56"></span><h2>DPTHQ<a class="headerlink" href="#dpthq" title="Link to this heading">¶</a></h2>
+<p>Depth cueing.</p>
+<p>View &gt; Overall Appearance &gt; Depth-cueing</p>
+<ul class="simple">
+<li><p>1st item: 1/0 true/false, Enable depth-cueing. (See DISPF.)</p></li>
+<li><p>2nd item: Starting depth (float, Angstrom).</p></li>
+<li><p>3rd item: Ending depth (float, Angstrom).</p></li>
+</ul>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DPTHQ</span> <span class="mi">1</span> <span class="o">-</span><span class="mf">0.5000</span>  <span class="mf">3.5000</span>
+</pre></div>
+</div>
+</section>
+<section id="light0">
+<span id="id57"></span><h2>LIGHT0<a class="headerlink" href="#light0" title="Link to this heading">¶</a></h2>
+<p>Lighting.</p>
+<p>View &gt; Overall Appearance &gt; Light</p>
+<ul class="simple">
+<li><p>LIGHT0 line: true/false 1/0 “Enable lighting”.</p></li>
+<li><p>1st-4th lines: Affine rotation matrix for direction of incident light. Identity matrix (default) is from direction of view.</p></li>
+<li><p>5th line: ? Default 0 0 20 0</p></li>
+<li><p>6th line: ? Default 0 0 -1</p></li>
+<li><p>7th line: Ambient, X X X 255, where X is converted from percent to 0-255, rounded to integer.</p></li>
+<li><p>8th line: Diffuse, X X X 255, where X is converted from percent to 0-255, rounded to integer.</p></li>
+<li><p>9th line: 255 255 255 255.</p></li>
+</ul>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">LIGHT0</span> <span class="mi">1</span>
+ <span class="mf">1.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">1.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">1.000000</span>  <span class="mf">0.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">1.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">0.000000</span> <span class="mf">20.000000</span>  <span class="mf">0.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">0.000000</span> <span class="o">-</span><span class="mf">1.000000</span>
+  <span class="mi">26</span>  <span class="mi">26</span>  <span class="mi">26</span> <span class="mi">255</span>
+ <span class="mi">179</span> <span class="mi">179</span> <span class="mi">179</span> <span class="mi">255</span>
+ <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span>
+</pre></div>
+</div>
+</section>
+<section id="light1">
+<span id="id58"></span><h2>LIGHT1<a class="headerlink" href="#light1" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">LIGHT1</span>
+ <span class="mf">1.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">1.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">1.000000</span>  <span class="mf">0.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">1.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">0.000000</span> <span class="mf">20.000000</span>  <span class="mf">0.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">0.000000</span> <span class="o">-</span><span class="mf">1.000000</span>
+   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>
+   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>
+   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="light2">
+<span id="id59"></span><h2>LIGHT2<a class="headerlink" href="#light2" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">LIGHT2</span>
+ <span class="mf">1.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">1.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">1.000000</span>  <span class="mf">0.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">1.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">0.000000</span> <span class="mf">20.000000</span>  <span class="mf">0.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">0.000000</span> <span class="o">-</span><span class="mf">1.000000</span>
+   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>
+   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>
+   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="light3">
+<span id="id60"></span><h2>LIGHT3<a class="headerlink" href="#light3" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">LIGHT3</span>
+ <span class="mf">1.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">1.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">1.000000</span>  <span class="mf">0.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">1.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">0.000000</span> <span class="mf">20.000000</span>  <span class="mf">0.000000</span>
+ <span class="mf">0.000000</span>  <span class="mf">0.000000</span> <span class="o">-</span><span class="mf">1.000000</span>
+   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>
+   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>
+   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="seccl">
+<span id="id61"></span><h2>SECCL<a class="headerlink" href="#seccl" title="Link to this heading">¶</a></h2>
+<p>Section colour scheme.</p>
+<p>Objects &gt; Properties &gt; Sections &gt; Sections and slices.</p>
+<p>Integer flag indicating option.</p>
+<ul class="simple">
+<li><p>0 : B-G-R</p></li>
+<li><p>1 : R-G-B</p></li>
+<li><p>2 : C-M-Y</p></li>
+<li><p>3 : Y-M-C</p></li>
+<li><p>4 : Gray scale</p></li>
+<li><p>5 : Inverted gray scale</p></li>
+<li><p>6 : Rainbow+</p></li>
+<li><p>7 : Inverted Rainbow+</p></li>
+<li><p>8 : Cyclic: B-G-R-B</p></li>
+<li><p>9 : Cyclic: R-G-B-R</p></li>
+<li><p>10 : Cyclic: Ostwald</p></li>
+<li><p>11 : Cyclic: Inverted Ostwald</p></li>
+<li><p>12 : Cyclic: W-R-K-B-W</p></li>
+<li><p>13 : Cyclic: K-R-W-B-K</p></li>
+</ul>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SECCL</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="texcl">
+<span id="id62"></span><h2>TEXCL<a class="headerlink" href="#texcl" title="Link to this heading">¶</a></h2>
+<p>A blank line precedes and follows this section.</p>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>
+<span class="n">TEXCL</span> <span class="mi">0</span>
+
+</pre></div>
+</div>
+</section>
+<section id="atomm">
+<span id="id63"></span><h2>ATOMM<a class="headerlink" href="#atomm" title="Link to this heading">¶</a></h2>
+<p>Atom material.</p>
+<p>Properties &gt; Atoms &gt; Material</p>
+<ul class="simple">
+<li><p>1st line: R, G, B, A(? Doesn’t change from 255.)</p></li>
+<li><p>2nd line: Shininess, float, percentage x 1.28. (So on scale from 1.280 to 128.000.)</p></li>
+</ul>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ATOMM</span>
+ <span class="mi">204</span> <span class="mi">204</span> <span class="mi">204</span> <span class="mi">255</span>
+  <span class="mf">25.600</span>
+</pre></div>
+</div>
+</section>
+<section id="bondm">
+<span id="id64"></span><h2>BONDM<a class="headerlink" href="#bondm" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">BONDM</span>
+ <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span>
+ <span class="mf">128.000</span>
+</pre></div>
+</div>
+</section>
+<section id="polym">
+<span id="id65"></span><h2>POLYM<a class="headerlink" href="#polym" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">POLYM</span>
+ <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span>
+ <span class="mf">128.000</span>
+</pre></div>
+</div>
+</section>
+<section id="surfm">
+<span id="id66"></span><h2>SURFM<a class="headerlink" href="#surfm" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SURFM</span>
+   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span> <span class="mi">255</span>
+ <span class="mf">128.000</span>
+</pre></div>
+</div>
+</section>
+<section id="formm">
+<span id="id67"></span><h2>FORMM<a class="headerlink" href="#formm" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FORMM</span>
+ <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span>
+ <span class="mf">128.000</span>
+</pre></div>
+</div>
+</section>
+<section id="hklpm">
+<span id="id68"></span><h2>HKLPM<a class="headerlink" href="#hklpm" title="Link to this heading">¶</a></h2>
+<p>e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">HKLPM</span>
+ <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span>
+ <span class="mf">128.000</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">vestacrystparser</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">The .vesta file format</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#vesta-format-version">#VESTA_FORMAT_VERSION</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#crystal">CRYSTAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#title">TITLE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#import-density">IMPORT_DENSITY</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#group">GROUP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#symop">SYMOP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tranm">TRANM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ltransl">LTRANSL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lorient">LORIENT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lmatrix">LMATRIX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cellp">CELLP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#struc">STRUC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#theri">THERI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#thert">THERT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#therm">THERM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#shape">SHAPE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bound">BOUND</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sbond">SBOND</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sitet">SITET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vectr">VECTR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vectt">VECTT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#splan">SPLAN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lblat">LBLAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lblsp">LBLSP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dlatm">DLATM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dlbnd">DLBND</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dlply">DLPLY</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pln2d">PLN2D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#atomt">ATOMT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scene">SCENE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hbond">HBOND</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#style">STYLE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dispf">DISPF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#model">MODEL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#surfs">SURFS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sects">SECTS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#forms">FORMS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#atoms">ATOMS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bonds">BONDS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#polys">POLYS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vects">VECTS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#formp">FORMP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#atomp">ATOMP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bondp">BONDP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#polyp">POLYP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#isurf">ISURF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tex3p">TEX3P</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sectp">SECTP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contr">CONTR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hklpp">HKLPP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ucolp">UCOLP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#comps">COMPS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#label">LABEL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#projt">PROJT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bkgrc">BKGRC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dpthq">DPTHQ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#light0">LIGHT0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#light1">LIGHT1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#light2">LIGHT2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#light3">LIGHT3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#seccl">SECCL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#texcl">TEXCL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#atomm">ATOMM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bondm">BONDM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#polym">POLYM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#surfm">SURFM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#formm">FORMM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hklpm">HKLPM</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing guidelines</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="api_export.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">vestacrystparser.export</span></code></a></li>
+      <li>Next: <a href="contributing.html" title="next chapter">Contributing guidelines</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Bernard Field.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/file_format.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
