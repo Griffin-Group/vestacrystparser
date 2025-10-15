@@ -33,8 +33,70 @@
 
           <div class="body" role="main">
             
-  <section id="vestacrystparser-export">
-<h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">vestacrystparser.export</span></code><a class="headerlink" href="#vestacrystparser-export" title="Link to this heading">¶</a></h1>
+  <section id="module-vestacrystparser.export">
+<span id="vestacrystparser-export"></span><h1><a class="reference internal" href="#module-vestacrystparser.export" title="vestacrystparser.export"><code class="xref py py-mod docutils literal notranslate"><span class="pre">vestacrystparser.export</span></code></a><a class="headerlink" href="#module-vestacrystparser.export" title="Link to this heading">¶</a></h1>
+<p>Open VESTA and export images.</p>
+<p><a class="reference internal" href="#vestacrystparser.export.export_image_from_file" title="vestacrystparser.export.export_image_from_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">export_image_from_file()</span></code></a> is the core function,
+which directly opens a VESTA file then exports an image file
+using VESTA’s (rather sparse) command line interface.</p>
+<p>This requires a working VESTA installation on your system.</p>
+<dl class="py exception">
+<dt class="sig sig-object py" id="vestacrystparser.export.NoVestaError">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">vestacrystparser.export.</span></span><span class="sig-name descname"><span class="pre">NoVestaError</span></span><a class="headerlink" href="#vestacrystparser.export.NoVestaError" title="Link to this definition">¶</a></dt>
+<dd><p>VESTA does not exist or cannot be found.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="vestacrystparser.export.export_image_from_file">
+<span class="sig-prename descclassname"><span class="pre">vestacrystparser.export.</span></span><span class="sig-name descname"><span class="pre">export_image_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">close</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.export.export_image_from_file" title="Link to this definition">¶</a></dt>
+<dd><p>Opens a file in VESTA and saves it as an image.</p>
+<p>You can open VESTA before running this command to set the size of the
+window, which determines the size of the image.</p>
+<p>Runs ASYNCHRONOUSLY. May be subject to race conditions.
+Modifying the files while running this command will
+cause unexpected behaviour. I do not know how to retrieve an exit call,
+besides checking if <cite>output</cite> has been written (which is what <cite>block</cite> does).</p>
+<p>Note that, even with the <cite>close</cite> argument, VESTA will remain open after
+this call. (<cite>close</cite> just closes the tab within VESTA.) You are
+responsible for closing it yourself when you’re done.</p>
+<p><cite>block</cite> is strongly recommended if you are doing more than a couple
+at once, because I’ve found VESTA will max-out on processes if it
+tries to open too many files simultaneously.</p>
+<p>VESTA has a command line interface:
+<a class="reference external" href="https://jp-minerals.org/vesta/en/doc/VESTAch17.html">https://jp-minerals.org/vesta/en/doc/VESTAch17.html</a></p>
+<p>Koichi Momma gives directions on how to use VESTA’s command line interface:
+<a class="reference external" href="https://groups.google.com/g/vesta-discuss/c/xePcwJ3Mdgw/m/GyC8_UZbAwAJ">https://groups.google.com/g/vesta-discuss/c/xePcwJ3Mdgw/m/GyC8_UZbAwAJ</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input</strong> – Path to file readable by VESTA.</p></li>
+<li><p><strong>output</strong> – Path to write image to. Should include a recognisable image
+file extension.</p></li>
+<li><p><strong>scale</strong> – Amount to scale raster image by.</p></li>
+<li><p><strong>close</strong> – Whether to close the VESTA tab afterward.</p></li>
+<li><p><strong>block</strong> – Whether to block the main process until the file is written.
+If the export process fails on VESTA’s end, then this will hang!
+However, it is recommended to reduce race conditions or system
+overload.</p></li>
+<li><p><strong>timeout</strong> – Number of seconds to block for until we raise TimeoutError.
+If None, will count indefinitely.
+Note, though, that VESTA will still be running if we hit the
+Timeout. We just hand the focus back to Python.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="#vestacrystparser.export.NoVestaError" title="vestacrystparser.export.NoVestaError"><strong>NoVestaError</strong></a> – If fails to run VESTA.</p></li>
+<li><p><strong>OSError</strong> – If run on an unsupport OS.
+    (Supports Windows, Linux, MacOS/Darwin.)</p></li>
+<li><p><strong>FileNotFoundError</strong> – If <cite>input</cite> doesn’t exist or <cite>output</cite>’s directory
+    doesn’t exist.</p></li>
+<li><p><strong>TimeoutError</strong> – block=True and we timeout.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
 

@@ -33,8 +33,319 @@
 
           <div class="body" role="main">
             
-  <section id="vestacrystparser-parser">
-<h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">vestacrystparser.parser</span></code><a class="headerlink" href="#vestacrystparser-parser" title="Link to this heading">¶</a></h1>
+  <section id="module-vestacrystparser.parser">
+<span id="vestacrystparser-parser"></span><h1><a class="reference internal" href="#module-vestacrystparser.parser" title="vestacrystparser.parser"><code class="xref py py-mod docutils literal notranslate"><span class="pre">vestacrystparser.parser</span></code></a><a class="headerlink" href="#module-vestacrystparser.parser" title="Link to this heading">¶</a></h1>
+<p>Parse, modify, and write VESTA files, for visualisation of crystals.</p>
+<p><a class="reference internal" href="vestafile.html#vestacrystparser.VestaFile" title="vestacrystparser.parser.VestaFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">VestaFile</span></code></a> is the core class, while all other objects here support it.
+(VestaFile may also be imported from the top level, <a class="reference internal" href="vestafile.html#vestacrystparser.VestaFile" title="vestacrystparser.VestaFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">vestacrystparser.VestaFile</span></code></a>.)
+Most functions can be completed using just this class’s methods.</p>
+<p><a class="reference internal" href="#vestacrystparser.parser.VestaSection" title="vestacrystparser.parser.VestaSection"><code class="xref py py-class docutils literal notranslate"><span class="pre">VestaSection</span></code></a> are the low-level building blocks of VestaFile,
+used when making low-level API calls.</p>
+<p>The other functions and methods are primarily of use to developers.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="vestacrystparser.parser.VestaPhase">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">vestacrystparser.parser.</span></span><span class="sig-name descname"><span class="pre">VestaPhase</span></span><a class="headerlink" href="#vestacrystparser.parser.VestaPhase" title="Link to this definition">¶</a></dt>
+<dd><p>A collection of uniquely-named VestaSection’s</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="vestacrystparser.parser.VestaPhase.__contains__">
+<span class="sig-name descname"><span class="pre">__contains__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#vestacrystparser.parser.VestaPhase.__contains__" title="Link to this definition">¶</a></dt>
+<dd><p>Return True if VestaPhase contains a section with <cite>name</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vestacrystparser.parser.VestaPhase.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#vestacrystparser.parser.VestaSection" title="vestacrystparser.parser.VestaSection"><span class="pre">VestaSection</span></a></span></span><a class="headerlink" href="#vestacrystparser.parser.VestaPhase.__getitem__" title="Link to this definition">¶</a></dt>
+<dd><p>Return item by name of section. Raise KeyError if not present.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vestacrystparser.parser.VestaPhase.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.parser.VestaPhase.__init__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vestacrystparser.parser.VestaPhase.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#vestacrystparser.parser.VestaSection" title="vestacrystparser.parser.VestaSection"><span class="pre">VestaSection</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#vestacrystparser.parser.VestaPhase.__iter__" title="Link to this definition">¶</a></dt>
+<dd><p>Iterate over each section.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vestacrystparser.parser.VestaPhase.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#vestacrystparser.parser.VestaPhase.__len__" title="Link to this definition">¶</a></dt>
+<dd><p>Number of sections.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vestacrystparser.parser.VestaPhase.__weakref__">
+<span class="sig-name descname"><span class="pre">__weakref__</span></span><a class="headerlink" href="#vestacrystparser.parser.VestaPhase.__weakref__" title="Link to this definition">¶</a></dt>
+<dd><p>list of weak references to the object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vestacrystparser.parser.VestaPhase.append">
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#vestacrystparser.parser.VestaSection" title="vestacrystparser.parser.VestaSection"><span class="pre">VestaSection</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.parser.VestaPhase.append" title="Link to this definition">¶</a></dt>
+<dd><p>Add a new section to the phase.</p>
+<p>VestaSection is added by reference, so you can keep modifying it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>section</strong> – <a class="reference internal" href="#vestacrystparser.parser.VestaSection" title="vestacrystparser.parser.VestaSection"><code class="xref py py-class docutils literal notranslate"><span class="pre">VestaSection</span></code></a> not already present.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>KeyError</strong> – section with the same header is already present.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="vestacrystparser.parser.VestaPhase.nsites">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nsites</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#vestacrystparser.parser.VestaPhase.nsites" title="Link to this definition">¶</a></dt>
+<dd><p>Number of sites (read-only)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="vestacrystparser.parser.VestaPhase.title">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">title</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#vestacrystparser.parser.VestaPhase.title" title="Link to this definition">¶</a></dt>
+<dd><p>Title of the phase (read-only)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="vestacrystparser.parser.VestaSection">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">vestacrystparser.parser.</span></span><span class="sig-name descname"><span class="pre">VestaSection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header_line</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.parser.VestaSection" title="Link to this definition">¶</a></dt>
+<dd><p>Section of a VestaFile.</p>
+<p>To create it, initialise with the header line (including in-line data).
+Then add subsequent lines with <a class="reference internal" href="#vestacrystparser.parser.VestaSection.add_line" title="vestacrystparser.parser.VestaSection.add_line"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_line()</span></code></a>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vestacrystparser.parser.VestaSection.header">
+<span class="sig-name descname"><span class="pre">header</span></span><a class="headerlink" href="#vestacrystparser.parser.VestaSection.header" title="Link to this definition">¶</a></dt>
+<dd><p>Name of the section.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vestacrystparser.parser.VestaSection.inline">
+<span class="sig-name descname"><span class="pre">inline</span></span><a class="headerlink" href="#vestacrystparser.parser.VestaSection.inline" title="Link to this definition">¶</a></dt>
+<dd><p>List of in-line data (i.e. data that appears in the same
+line as the header, space-separated).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vestacrystparser.parser.VestaSection.data">
+<span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#vestacrystparser.parser.VestaSection.data" title="Link to this definition">¶</a></dt>
+<dd><p>All other data, with one list for each line.
+Most data, when parsed, is split at whitespace.
+The exception is the TITLE, which is kept as a single string
+(e.g. [[“New structure”]]).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[list]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vestacrystparser.parser.VestaSection.raw_header">
+<span class="sig-name descname"><span class="pre">raw_header</span></span><a class="headerlink" href="#vestacrystparser.parser.VestaSection.raw_header" title="Link to this definition">¶</a></dt>
+<dd><p>Unformatted and unsplit header line. Just in case you
+need it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vestacrystparser.parser.VestaSection.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header_line</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.parser.VestaSection.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize a VESTA section from a header line.</p>
+<dl class="simple">
+<dt>For the TITLE section:</dt><dd><ul class="simple">
+<li><p>Inline data is not preserved on the header, but moved to the
+multi-line data.</p></li>
+</ul>
+</dd>
+<dt>For other sections:</dt><dd><ul class="simple">
+<li><p>If inline data is present on the header, it is stored (parsed) in
+self.inline.</p></li>
+<li><p>Subsequent lines are stored in self.data.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>header_line</strong> (<em>str</em>) – The complete header line (with any inline data).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vestacrystparser.parser.VestaSection.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#vestacrystparser.parser.VestaSection.__len__" title="Link to this definition">¶</a></dt>
+<dd><p>Return number of lines (besides the header line)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vestacrystparser.parser.VestaSection.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#vestacrystparser.parser.VestaSection.__str__" title="Link to this definition">¶</a></dt>
+<dd><p>Return the section as valid VESTA text.</p>
+<ul class="simple">
+<li><p>If inline data exists, it is written on the header line.</p></li>
+<li><p>Then, any extra lines are written one per line.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vestacrystparser.parser.VestaSection.__weakref__">
+<span class="sig-name descname"><span class="pre">__weakref__</span></span><a class="headerlink" href="#vestacrystparser.parser.VestaSection.__weakref__" title="Link to this definition">¶</a></dt>
+<dd><p>list of weak references to the object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vestacrystparser.parser.VestaSection.add_line">
+<span class="sig-name descname"><span class="pre">add_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.parser.VestaSection.add_line" title="Link to this definition">¶</a></dt>
+<dd><p>Append a line to the section.</p>
+<p>For TITLE, store the entire line as a string.
+For other sections, split the line into tokens and convert them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>line</strong> – raw string of the line.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="vestacrystparser.parser.invert_matrix">
+<span class="sig-prename descclassname"><span class="pre">vestacrystparser.parser.</span></span><span class="sig-name descname"><span class="pre">invert_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#vestacrystparser.parser.invert_matrix" title="Link to this definition">¶</a></dt>
+<dd><p>Inverts a 3x3 matrix.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="vestacrystparser.parser.load_default_bond_length">
+<span class="sig-prename descclassname"><span class="pre">vestacrystparser.parser.</span></span><span class="sig-name descname"><span class="pre">load_default_bond_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#vestacrystparser.parser.load_default_bond_length" title="Link to this definition">¶</a></dt>
+<dd><p>Returns default maximum bond length for a pair of elements (if present).</p>
+<p>(N.B. If adding bonds manually, VESTA GUI defaults to 1.6.)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A1</strong> – Pair of elements.</p></li>
+<li><p><strong>A2</strong> – Pair of elements.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>Maximum bond length in Angstrom, if present.</p>
+<p>May be None. Not every element pair has default bonds.</p>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="vestacrystparser.parser.load_default_bond_style">
+<span class="sig-prename descclassname"><span class="pre">vestacrystparser.parser.</span></span><span class="sig-name descname"><span class="pre">load_default_bond_style</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hbond</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#vestacrystparser.parser.load_default_bond_style" title="Link to this definition">¶</a></dt>
+<dd><p>Loads default bond style for a pair of elements (if present).</p>
+<p>Loads data from sbond.csv.</p>
+<p>(N.B. If adding bonds manually, VESTA GUI defaults to 1.6.)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A1</strong> – Pair of element symbols. Order does not matter.</p></li>
+<li><p><strong>A2</strong> – Pair of element symbols. Order does not matter.</p></li>
+<li><p><strong>hbond</strong> – If True, grab the hydrogen bond, if present.
+This is the second matching entry in sbond.csv</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>May be None. Not every element pair has default bonds.
+If the element pair does have a bond, a list is returned:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>index in sbond.csv,</p></li>
+<li><p>A1,</p></li>
+<li><p>A2,</p></li>
+<li><p>minimum length,</p></li>
+<li><p>maximum length,</p></li>
+<li><p>search mode,</p></li>
+<li><p>boundary mode,</p></li>
+<li><p>show polyhedra,</p></li>
+<li><p>0 (search by label = False),</p></li>
+<li><p>style (normal (1) or H-bond (5))</p></li>
+</ul>
+</div></blockquote>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="vestacrystparser.parser.load_elements_data">
+<span class="sig-prename descclassname"><span class="pre">vestacrystparser.parser.</span></span><span class="sig-name descname"><span class="pre">load_elements_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#vestacrystparser.parser.load_elements_data" title="Link to this definition">¶</a></dt>
+<dd><p>Load default data for a specific element.</p>
+<p>Loads data from elements.csv.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>element</strong> – Elemental symbol (str) or atomic number (int).
+If element is not present, falls back to “XX” (and logs it at INFO
+level).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>Atomic number (int).</p></li>
+<li><p>Elemental symbol (str).</p></li>
+<li><p>Atomic radius (float, Angstrom).</p></li>
+<li><p>van der Waals radius (float, Angstrom).</p></li>
+<li><p>Ionic radius (float, Angstrom).</p></li>
+<li><p>Red colour value (int, 0-255).</p></li>
+<li><p>Green colour value (int, 0-255).</p></li>
+<li><p>Blue colour value (int, 0-255).</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="vestacrystparser.parser.parse_line">
+<span class="sig-prename descclassname"><span class="pre">vestacrystparser.parser.</span></span><span class="sig-name descname"><span class="pre">parse_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#vestacrystparser.parser.parse_line" title="Link to this definition">¶</a></dt>
+<dd><p>Split a line into tokens and convert each token.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>line</strong> – String with data separated by spaces.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of tokens (int, float, or string, as appropriate).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="vestacrystparser.parser.parse_token">
+<span class="sig-prename descclassname"><span class="pre">vestacrystparser.parser.</span></span><span class="sig-name descname"><span class="pre">parse_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></span><a class="headerlink" href="#vestacrystparser.parser.parse_token" title="Link to this definition">¶</a></dt>
+<dd><p>Convert a token to int or float if possible (or leave as a string).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>token</strong> – A string.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><cite>token</cite> converted to <code class="xref py py-type docutils literal notranslate"><span class="pre">int</span></code> if possible,
+or else <code class="xref py py-type docutils literal notranslate"><span class="pre">float</span></code> if possible, or else returned
+as-is.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
 

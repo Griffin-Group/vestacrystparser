@@ -52,7 +52,7 @@ Until then, it lives on GitHub, at <a class="reference external" href="https://g
 <span class="n">vfile</span> <span class="o">=</span> <span class="n">VestaFile</span><span class="p">(</span><span class="s2">&quot;file.vesta&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p><code class="xref py py-class docutils literal notranslate"><span class="pre">VestaFile</span></code> holds all the data for a VESTA file and provides methods for
+<p><a class="reference internal" href="vestafile.html#vestacrystparser.VestaFile" title="vestacrystparser.VestaFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">VestaFile</span></code></a> holds all the data for a VESTA file and provides methods for
 inspecting and modifying that data.
 For example, you can change the view boundary and hide the compass with,</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vfile</span><span class="o">.</span><span class="n">set_boundary</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
@@ -61,7 +61,7 @@ For example, you can change the view boundary and hide the compass with,</p>
 </div>
 <p>The methods of VestaFile are not yet comprehensive.
 If you need to perform an action not covered by the high-level API, you can
-modify the sections directly (which are represented with <code class="xref py py-class docutils literal notranslate"><span class="pre">VestaSection</span></code>
+modify the sections directly (which are represented with <a class="reference internal" href="api_parser.html#vestacrystparser.parser.VestaSection" title="vestacrystparser.parser.VestaSection"><code class="xref py py-class docutils literal notranslate"><span class="pre">VestaSection</span></code></a>
 objects).
 Beware that no safety checks are performed here, so be careful not to leave the
 sections in a corrupt state.</p>
@@ -71,9 +71,9 @@ sections in a corrupt state.</p>
 <span class="n">section2</span><span class="o">.</span><span class="n">inline</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 </pre></div>
 </div>
-<p>For VESTA files with multiple phases, <code class="xref py py-meth docutils literal notranslate"><span class="pre">VestaFile.set_current_phase()</span></code>
+<p>For VESTA files with multiple phases, <a class="reference internal" href="vestafile.html#vestacrystparser.VestaFile.set_current_phase" title="vestacrystparser.VestaFile.set_current_phase"><code class="xref py py-meth docutils literal notranslate"><span class="pre">VestaFile.set_current_phase()</span></code></a>
 should be used to change the phase referenced by default by the API.
-Alternatively, <code class="xref py py-meth docutils literal notranslate"><span class="pre">VestaFile.__getitem__()</span></code> accepts
+Alternatively, <a class="reference internal" href="vestafile.html#vestacrystparser.VestaFile.__getitem__" title="vestacrystparser.VestaFile.__getitem__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">VestaFile.__getitem__()</span></code></a> accepts
 a second argument, the index of the desired phase.</p>
 <p>E.g. The following two code blocks both unset the compass visibility for
 Phase 1 (phase indices are 0-based).</p>
@@ -85,17 +85,17 @@ Phase 1 (phase indices are 0-based).</p>
 <span class="n">section</span><span class="o">.</span><span class="n">inline</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 </pre></div>
 </div>
-<p>Finally, the VestaFile may be written back to file with <code class="xref py py-meth docutils literal notranslate"><span class="pre">VestaFile.save()</span></code>.</p>
+<p>Finally, the VestaFile may be written back to file with <a class="reference internal" href="vestafile.html#vestacrystparser.VestaFile.save" title="vestacrystparser.VestaFile.save"><code class="xref py py-meth docutils literal notranslate"><span class="pre">VestaFile.save()</span></code></a>.</p>
 </section>
 <section id="importing-structure-files-to-vesta">
 <h2>Importing structure files to VESTA<a class="headerlink" href="#importing-structure-files-to-vesta" title="Link to this heading">¶</a></h2>
 <p>Often, you may have structure data which you could open in VESTA, but not yet
 a VESTA file.
-In these cases, the <code class="xref py py-mod docutils literal notranslate"><span class="pre">convert</span></code> module allows reading in structure data and
-outputing a <code class="xref py py-class docutils literal notranslate"><span class="pre">VestaFile</span></code> object (which can be written to a VESTA file).
+In these cases, the <a class="reference internal" href="api_convert.html#module-vestacrystparser.convert" title="vestacrystparser.convert"><code class="xref py py-mod docutils literal notranslate"><span class="pre">convert</span></code></a> module allows reading in structure data and
+outputing a <a class="reference internal" href="vestafile.html#vestacrystparser.VestaFile" title="vestacrystparser.VestaFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">VestaFile</span></code></a> object (which can be written to a VESTA file).
 Currently, POSCAR files and generic <code class="xref py py-class docutils literal notranslate"><span class="pre">pymatgen.core.Structure</span></code> objects are
 supported.</p>
-<p>The <code class="xref py py-mod docutils literal notranslate"><span class="pre">convert</span></code> module requires <a class="reference external" href="https://pymatgen.org/">pymatgen</a> to be installed.</p>
+<p>The <a class="reference internal" href="api_convert.html#module-vestacrystparser.convert" title="vestacrystparser.convert"><code class="xref py py-mod docutils literal notranslate"><span class="pre">convert</span></code></a> module requires <a class="reference external" href="https://pymatgen.org/">pymatgen</a> to be installed.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">vestacrystparser.convert</span>
 
 <span class="c1"># Load directly from POSCAR file.</span>
