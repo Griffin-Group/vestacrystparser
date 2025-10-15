@@ -28,6 +28,8 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Physics",
     "Topic :: Scientific/Engineering :: Visualization",
 ]
+license = "MIT"
+license-files = ["LICENSE"]
 
 [project.optional-dependencies]
 pymatgen = ["pymatgen"]
@@ -42,3 +44,4 @@ dev = [
 
 [project.urls]
 Repository = "https://github.com/Griffin-Group/vestacrystparser"
+Documentation = "https://griffin-group.github.io/vestacrystparser/"
