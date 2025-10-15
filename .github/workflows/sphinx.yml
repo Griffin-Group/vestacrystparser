@@ -11,6 +11,12 @@ jobs:
     - uses: actions/checkout@v4
       with:
         persist-credentials: false
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.13"
+    - name: Install vestacrystparser
+      run: python -m pip install -e .[pymatgen]
     - name: Build HTML
       uses: ammaraskar/sphinx-action@8.2.3
     - name: Upload artifacts
