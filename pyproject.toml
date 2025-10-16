@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools >= 61.0"]
+requires = ["setuptools >= 80.0", "setuptools_scm[simple] >= 8"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "vestacrystparser"
-version = "0.0.1a"
+version = "0.0.1a1"
 dependencies = [
 ]
 requires-python = ">= 3.9"

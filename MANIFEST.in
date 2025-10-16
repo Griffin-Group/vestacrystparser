@@ -1,0 +1,2 @@
+exclude .gitignore CONTRIBUTING.md
+recursive-exclude docs .github
