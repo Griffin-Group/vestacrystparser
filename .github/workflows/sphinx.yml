@@ -1,6 +1,14 @@
 name: "Sphinx: Render docs"
 
-on: push
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      # Rebuild the docs only if the docs changed.
+      - "docs/**"
+      - "vestacrystparser/**"
+      - "CONTRIBUTING.md"
+      - ".github/workflows/sphinx.yml"
 
 jobs:
   build:

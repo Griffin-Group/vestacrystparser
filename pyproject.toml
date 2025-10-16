@@ -18,7 +18,7 @@ maintainers = [
 description = "Parser for VESTA crystal structure visualisation files."
 readme = "README.md"
 classifiers = [
-    "Development Status :: 1 - Planning",
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
     "Natural Language :: English",
     "Programming Language :: Python",
