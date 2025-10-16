@@ -1,2 +1,3 @@
-exclude .gitignore CONTRIBUTING.md
-recursive-exclude docs .github
+exclude .gitignore CONTRIBUTING.md MANIFEST.in
+prune docs
+prune .github
