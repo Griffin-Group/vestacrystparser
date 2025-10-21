@@ -1,4 +1,4 @@
-# Copyright 2025 Bernard Field
+# Copyright 2025 Bernard Field, Musa Hussein
 """Parse, modify, and write VESTA files, for visualisation of crystals.
 
 :class:`.VestaFile` is the core class, while all other objects here support it.
