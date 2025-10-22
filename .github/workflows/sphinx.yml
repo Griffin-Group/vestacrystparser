@@ -21,6 +21,8 @@ jobs:
         persist-credentials: false
     - name: Build HTML
       uses: ammaraskar/sphinx-action@8.2.3
+      env:
+        SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VESTACRYSTPARSER: "v0.0.0"
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
