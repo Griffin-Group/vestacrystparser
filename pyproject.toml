@@ -46,3 +46,6 @@ dev = [
 [project.urls]
 Repository = "https://github.com/Griffin-Group/vestacrystparser"
 Documentation = "https://griffin-group.github.io/vestacrystparser/"
+
+[tools.setuptools_scm]
+fallback_version = "v0.0.0"
