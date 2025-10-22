@@ -1266,7 +1266,9 @@ class VestaFile:
 
     def distance(self, x1: float, y1: float, z1: float,
                  x2: float, y2: float, z2: float) -> float:
-        """Return the Cartesian distance between two points (frac coords)."""
+        """Return the Cartesian distance between two points
+        (given in fractional coordinates).
+        """
         cell = self.get_cell_matrix()
         # Difference vector, in fractional coordinates.
         diff = [x1 - x2, y1 - y2, z1 - z2]
@@ -1710,7 +1712,7 @@ class VestaFile:
             start: Depth at which depth cueing begins.
             end: Depth at which depth cueing ends.
 
-        Related properties: DPTHQ
+        Related sections: :ref:`DPTHQ`
         """
         section = self["DPTHQ"]
         if enable is not None:
