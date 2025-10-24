@@ -37,13 +37,21 @@
 <h1>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h1>
 <section id="installation">
 <span id="id1"></span><h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h2>
-<p>vestacrystparser can be installed via pip:</p>
+<p>vestacrystparser can be installed via <code class="docutils literal notranslate"><span class="pre">pip</span></code>:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install vestacrystparser</span>
 </pre></div>
 </div>
 <p>You can also find the latest source code on GitHub, at
 <a class="reference external" href="https://github.com/GriffinGroup/vestacrystparser">https://github.com/GriffinGroup/vestacrystparser</a>, where you can install it via
 the standard means for installing from source from GitHub.</p>
+<p>vestacrystparser itself is lightweight. However, <a class="reference internal" href="api_convert.html#module-vestacrystparser.convert" title="vestacrystparser.convert"><code class="xref py py-mod docutils literal notranslate"><span class="pre">vestacrystparser.convert</span></code></a>
+requires <a class="reference external" href="https://pymatgen.org/">pymatgen</a> to parse structure files.
+This can be installed as an extra via</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install &quot;vestacyrstparser[pymatgen]&quot;</span>
+</pre></div>
+</div>
+<p>or installed separately via <code class="docutils literal notranslate"><span class="pre">pip</span></code> or <code class="docutils literal notranslate"><span class="pre">conda</span></code>.</p>
+<p>Dependencies for development can be installed with the <code class="docutils literal notranslate"><span class="pre">[dev]</span></code> extra.</p>
 </section>
 <section id="modifying-vesta-files">
 <h2>Modifying VESTA files<a class="headerlink" href="#modifying-vesta-files" title="Link to this heading">¶</a></h2>

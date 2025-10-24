@@ -6,7 +6,7 @@ Usage
 Installation
 ------------
 
-vestacrystparser can be installed via pip:
+vestacrystparser can be installed via ``pip``:
 
 .. code-block:: console
 
@@ -15,6 +15,18 @@ vestacrystparser can be installed via pip:
 You can also find the latest source code on GitHub, at
 https://github.com/GriffinGroup/vestacrystparser, where you can install it via
 the standard means for installing from source from GitHub.
+
+vestacrystparser itself is lightweight. However, :mod:`vestacrystparser.convert`
+requires `pymatgen`_ to parse structure files.
+This can be installed as an extra via
+
+.. code-block:: console
+
+    pip install "vestacyrstparser[pymatgen]"
+
+or installed separately via ``pip`` or ``conda``.
+
+Dependencies for development can be installed with the ``[dev]`` extra.
 
 Modifying VESTA files
 ---------------------
