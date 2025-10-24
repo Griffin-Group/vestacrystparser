@@ -21,7 +21,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         persist-credentials: false
-        fetch-tags: true
+        #fetch-tags: true This seemed to cause errors?
         # HEAD should have a tag if we just published, so don't need fetch: 0.
     - name: Set up Python
       uses: actions/setup-python@v5
