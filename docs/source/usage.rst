@@ -6,14 +6,15 @@ Usage
 Installation
 ------------
 
-At release I'll probably put this on pip, at which point you can do
+vestacrystparser can be installed via pip:
 
 .. code-block:: console
 
     pip install vestacrystparser
 
-But that isn't available yet.
-Until then, it lives on GitHub, at https://github.com/GriffinGroup/vestacrystparser.
+You can also find the latest source code on GitHub, at
+https://github.com/GriffinGroup/vestacrystparser, where you can install it via
+the standard means for installing from source from GitHub.
 
 Modifying VESTA files
 ---------------------
