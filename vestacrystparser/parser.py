@@ -765,6 +765,96 @@ class VestaFile:
             if line[0] > 0:
                 line[0] = i + 1
 
+    def add_isosurface(self,
+                       level: float,
+                       mode: int = 0,
+                       r: int = 255,
+                       g: int = 255,
+                       b: int = 0,
+                       opacity1: int = 127,
+                       opacity2: int = 255,
+            ):
+        """Adds a new isosurface.
+        
+        Mimics Properties > Isosurfaces > Isosurfaces.
+        
+        Args:
+            level: isosurface threshold.
+            mode: flag. 0=Positive and Negative, 1=Positive, 2=Negative.
+            r, g, b: Colour of isosurface (0-255).
+            opacity1: Opacity of polygons parallel to the screen (0-255).
+            opacity2: Opacity of polygons perpendicular to the screen (0-255).
+        
+        Related sections: :ref:`ISURF`
+        """
+        section = self["ISURF"]
+        # Validate inputs
+        if mode not in [0, 1, 2]:
+            raise ValueError(f"Mode is expected to be 0, 1, or 2, not {mode}.")
+        # What is the new index?
+        index = len(section)
+        # Construct the new row
+        row = [index, level, mode, r, g, b, opacity1, opacity2]
+        # Append the new row
+        section.data.insert(index-1, row)
+
+    def edit_isosurface(self,
+                        index: int,
+                        level: float = None,
+                        mode: int = None,
+                        r: int = None,
+                        g: int = None,
+                        b: int = None,
+                        opacity1: int = None,
+                        opacity2: int = None,
+            ):
+        """Edits an existing isosurface.
+        
+        Mimics Properties > Isosurfaces > Isosurfaces.
+
+        All arguments after index are optional. Unset arguments are left 
+        unchanged.
+        
+        Args:
+            index: 1-based index. Accepts negative indices, counting from the
+                end.
+            level: isosurface threshold.
+            mode: flag. 0=Positive and Negative, 1=Positive, 2=Negative.
+            r, g, b: Colour of isosurface (0-255).
+            opacity1: Opacity of polygons parallel to the screen (0-255).
+            opacity2: Opacity of polygons perpendicular to the screen (0-255).
+        
+        Related sections: :ref:`ISURF`
+        """
+        if index == 0:
+            raise IndexError("VESTA indices are 1-based; 0 is invalid index.")
+        section = self["ISURF"]
+        # Process the index.
+        if index < 0:
+            # Note that length of section includes the empty 0-line.
+            index = len(section) + index
+        if index <= 0 or index >= len(section):
+            raise IndexError("Index is out of range.")
+        # Validate inputs
+        if mode not in [0, 1, 2]:
+            raise ValueError(f"Mode is expected to be 0, 1, or 2, not {mode}.")
+        # Update values
+        row = section.data[index - 1]
+        if mode is not None:
+            row[1] = mode
+        if level is not None:
+            row[2] = level
+        if r is not None:
+            row[3] = r
+        if g is not None:
+            row[4] = g
+        if b is not None:
+            row[5] = b
+        if opacity1 is not None:
+            row[6] = opacity1
+        if opacity2 is not None:
+            row[7] = opacity2
+
     def delete_isosurface(self, index: int):
         """Deletes an isosurface, specified by index.
 
@@ -772,7 +862,7 @@ class VestaFile:
             index: 1-based index. Accepts negative indices, counting from the
                 end.
 
-        Related section: ISURF.
+        Related sections: :ref:`ISURF`
         """
         if index == 0:
             raise IndexError("VESTA indices are 1-based; 0 is invalid index.")
@@ -789,6 +879,37 @@ class VestaFile:
         for i, line in enumerate(section.data):
             if line[0] > 0:
                 line[0] = i + 1
+
+    def add_volumetric_data(path: str, factor: float = 1, mode: str = "add"):
+        """Adds a new volumetric data set to be imported by VESTA.
+        
+        Does not validate the given file path.
+
+        While VESTA resets the isosurfaces when loading new volumetric data,
+        because VestaFile does not import the data we don't reset the
+        isosurfaces.
+
+        Args:
+            path: Relative path to volumetric data file.
+            factor: Value to multiply volumetric data by before adding to file.
+                Angstrom^3 to Bohr^3 is 0.148185.
+                Bohr^3 to Angstrom^3 is 6.748334.
+            mode: How to include the volumetric data.
+                - "add" or "+": add the data.
+                - "subtract" or "-": subtract the data (same as `-1*factor`).
+                - "multiply" or "x": multiply the data.
+                - "divide" or "/": use this data as the divisor and previous
+                    as numerator.
+                - "replace": replace all existing volumetric data.
+
+        Related sections: :ref:`IMPORT_DENISTY`
+        """
+        # TODO
+        pass
+
+    def delete_volumetric_data(self, index: int):
+        # TODO
+        pass
 
     def set_section_color_scheme(self, scheme: Union[int, str]):
         """Sets the colour scheme of volumetric sections.
