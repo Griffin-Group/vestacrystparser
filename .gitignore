@@ -2,6 +2,7 @@
 *.swp
 tmp.*
 docs/source/generated
+CHGCAR_PbSe.vasp
 
 .vscode/
 

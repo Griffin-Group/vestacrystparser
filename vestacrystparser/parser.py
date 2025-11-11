@@ -327,7 +327,14 @@ class VestaSection:
             line: raw string of the line.
         """
         if self.header == "TITLE":
+            # TITLE's single entry may have spaces.
             self.data.append([line])
+        elif self.header == "IMPORT_DENSITY":
+            # IMPORT_DENSITY is something like "+1.00000 path/to/file/name"
+            # The first entry may look like a float, but it may start with
+            # something like "x+1.000" or "/-1.234", so is actually a string.
+            # And the second part, the file name, might have spaces.
+            self.data.append(line.split(maxsplit=1))
         else:
             self.data.append(parse_line(line))
 
@@ -346,11 +353,7 @@ class VestaSection:
         else:
             text += f"{self.header}\n"
         for line in self.data:
-            if self.header == "IMPORT_DENSITY":
-                # IMPORT_DENSITY requires a *signed* float.
-                text += "{:+.6f} {}\n".format(*line)
-            else:
-                text += " ".join(str(x) for x in line) + "\n"
+            text += " ".join(str(x) for x in line) + "\n"
         # Add a blank line if required.
         if self.header in sections_with_blank_line:
             text += "\n"
@@ -376,26 +379,34 @@ class VestaPhase:
         """Return True if VestaPhase contains a section with `name`."""
         return name in self._sections
 
-    def append(self, section: VestaSection):
+    def append(self, section: VestaSection, before: str = None):
         """Add a new section to the phase.
 
         VestaSection is added by reference, so you can keep modifying it.
 
         Args:
             section: :class:`VestaSection` not already present.
+            before: If provided, insert the new section before the section
+                of the same name. Otherwise, insert at end.
 
         Raises:
             KeyError: section with the same header is already present.
+            KeyError: `before` is not a header in this Phase.
         """
         header = section.header
         if header in self:
             raise KeyError(
                 f"{header} is already in this VestaPhase! Cannot append.")
         else:
+            if before and before not in self:
+                raise KeyError(f"{before} is not present in this VestaPhase!")
             # Intentionally not copying, as we want to update the
             # VestaSection as we construct it.
             self._sections[header] = section
-            self._order.append(header)
+            if before:
+                self._order.insert(self._order.index(before), header)
+            else:
+                self._order.append(header)
 
     def __len__(self) -> int:
         """Number of sections."""
@@ -405,6 +416,13 @@ class VestaPhase:
         """Iterate over each section."""
         for header in self._order:
             yield self._sections[header]
+    
+    def remove(self, name: str):
+        """Deletes the given VestaSection."""
+        if name not in self:
+            raise KeyError(f"{name} is not in this VestaPhase! Cannot remove.")
+        del self._order[name]
+        del self._sections[name]
 
     @property
     def title(self) -> str:
@@ -630,6 +648,28 @@ class VestaFile:
     def nvectors(self) -> int:
         """Number of vector types in the current phase (read-only)"""
         return len(self["VECTT"].data) - 1
+
+    def remove(self, name: str, phase: int = None):
+        """
+        Deletes a section. Use with caution to avoid malformed data!
+
+        Its main use is to remove optional sections like IMPORT_DENSITY
+        when they become empty.
+
+        Args:
+            name: Name of the section.
+            phase: Phase (0-indexed). Defaults to current phase.
+        """
+        if phase is None:
+            phase = self.current_phase
+        if (name, phase) not in self:
+            raise KeyError(f"{name} is not in phase {phase}! Cannot remove.")
+        if name in sections_that_are_global:
+            self._globalsections.remove(name)
+        elif name == "#VESTA_FORMAT_VERSION":
+            raise RuntimeError(f"Cannot delete {name}.")
+        else:
+            self._phases[phase].remove(name)
 
     # Methods for modifying the system.
     def set_site_color(self, index: Union[int, list[int]],
@@ -880,7 +920,8 @@ class VestaFile:
             if line[0] > 0:
                 line[0] = i + 1
 
-    def add_volumetric_data(path: str, factor: float = 1, mode: str = "add"):
+    def add_volumetric_data(self, path: str, factor: float = 1,
+                            mode: str = "add"):
         """Adds a new volumetric data set to be imported by VESTA.
         
         Does not validate the given file path.
@@ -902,14 +943,75 @@ class VestaFile:
                     as numerator.
                 - "replace": replace all existing volumetric data.
 
-        Related sections: :ref:`IMPORT_DENISTY`
+        Related sections: :ref:`IMPORT_DENSITY`
         """
-        # TODO
-        pass
+        # Parse the mode.
+        prefix = ''
+        interpolation_factor = 1 # Default interpolation factor.
+        if mode == "replace":
+            if "IMPORT_DENSITY" in self:
+                # Record the current interpolation factor.
+                interpolation_factor = self["IMPORT_DENSITY"].inline
+                # Delete all current data.
+                self.remove("IMPORT_DENSITY")
+        elif mode == "add" or mode == "+":
+            pass # No modification needed
+        elif mode == "subtract" or mode == "-":
+            factor *= -1
+        elif mode == "multiply" or mode == "x":
+            prefix = 'x'
+        elif mode == "divide" or mode == "/":
+            prefix = "/"
+        else:
+            raise ValueError(f"Unrecognised volumetric data mode: {mode}")
+        # If the section doesn't exist, add it.
+        if "IMPORT_DENSITY" not in self:
+            self._phases[self.current_phase].append(
+                VestaSection(f"IMPORT_DENSITY {interpolation_factor}"),
+                before="GROUP")
+        # Specify the line
+        formatted_factor = f"{prefix}{factor:+.6f}"
+        self["IMPORT_DENSITY"].data.append([formatted_factor, path])
 
     def delete_volumetric_data(self, index: int):
-        # TODO
-        pass
+        """Deletes a volumetric dataset, specified by index.
+
+        Removes IMPORT_DENSITY if no volumetric data remains.
+        
+        Args:
+            index: 1-based index. Accepts negative indices, counting from the
+                end.
+        
+        Related sections: :ref:`IMPORT_DENSITY`
+        """
+        if index == 0:
+            raise IndexError("VESTA indices are 1-based; 0 is invalid index.")
+        try:
+            section = self["IMPORT_DENSITY"]
+        except KeyError:
+            raise IndexError("No volumetric data available.")
+        # Process the index.
+        if index < 0:
+            index = len(section) + 1 + index
+        if index <= 0 or index >= len(section):
+            raise IndexError("Index is out of range.")
+        # Delete the entry
+        if len(section) == 1:
+            # It is the only entry, so we remove the whole section
+            self.remove("IMPORT_DENSITY")
+        else:
+            del section.data[index - 1]
+
+    def set_volumetric_interpolation_factor(self, factor: int):
+        """Sets the interpolation factor for volumetric data.
+        
+        Related sections: :ref:`IMPORT_DENSITY`
+        """
+        if "IMPORT_DENSITY" not in self:
+            logger.warning(
+                "IMPORT_DENSITY not present. Cannot set interpolation factor.")
+            return
+        self["IMPORT_DENSITY"].inline = factor
 
     def set_section_color_scheme(self, scheme: Union[int, str]):
         """Sets the colour scheme of volumetric sections.
