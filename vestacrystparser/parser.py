@@ -421,7 +421,7 @@ class VestaPhase:
         """Deletes the given VestaSection."""
         if name not in self:
             raise KeyError(f"{name} is not in this VestaPhase! Cannot remove.")
-        del self._order[name]
+        del self._order[self._order.index(name)]
         del self._sections[name]
 
     @property
@@ -834,7 +834,7 @@ class VestaFile:
         # What is the new index?
         index = len(section)
         # Construct the new row
-        row = [index, level, mode, r, g, b, opacity1, opacity2]
+        row = [index, mode, level, r, g, b, opacity1, opacity2]
         # Append the new row
         section.data.insert(index-1, row)
 
@@ -876,7 +876,7 @@ class VestaFile:
         if index <= 0 or index >= len(section):
             raise IndexError("Index is out of range.")
         # Validate inputs
-        if mode not in [0, 1, 2]:
+        if mode is not None and mode not in [0, 1, 2]:
             raise ValueError(f"Mode is expected to be 0, 1, or 2, not {mode}.")
         # Update values
         row = section.data[index - 1]
@@ -951,7 +951,7 @@ class VestaFile:
         if mode == "replace":
             if "IMPORT_DENSITY" in self:
                 # Record the current interpolation factor.
-                interpolation_factor = self["IMPORT_DENSITY"].inline
+                interpolation_factor = self["IMPORT_DENSITY"].inline[0]
                 # Delete all current data.
                 self.remove("IMPORT_DENSITY")
         elif mode == "add" or mode == "+":
@@ -993,7 +993,7 @@ class VestaFile:
         # Process the index.
         if index < 0:
             index = len(section) + 1 + index
-        if index <= 0 or index >= len(section):
+        if index <= 0 or index > len(section):
             raise IndexError("Index is out of range.")
         # Delete the entry
         if len(section) == 1:
@@ -1004,6 +1004,8 @@ class VestaFile:
 
     def set_volumetric_interpolation_factor(self, factor: int):
         """Sets the interpolation factor for volumetric data.
+
+        Logs a warning but does nothing if no volumetric data present.
         
         Related sections: :ref:`IMPORT_DENSITY`
         """
@@ -1011,7 +1013,7 @@ class VestaFile:
             logger.warning(
                 "IMPORT_DENSITY not present. Cannot set interpolation factor.")
             return
-        self["IMPORT_DENSITY"].inline = factor
+        self["IMPORT_DENSITY"].inline[0] = factor
 
     def set_section_color_scheme(self, scheme: Union[int, str]):
         """Sets the colour scheme of volumetric sections.

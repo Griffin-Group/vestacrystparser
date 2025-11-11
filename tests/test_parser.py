@@ -1059,3 +1059,25 @@ def test_edit_bond(sample_vestafile):
         sample_vestafile.edit_bond(1, A1="Cu")
     assert compare_vesta_strings(str(sample_vestafile["SBOND"]), expected_sbond), \
         "Editing non-existent bonds changed things!"
+
+
+def test_add_volumetric_data(sample_vestafile):
+    # Test adding volumetric data to a file that doesn't currently have any
+    sample_vestafile.add_volumetric_data("FOO")
+    expected_density = """IMPORT_DENSITY 1
++1.000000 FOO
+"""
+    assert "IMPORT_DENSITY" in sample_vestafile, \
+        "Failed to add IMPORT_DENSITY"
+    assert compare_vesta_strings(str(sample_vestafile["IMPORT_DENSITY"]), expected_density), \
+        "Failed to add new volumetric data"
+
+
+def test_set_volumetric_interpolation_factor(sample_vestafile, caplog):
+    # Test removing volumetric data in an empty file
+    assert "IMPORT_DENSITY" not in sample_vestafile
+    sample_vestafile.set_volumetric_interpolation_factor(5)
+    assert "IMPORT_DENSITY" not in sample_vestafile
+    assert caplog.records[-1].levelname == "WARNING", \
+        "Setting interpolation factor in absence of IMPORT_DENSITY did not raise a warning."
+
