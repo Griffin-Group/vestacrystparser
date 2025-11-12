@@ -936,11 +936,11 @@ class VestaFile:
                 Angstrom^3 to Bohr^3 is 0.148185.
                 Bohr^3 to Angstrom^3 is 6.748334.
             mode: How to include the volumetric data.
+
                 - "add" or "+": add the data.
                 - "subtract" or "-": subtract the data (same as `-1*factor`).
                 - "multiply" or "x": multiply the data.
-                - "divide" or "/": use this data as the divisor and previous
-                    as numerator.
+                - "divide" or "/": use this data as the divisor and previous as numerator.
                 - "replace": replace all existing volumetric data.
 
         Related sections: :ref:`IMPORT_DENSITY`

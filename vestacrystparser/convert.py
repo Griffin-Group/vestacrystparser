@@ -54,13 +54,16 @@ def vesta_from_volumetric(volu: VolumetricData, fname: str, n: float = 2,
     """Return a VestaFile from pymatgen VolumetricData
 
     Assumes the Volumetric data is in units of Angstrom, not Bohr.
+
+    Isosurface level is determined by (Vesta Manual section 16.7)
+
+    .. math::
+        d(iso) = \\langle \\vert \\rho \\vert \\rangle + n \\times \\sigma(\\vert \\rho \\vert)
     
     Args:
         volu: VolumetricData object, with structure and volumetric data
         fname: Filename where the volumetric data lives.
         n: Parameter for setting the default isosurface level.
-            From VESTA Manual,
-            $d(iso) = \\langle \\vert \\rho \\vert \\rangle + n \\times \\sigma(\\vert \\rho \\vert)$
         chgcar_like: If True, divides out the volume.
     """
     # Get the structural component
@@ -85,6 +88,11 @@ def vesta_from_volumetric(volu: VolumetricData, fname: str, n: float = 2,
 def vesta_from_chgcar(fname: str, n: float = 2) -> VestaFile:
     """Return a VestaFile from VASP CHGCAR.
 
+    Isosurface level is determined by (Vesta Manual section 16.7)
+
+    .. math::
+        d(iso) = \\langle \\vert \\rho \\vert \\rangle + n \\times \\sigma(\\vert \\rho \\vert)
+
     A caution, though. It would appear that VESTA uses a slightly strange
     method of calculating the standard deviation.
     As such, the isosurface level set by this method may be off by an amount
@@ -93,8 +101,6 @@ def vesta_from_chgcar(fname: str, n: float = 2) -> VestaFile:
     Args:
         fname: Filename of the CHGCAR
         n: Parameter for setting the default isosurface level.
-            From VESTA Manual,
-            $d(iso) = \\langle \\vert \\rho \\vert \\rangle + n \\times \\sigma(\\vert \\rho \\vert)$
     """
     # Load file
     chg = Chgcar.from_file(fname)
