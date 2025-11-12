@@ -1002,6 +1002,8 @@ class VestaFile:
         else:
             del section.data[index - 1]
 
+    # TODO: Utilities for resolving relative file paths when saving.
+
     def set_volumetric_interpolation_factor(self, factor: int):
         """Sets the interpolation factor for volumetric data.
 

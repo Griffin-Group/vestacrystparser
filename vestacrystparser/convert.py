@@ -3,8 +3,12 @@
 """Create VESTA files from structural data files (POSCAR, etc.).
 """
 
+import numpy as np
+
 from pymatgen.core import Structure
 from pymatgen.io.vasp.inputs import Poscar
+from pymatgen.io.common import VolumetricData
+from pymatgen.io.vasp.outputs import Chgcar
 
 from vestacrystparser.parser import VestaFile
 
@@ -43,6 +47,48 @@ def vesta_from_poscar(fname: str) -> VestaFile:
     # Set the title
     vfile.title = pos.comment
     return vfile
+
+# Volumetric data
+def vesta_from_volumetric(volu: VolumetricData, fname: str, n: float = 2) -> VestaFile:
+    """Return a VestaFile from pymatgen VolumetricData
+    
+    Args:
+        volu: VolumetricData object, with structure and volumetric data
+        fname: Filename where the volumetric data lives.
+        n: Parameter for setting the default isosurface level.
+            From VESTA Manual,
+            $d(iso) = \\langle \\vert \\rho \\vert \\rangle + n \\times \\sigma(\\vert \\rho \\vert)$
+    """
+    # Get the structural component
+    vfile = vesta_from_structure(volu.structure)
+    # Determine the isosurface level
+    # See Section 16.7 of the VESTA Manual
+    absrho = np.abs(volu.data["total"]) / volu.structure.volume
+    level = absrho.mean() + n * absrho.std()
+    # Set volumetric data
+    vfile.add_volumetric_data(fname)
+    vfile.add_isosurface(level)
+    return vfile
+
+
+def vesta_from_chgcar(fname: str, n: float = 2) -> VestaFile:
+    """Return a VestaFile from VASP CHGCAR.
+    
+    Args:
+        fname: Filename of the CHGCAR
+        n: Parameter for setting the default isosurface level.
+            From VESTA Manual,
+            $d(iso) = \\langle \\vert \\rho \\vert \\rangle + n \\times \\sigma(\\vert \\rho \\vert)$
+    """
+    # Load file
+    chg = Chgcar.from_file(fname)
+    # Parse file into VESTA format
+    vfile = vesta_from_volumetric(chg, fname, n = n)
+    # Add title
+    vfile.title = chg.poscar.comment
+    return vfile
+
+
 
 # Thoughts...
 # CIF will be tricky, because it contains symmetry and precision
