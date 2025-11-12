@@ -32,6 +32,7 @@ def poscar_filename() -> str:
 def poscar_structure(poscar_filename) -> Structure:
     return Structure.from_file(poscar_filename)
 
+
 def test_vesta_from_poscar(poscar_filename, sample_vestafile):
     # Load the file, then compare it with the file we loaded.
     converted_file = vesta_from_poscar(poscar_filename)

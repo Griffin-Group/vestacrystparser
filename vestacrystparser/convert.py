@@ -49,6 +49,8 @@ def vesta_from_poscar(fname: str) -> VestaFile:
     return vfile
 
 # Volumetric data
+
+
 def vesta_from_volumetric(volu: VolumetricData, fname: str, n: float = 2,
                           chgcar_like: bool = True) -> VestaFile:
     """Return a VestaFile from pymatgen VolumetricData
@@ -59,7 +61,7 @@ def vesta_from_volumetric(volu: VolumetricData, fname: str, n: float = 2,
 
     .. math::
         d(iso) = \\langle \\vert \\rho \\vert \\rangle + n \\times \\sigma(\\vert \\rho \\vert)
-    
+
     Args:
         volu: VolumetricData object, with structure and volumetric data
         fname: Filename where the volumetric data lives.
@@ -71,7 +73,7 @@ def vesta_from_volumetric(volu: VolumetricData, fname: str, n: float = 2,
     # Determine the isosurface level
     # See Section 16.7 of the VESTA Manual
     # Convert to Bohr and divide out volume: Section 17.4.3
-    a2b = 0.148185 # Angstom^3 to Bohr^3
+    a2b = 0.148185  # Angstom^3 to Bohr^3
     if chgcar_like:
         data = volu.data["total"] / volu.structure.volume * a2b
     else:
@@ -97,7 +99,7 @@ def vesta_from_chgcar(fname: str, n: float = 2) -> VestaFile:
     method of calculating the standard deviation.
     As such, the isosurface level set by this method may be off by an amount
     (e.g. 5%).
-    
+
     Args:
         fname: Filename of the CHGCAR
         n: Parameter for setting the default isosurface level.
@@ -105,11 +107,10 @@ def vesta_from_chgcar(fname: str, n: float = 2) -> VestaFile:
     # Load file
     chg = Chgcar.from_file(fname)
     # Parse file into VESTA format
-    vfile = vesta_from_volumetric(chg, fname, n = n)
+    vfile = vesta_from_volumetric(chg, fname, n=n)
     # Add title
     vfile.title = chg.poscar.comment
     return vfile
-
 
 
 # Thoughts...

@@ -382,6 +382,7 @@ def test_set_section_cutoff_levels(sample_vestafile):
     assert compare_vesta_strings(
         str(sample_vestafile["SECTS"]), expected_sects)
 
+
 def test_set_section_saturation_levels(sample_vestafile):
     # Change both
     sample_vestafile.set_section_saturation_levels(0.1, 0.9)
@@ -403,6 +404,7 @@ def test_set_section_saturation_levels(sample_vestafile):
     assert compare_vesta_strings(
         str(sample_vestafile["SECTP"]), expected_sectp), \
         "Error when setting maximum section saturation level."
+
 
 def test_set_boundary(sample_vestafile):
     # Test setting all 6 parameters
@@ -1101,4 +1103,3 @@ def test_set_volumetric_interpolation_factor(sample_vestafile, caplog):
     assert "IMPORT_DENSITY" not in sample_vestafile
     assert caplog.records[-1].levelname == "WARNING", \
         "Setting interpolation factor in absence of IMPORT_DENSITY did not raise a warning."
-

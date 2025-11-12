@@ -9,6 +9,7 @@ from vestacrystparser.parser import VestaFile
 
 from test_parser import compare_vesta_strings, DATA_DIR
 
+
 @pytest.fixture
 def sample_vesta_filename() -> str:
     return os.path.join(DATA_DIR, "CHGCAR_PbSe.vesta")
@@ -17,6 +18,7 @@ def sample_vesta_filename() -> str:
 @pytest.fixture
 def sample_vestafile(sample_vesta_filename) -> VestaFile:
     return VestaFile(sample_vesta_filename)
+
 
 @pytest.fixture
 def sample_vesta_filename2() -> str:
@@ -169,7 +171,8 @@ def test_add_volumetric_data(sample_vestafile):
     assert compare_vesta_strings(str(sample_vestafile["IMPORT_DENSITY"]), expected_density), \
         "Couldn't add volumetric data with default parameters."
     # other options
-    sample_vestafile.add_volumetric_data("ABC.vasp", factor=1.5, mode="subtract")
+    sample_vestafile.add_volumetric_data(
+        "ABC.vasp", factor=1.5, mode="subtract")
     expected_density = """IMPORT_DENSITY 1
 +1.000000 CHGCAR_PbSe.vasp
 +1.000000 Option1.vasp
@@ -177,7 +180,8 @@ def test_add_volumetric_data(sample_vestafile):
 """
     assert compare_vesta_strings(str(sample_vestafile["IMPORT_DENSITY"]), expected_density), \
         "Failed to subtract volumetric data."
-    sample_vestafile.add_volumetric_data("XYZ.vasp", factor=-0.1, mode="multiply")
+    sample_vestafile.add_volumetric_data(
+        "XYZ.vasp", factor=-0.1, mode="multiply")
     expected_density = """IMPORT_DENSITY 1
 +1.000000 CHGCAR_PbSe.vasp
 +1.000000 Option1.vasp
@@ -186,7 +190,8 @@ x-0.100000 XYZ.vasp
 """
     assert compare_vesta_strings(str(sample_vestafile["IMPORT_DENSITY"]), expected_density), \
         "Failed to multiply volumetric data."
-    sample_vestafile.add_volumetric_data("../my cool directory/my file.xyz", mode="divide")
+    sample_vestafile.add_volumetric_data(
+        "../my cool directory/my file.xyz", mode="divide")
     expected_density = """IMPORT_DENSITY 1
 +1.000000 CHGCAR_PbSe.vasp
 +1.000000 Option1.vasp
@@ -236,6 +241,7 @@ def test_add_volumetric_data_replace(sample_vestafile):
     assert compare_vesta_strings(str(sample_vestafile["IMPORT_DENSITY"]), expected_density), \
         "Failed to replace volumetric data."
 
+
 def test_add_volumetric_data_replace2(sample_vestafile):
     # Replace
     sample_vestafile.set_volumetric_interpolation_factor(4)
@@ -245,6 +251,7 @@ def test_add_volumetric_data_replace2(sample_vestafile):
 """
     assert compare_vesta_strings(str(sample_vestafile["IMPORT_DENSITY"]), expected_density), \
         "Failed to replace volumetric data with interpolation factor."
+
 
 def test_delete_volumetric_data(sample_vestafile):
     # Check invalid indices while we still have data.
@@ -298,4 +305,3 @@ def test_set_volumetric_interpolation_factor(sample_vestafile):
 """
     assert compare_vesta_strings(str(sample_vestafile["IMPORT_DENSITY"]), expected_density), \
         "Failed to set volumetric interpolation factor"
-

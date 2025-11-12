@@ -416,7 +416,7 @@ class VestaPhase:
         """Iterate over each section."""
         for header in self._order:
             yield self._sections[header]
-    
+
     def remove(self, name: str):
         """Deletes the given VestaSection."""
         if name not in self:
@@ -813,18 +813,18 @@ class VestaFile:
                        b: int = 0,
                        opacity1: int = 127,
                        opacity2: int = 255,
-            ):
+                       ):
         """Adds a new isosurface.
-        
+
         Mimics Properties > Isosurfaces > Isosurfaces.
-        
+
         Args:
             level: isosurface threshold.
             mode: flag. 0=Positive and Negative, 1=Positive, 2=Negative.
             r, g, b: Colour of isosurface (0-255).
             opacity1: Opacity of polygons parallel to the screen (0-255).
             opacity2: Opacity of polygons perpendicular to the screen (0-255).
-        
+
         Related sections: :ref:`ISURF`
         """
         section = self["ISURF"]
@@ -847,14 +847,14 @@ class VestaFile:
                         b: int = None,
                         opacity1: int = None,
                         opacity2: int = None,
-            ):
+                        ):
         """Edits an existing isosurface.
-        
+
         Mimics Properties > Isosurfaces > Isosurfaces.
 
         All arguments after index are optional. Unset arguments are left 
         unchanged.
-        
+
         Args:
             index: 1-based index. Accepts negative indices, counting from the
                 end.
@@ -863,7 +863,7 @@ class VestaFile:
             r, g, b: Colour of isosurface (0-255).
             opacity1: Opacity of polygons parallel to the screen (0-255).
             opacity2: Opacity of polygons perpendicular to the screen (0-255).
-        
+
         Related sections: :ref:`ISURF`
         """
         if index == 0:
@@ -923,7 +923,7 @@ class VestaFile:
     def add_volumetric_data(self, path: str, factor: float = 1,
                             mode: str = "add"):
         """Adds a new volumetric data set to be imported by VESTA.
-        
+
         Does not validate the given file path.
 
         While VESTA resets the isosurfaces when loading new volumetric data,
@@ -947,7 +947,7 @@ class VestaFile:
         """
         # Parse the mode.
         prefix = ''
-        interpolation_factor = 1 # Default interpolation factor.
+        interpolation_factor = 1  # Default interpolation factor.
         if mode == "replace":
             if "IMPORT_DENSITY" in self:
                 # Record the current interpolation factor.
@@ -955,7 +955,7 @@ class VestaFile:
                 # Delete all current data.
                 self.remove("IMPORT_DENSITY")
         elif mode == "add" or mode == "+":
-            pass # No modification needed
+            pass  # No modification needed
         elif mode == "subtract" or mode == "-":
             factor *= -1
         elif mode == "multiply" or mode == "x":
@@ -977,11 +977,11 @@ class VestaFile:
         """Deletes a volumetric dataset, specified by index.
 
         Removes IMPORT_DENSITY if no volumetric data remains.
-        
+
         Args:
             index: 1-based index. Accepts negative indices, counting from the
                 end.
-        
+
         Related sections: :ref:`IMPORT_DENSITY`
         """
         if index == 0:
@@ -1008,7 +1008,7 @@ class VestaFile:
         """Sets the interpolation factor for volumetric data.
 
         Logs a warning but does nothing if no volumetric data present.
-        
+
         Related sections: :ref:`IMPORT_DENSITY`
         """
         if "IMPORT_DENSITY" not in self:
