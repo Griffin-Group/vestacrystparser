@@ -115,6 +115,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="vestafile.html#vestacrystparser.VestaFile.add_bond">add_bond() (vestacrystparser.VestaFile method)</a>
 </li>
+      <li><a href="vestafile.html#vestacrystparser.VestaFile.add_isosurface">add_isosurface() (vestacrystparser.VestaFile method)</a>
+</li>
       <li><a href="vestafile.html#vestacrystparser.VestaFile.add_lattice_plane">add_lattice_plane() (vestacrystparser.VestaFile method)</a>
 </li>
       <li><a href="api_parser.html#vestacrystparser.parser.VestaSection.add_line">add_line() (vestacrystparser.parser.VestaSection method)</a>
@@ -124,6 +126,8 @@
       <li><a href="vestafile.html#vestacrystparser.VestaFile.add_site">add_site() (vestacrystparser.VestaFile method)</a>
 </li>
       <li><a href="vestafile.html#vestacrystparser.VestaFile.add_vector_type">add_vector_type() (vestacrystparser.VestaFile method)</a>
+</li>
+      <li><a href="vestafile.html#vestacrystparser.VestaFile.add_volumetric_data">add_volumetric_data() (vestacrystparser.VestaFile method)</a>
 </li>
       <li><a href="api_parser.html#vestacrystparser.parser.VestaPhase.append">append() (vestacrystparser.parser.VestaPhase method)</a>
 </li>
@@ -145,6 +149,8 @@
 </li>
       <li><a href="vestafile.html#vestacrystparser.VestaFile.delete_vector_type">delete_vector_type() (vestacrystparser.VestaFile method)</a>
 </li>
+      <li><a href="vestafile.html#vestacrystparser.VestaFile.delete_volumetric_data">delete_volumetric_data() (vestacrystparser.VestaFile method)</a>
+</li>
       <li><a href="vestafile.html#vestacrystparser.VestaFile.distance">distance() (vestacrystparser.VestaFile method)</a>
 </li>
   </ul></td>
@@ -154,6 +160,8 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="vestafile.html#vestacrystparser.VestaFile.edit_bond">edit_bond() (vestacrystparser.VestaFile method)</a>
+</li>
+      <li><a href="vestafile.html#vestacrystparser.VestaFile.edit_isosurface">edit_isosurface() (vestacrystparser.VestaFile method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -286,6 +294,12 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_parser.html#vestacrystparser.parser.VestaSection.raw_header">raw_header (vestacrystparser.parser.VestaSection attribute)</a>
 </li>
+      <li><a href="api_parser.html#vestacrystparser.parser.VestaPhase.remove">remove() (vestacrystparser.parser.VestaPhase method)</a>
+
+      <ul>
+        <li><a href="vestafile.html#vestacrystparser.VestaFile.remove">(vestacrystparser.VestaFile method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="vestafile.html#vestacrystparser.VestaFile.remove_vector_from_site">remove_vector_from_site() (vestacrystparser.VestaFile method)</a>
@@ -322,10 +336,10 @@
 </li>
       <li><a href="vestafile.html#vestacrystparser.VestaFile.set_lighting">set_lighting() (vestacrystparser.VestaFile method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="vestafile.html#vestacrystparser.VestaFile.set_lighting_angle">set_lighting_angle() (vestacrystparser.VestaFile method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="vestafile.html#vestacrystparser.VestaFile.set_scene_view_direction">set_scene_view_direction() (vestacrystparser.VestaFile method)</a>
 </li>
       <li><a href="vestafile.html#vestacrystparser.VestaFile.set_scene_view_matrix">set_scene_view_matrix() (vestacrystparser.VestaFile method)</a>
@@ -336,6 +350,8 @@
 </li>
       <li><a href="vestafile.html#vestacrystparser.VestaFile.set_section_cutoff_levels">set_section_cutoff_levels() (vestacrystparser.VestaFile method)</a>
 </li>
+      <li><a href="vestafile.html#vestacrystparser.VestaFile.set_section_saturation_levels">set_section_saturation_levels() (vestacrystparser.VestaFile method)</a>
+</li>
       <li><a href="vestafile.html#vestacrystparser.VestaFile.set_site_color">set_site_color() (vestacrystparser.VestaFile method)</a>
 </li>
       <li><a href="vestafile.html#vestacrystparser.VestaFile.set_title">set_title() (vestacrystparser.VestaFile method)</a>
@@ -345,6 +361,8 @@
       <li><a href="vestafile.html#vestacrystparser.VestaFile.set_vector_scale">set_vector_scale() (vestacrystparser.VestaFile method)</a>
 </li>
       <li><a href="vestafile.html#vestacrystparser.VestaFile.set_vector_to_site">set_vector_to_site() (vestacrystparser.VestaFile method)</a>
+</li>
+      <li><a href="vestafile.html#vestacrystparser.VestaFile.set_volumetric_interpolation_factor">set_volumetric_interpolation_factor() (vestacrystparser.VestaFile method)</a>
 </li>
       <li><a href="vestafile.html#vestacrystparser.VestaFile.sort_bonds">sort_bonds() (vestacrystparser.VestaFile method)</a>
 </li>
@@ -380,9 +398,13 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api_convert.html#vestacrystparser.convert.vesta_from_chgcar">vesta_from_chgcar() (in module vestacrystparser.convert)</a>
+</li>
       <li><a href="api_convert.html#vestacrystparser.convert.vesta_from_poscar">vesta_from_poscar() (in module vestacrystparser.convert)</a>
 </li>
       <li><a href="api_convert.html#vestacrystparser.convert.vesta_from_structure">vesta_from_structure() (in module vestacrystparser.convert)</a>
+</li>
+      <li><a href="api_convert.html#vestacrystparser.convert.vesta_from_volumetric">vesta_from_volumetric() (in module vestacrystparser.convert)</a>
 </li>
       <li>
     vestacrystparser.convert
@@ -391,6 +413,8 @@
         <li><a href="api_convert.html#module-vestacrystparser.convert">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     vestacrystparser.export
 
@@ -398,8 +422,6 @@
         <li><a href="api_export.html#module-vestacrystparser.export">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     vestacrystparser.parser
 

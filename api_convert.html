@@ -12,6 +12,7 @@
     <script src="_static/documentation_options.js?v=5929fcd5"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="vestacrystparser.export" href="api_export.html" />
@@ -37,6 +38,27 @@
 <span id="vestacrystparser-convert"></span><h1><a class="reference internal" href="#module-vestacrystparser.convert" title="vestacrystparser.convert"><code class="xref py py-mod docutils literal notranslate"><span class="pre">vestacrystparser.convert</span></code></a><a class="headerlink" href="#module-vestacrystparser.convert" title="Link to this heading">¶</a></h1>
 <p>Create VESTA files from structural data files (POSCAR, etc.).</p>
 <dl class="py function">
+<dt class="sig sig-object py" id="vestacrystparser.convert.vesta_from_chgcar">
+<span class="sig-prename descclassname"><span class="pre">vestacrystparser.convert.</span></span><span class="sig-name descname"><span class="pre">vesta_from_chgcar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="vestafile.html#vestacrystparser.VestaFile" title="vestacrystparser.parser.VestaFile"><span class="pre">VestaFile</span></a></span></span><a class="headerlink" href="#vestacrystparser.convert.vesta_from_chgcar" title="Link to this definition">¶</a></dt>
+<dd><p>Return a VestaFile from VASP CHGCAR.</p>
+<p>Isosurface level is determined by (Vesta Manual section 16.7)</p>
+<div class="math notranslate nohighlight">
+\[d(iso) = \langle \vert \rho \vert \rangle + n \times \sigma(\vert \rho \vert)\]</div>
+<p>A caution, though. It would appear that VESTA uses a slightly strange
+method of calculating the standard deviation.
+As such, the isosurface level set by this method may be off by an amount
+(e.g. 5%).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname</strong> – Filename of the CHGCAR</p></li>
+<li><p><strong>n</strong> – Parameter for setting the default isosurface level.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="vestacrystparser.convert.vesta_from_poscar">
 <span class="sig-prename descclassname"><span class="pre">vestacrystparser.convert.</span></span><span class="sig-name descname"><span class="pre">vesta_from_poscar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="vestafile.html#vestacrystparser.VestaFile" title="vestacrystparser.parser.VestaFile"><span class="pre">VestaFile</span></a></span></span><a class="headerlink" href="#vestacrystparser.convert.vesta_from_poscar" title="Link to this definition">¶</a></dt>
 <dd><p>Return a VestaFile from a POSCAR file at fname</p>
@@ -46,6 +68,26 @@
 <dt class="sig sig-object py" id="vestacrystparser.convert.vesta_from_structure">
 <span class="sig-prename descclassname"><span class="pre">vestacrystparser.convert.</span></span><span class="sig-name descname"><span class="pre">vesta_from_structure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stru</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Structure</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="vestafile.html#vestacrystparser.VestaFile" title="vestacrystparser.parser.VestaFile"><span class="pre">VestaFile</span></a></span></span><a class="headerlink" href="#vestacrystparser.convert.vesta_from_structure" title="Link to this definition">¶</a></dt>
 <dd><p>Return a VestaFile from pymatgen.core.Structure</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="vestacrystparser.convert.vesta_from_volumetric">
+<span class="sig-prename descclassname"><span class="pre">vestacrystparser.convert.</span></span><span class="sig-name descname"><span class="pre">vesta_from_volumetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">volu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VolumetricData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chgcar_like</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="vestafile.html#vestacrystparser.VestaFile" title="vestacrystparser.parser.VestaFile"><span class="pre">VestaFile</span></a></span></span><a class="headerlink" href="#vestacrystparser.convert.vesta_from_volumetric" title="Link to this definition">¶</a></dt>
+<dd><p>Return a VestaFile from pymatgen VolumetricData</p>
+<p>Assumes the Volumetric data is in units of Angstrom, not Bohr.</p>
+<p>Isosurface level is determined by (Vesta Manual section 16.7)</p>
+<div class="math notranslate nohighlight">
+\[d(iso) = \langle \vert \rho \vert \rangle + n \times \sigma(\vert \rho \vert)\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>volu</strong> – VolumetricData object, with structure and volumetric data</p></li>
+<li><p><strong>fname</strong> – Filename where the volumetric data lives.</p></li>
+<li><p><strong>n</strong> – Parameter for setting the default isosurface level.</p></li>
+<li><p><strong>chgcar_like</strong> – If True, divides out the volume.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

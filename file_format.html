@@ -79,9 +79,15 @@ Has a blank line after it.</p>
 <span id="id4"></span><h2>IMPORT_DENSITY<a class="headerlink" href="#import-density" title="Link to this heading">¶</a></h2>
 <p><strong>Optional section.</strong></p>
 <p>Where to import volumetric density data from.</p>
-<p>Has a flag <code class="docutils literal notranslate"><span class="pre">1</span></code> after the title (units??).
-Each line is a file path (2nd item, string) and how to add it to the existing data (signed float, 1st item).</p>
+<p>Edit Data &gt; Volumetric Data &gt; Isosurfaces.</p>
+<p>Has an integer after the title, the Interpolation Factor (default 1).</p>
+<p>Each line is a relative file path (2nd item, string) and how to add it to the existing data (signed float, 1st item).
+If it is prefixed by <code class="docutils literal notranslate"><span class="pre">x</span></code>, it is to multiply the data.
+If it is prefixed by <code class="docutils literal notranslate"><span class="pre">/</span></code>, it is to divide the preceding data.</p>
 <p>Has an empty line after it.</p>
+<p>Angstrom^3 to Bohr^3 has a factor of 0.148185.</p>
+<p>Bohr^3 to Angstrom^3 has a factor of 6.748334.</p>
+<p>Importing new volumetric data through VESTA resets the isosurface configuration (ISURF).</p>
 <p>e.g.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">IMPORT_DENSITY</span> <span class="mi">1</span>
 <span class="o">+</span><span class="mf">1.000000</span> <span class="n">CHGCAR</span>
@@ -560,7 +566,8 @@ No data is directly connected to the STYLE header. However, it appears to serve 
 <li><p>+2: “Show models” is true.</p></li>
 <li><p>+2048: “Hide non-bonding atoms” is true (Properties &gt; Atoms &gt; Atom style)</p></li>
 <li><p>+4096: Enable depth-cueing (View &gt; Overall Appearance &gt; Depth-cueing)</p></li>
-<li><p>+8192: Isosurface render from front-to-back (Properties &gt; Isosurfaces).</p></li>
+<li><p>+8192: Isosurface render from front-to-back (Properties &gt; Isosurfaces).
+When true, isosurfaces in front occlude those behind. Default false.</p></li>
 <li><p>+66536: “Show dot surface” is true.</p></li>
 <li><p>+131072: “Show as displacement ellispoids” instead of “Show as balls” (Properties &gt; Atoms &gt; Atom style)</p></li>
 <li><p>+2097152: Perspective projection (View &gt; Overall Appearance &gt; Projection)</p></li>
@@ -727,13 +734,14 @@ No data is directly connected to the STYLE header. However, it appears to serve 
 <p>From Properties &gt; Isosurfaces &gt; Isosurfaces, the table there.</p>
 <p>Each row is an isosurface.</p>
 <ul class="simple">
-<li><p>1st item: index/number?</p></li>
-<li><p>2nd item: mode flag?</p></li>
-<li><p>3rd item: isosurface level.</p></li>
+<li><p>1st item: Index.</p></li>
+<li><p>2nd item: Mode flag. 0: Positive and negative; 1: Positive; 2: Negative</p></li>
+<li><p>3rd item: Isosurface level.</p></li>
 <li><p>4-6th item: RGB colour of isosurface.</p></li>
-<li><p>7th item: Opacity 1 (0-255)</p></li>
-<li><p>8th item: Opacity 2 (0-255)</p></li>
+<li><p>7th item: Opacity 1 (0-255), of polygons parallel to the screen.</p></li>
+<li><p>8th item: Opacity 2 (0-255), of polygons perpendicular to the screen.</p></li>
 </ul>
+<p>Terminates with four 0’s.</p>
 <p>e.g.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ISURF</span>
 <span class="mi">1</span>   <span class="mi">1</span>    <span class="mf">0.55903</span> <span class="mi">255</span> <span class="mi">255</span>   <span class="mi">0</span> <span class="mi">127</span> <span class="mi">255</span>

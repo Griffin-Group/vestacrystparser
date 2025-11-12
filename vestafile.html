@@ -175,6 +175,27 @@ If False, interpret A1 and A2 as element symbols.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="vestacrystparser.VestaFile.add_isosurface">
+<span class="sig-name descname"><span class="pre">add_isosurface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">255</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">255</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opacity1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">127</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opacity2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">255</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.VestaFile.add_isosurface" title="Link to this definition">¶</a></dt>
+<dd><p>Adds a new isosurface.</p>
+<p>Mimics Properties &gt; Isosurfaces &gt; Isosurfaces.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>level</strong> – isosurface threshold.</p></li>
+<li><p><strong>mode</strong> – flag. 0=Positive and Negative, 1=Positive, 2=Negative.</p></li>
+<li><p><strong>r</strong> – Colour of isosurface (0-255).</p></li>
+<li><p><strong>g</strong> – Colour of isosurface (0-255).</p></li>
+<li><p><strong>b</strong> – Colour of isosurface (0-255).</p></li>
+<li><p><strong>opacity1</strong> – Opacity of polygons parallel to the screen (0-255).</p></li>
+<li><p><strong>opacity2</strong> – Opacity of polygons perpendicular to the screen (0-255).</p></li>
+</ul>
+</dd>
+</dl>
+<p>Related sections: <a class="reference internal" href="file_format.html#isurf"><span class="std std-ref">ISURF</span></a></p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="vestacrystparser.VestaFile.add_lattice_plane">
 <span class="sig-name descname"><span class="pre">add_lattice_plane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">255</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">255</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">192</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.VestaFile.add_lattice_plane" title="Link to this definition">¶</a></dt>
 <dd><p>Adds a lattice plane, sectioning the volumetric data.</p>
@@ -261,6 +282,36 @@ internal representation.)</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="vestacrystparser.VestaFile.add_volumetric_data">
+<span class="sig-name descname"><span class="pre">add_volumetric_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'add'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.VestaFile.add_volumetric_data" title="Link to this definition">¶</a></dt>
+<dd><p>Adds a new volumetric data set to be imported by VESTA.</p>
+<p>Does not validate the given file path.</p>
+<p>While VESTA resets the isosurfaces when loading new volumetric data,
+because VestaFile does not import the data we don’t reset the
+isosurfaces.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – Relative path to volumetric data file.</p></li>
+<li><p><strong>factor</strong> – Value to multiply volumetric data by before adding to file.
+Angstrom^3 to Bohr^3 is 0.148185.
+Bohr^3 to Angstrom^3 is 6.748334.</p></li>
+<li><p><strong>mode</strong> – <p>How to include the volumetric data.</p>
+<ul>
+<li><p>”add” or “+”: add the data.</p></li>
+<li><p>”subtract” or “-”: subtract the data (same as <cite>-1*factor</cite>).</p></li>
+<li><p>”multiply” or “x”: multiply the data.</p></li>
+<li><p>”divide” or “/”: use this data as the divisor and previous as numerator.</p></li>
+<li><p>”replace”: replace all existing volumetric data.</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+</dl>
+<p>Related sections: <a class="reference internal" href="file_format.html#import-density"><span class="std std-ref">IMPORT_DENSITY</span></a></p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="vestacrystparser.VestaFile.delete_bond">
 <span class="sig-name descname"><span class="pre">delete_bond</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.VestaFile.delete_bond" title="Link to this definition">¶</a></dt>
 <dd><p>Deletes the specified bond type.</p>
@@ -283,7 +334,7 @@ Accepts negative indices, counting from the end.</p>
 end.</p>
 </dd>
 </dl>
-<p>Related section: ISURF.</p>
+<p>Related sections: <a class="reference internal" href="file_format.html#isurf"><span class="std std-ref">ISURF</span></a></p>
 </dd></dl>
 
 <dl class="py method">
@@ -309,6 +360,20 @@ end.</p>
 </dd>
 </dl>
 <p>Related sections: <a class="reference internal" href="file_format.html#vectt"><span class="std std-ref">VECTT</span></a>, <a class="reference internal" href="file_format.html#vectr"><span class="std std-ref">VECTR</span></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vestacrystparser.VestaFile.delete_volumetric_data">
+<span class="sig-name descname"><span class="pre">delete_volumetric_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.VestaFile.delete_volumetric_data" title="Link to this definition">¶</a></dt>
+<dd><p>Deletes a volumetric dataset, specified by index.</p>
+<p>Removes IMPORT_DENSITY if no volumetric data remains.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>index</strong> – 1-based index. Accepts negative indices, counting from the
+end.</p>
+</dd>
+</dl>
+<p>Related sections: <a class="reference internal" href="file_format.html#import-density"><span class="std std-ref">IMPORT_DENSITY</span></a></p>
 </dd></dl>
 
 <dl class="py method">
@@ -366,6 +431,31 @@ If False, interpret A1 and A2 as element symbols.</p></li>
 </dd>
 </dl>
 <p>Related sections: <a class="reference internal" href="file_format.html#sbond"><span class="std std-ref">SBOND</span></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vestacrystparser.VestaFile.edit_isosurface">
+<span class="sig-name descname"><span class="pre">edit_isosurface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opacity1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opacity2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.VestaFile.edit_isosurface" title="Link to this definition">¶</a></dt>
+<dd><p>Edits an existing isosurface.</p>
+<p>Mimics Properties &gt; Isosurfaces &gt; Isosurfaces.</p>
+<p>All arguments after index are optional. Unset arguments are left
+unchanged.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> – 1-based index. Accepts negative indices, counting from the
+end.</p></li>
+<li><p><strong>level</strong> – isosurface threshold.</p></li>
+<li><p><strong>mode</strong> – flag. 0=Positive and Negative, 1=Positive, 2=Negative.</p></li>
+<li><p><strong>r</strong> – Colour of isosurface (0-255).</p></li>
+<li><p><strong>g</strong> – Colour of isosurface (0-255).</p></li>
+<li><p><strong>b</strong> – Colour of isosurface (0-255).</p></li>
+<li><p><strong>opacity1</strong> – Opacity of polygons parallel to the screen (0-255).</p></li>
+<li><p><strong>opacity2</strong> – Opacity of polygons perpendicular to the screen (0-255).</p></li>
+</ul>
+</dd>
+</dl>
+<p>Related sections: <a class="reference internal" href="file_format.html#isurf"><span class="std std-ref">ISURF</span></a></p>
 </dd></dl>
 
 <dl class="py method">
@@ -521,6 +611,22 @@ x (float), y (float), z (float).</p>
 <dt class="sig sig-object py" id="vestacrystparser.VestaFile.nvectors">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nvectors</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#vestacrystparser.VestaFile.nvectors" title="Link to this definition">¶</a></dt>
 <dd><p>Number of vector types in the current phase (read-only)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vestacrystparser.VestaFile.remove">
+<span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.VestaFile.remove" title="Link to this definition">¶</a></dt>
+<dd><p>Deletes a section. Use with caution to avoid malformed data!</p>
+<p>Its main use is to remove optional sections like IMPORT_DENSITY
+when they become empty.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – Name of the section.</p></li>
+<li><p><strong>phase</strong> – Phase (0-indexed). Defaults to current phase.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -792,6 +898,15 @@ list.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="vestacrystparser.VestaFile.set_section_saturation_levels">
+<span class="sig-name descname"><span class="pre">set_section_saturation_levels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.VestaFile.set_section_saturation_levels" title="Link to this definition">¶</a></dt>
+<dd><p>Sets saturation levels for volumetric sections</p>
+<p>Mimics Properties &gt; Sections &gt; Saturation levels</p>
+<p>Unset keyword arguments are left unchanged.</p>
+<p>Related sections: <a class="reference internal" href="file_format.html#sectp"><span class="std std-ref">SECTP</span></a></p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="vestacrystparser.VestaFile.set_site_color">
 <span class="sig-name descname"><span class="pre">set_site_color</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.VestaFile.set_site_color" title="Link to this definition">¶</a></dt>
 <dd><p>Set the RGB site colour for sites with index (1-based).</p>
@@ -863,6 +978,14 @@ Also, no duplicate checking is performed.</p>
 </dd>
 </dl>
 <p>Related sections: <a class="reference internal" href="file_format.html#vectr"><span class="std std-ref">VECTR</span></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vestacrystparser.VestaFile.set_volumetric_interpolation_factor">
+<span class="sig-name descname"><span class="pre">set_volumetric_interpolation_factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.VestaFile.set_volumetric_interpolation_factor" title="Link to this definition">¶</a></dt>
+<dd><p>Sets the interpolation factor for volumetric data.</p>
+<p>Logs a warning but does nothing if no volumetric data present.</p>
+<p>Related sections: <a class="reference internal" href="file_format.html#import-density"><span class="std std-ref">IMPORT_DENSITY</span></a></p>
 </dd></dl>
 
 <dl class="py method">
