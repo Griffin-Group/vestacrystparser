@@ -382,6 +382,27 @@ def test_set_section_cutoff_levels(sample_vestafile):
     assert compare_vesta_strings(
         str(sample_vestafile["SECTS"]), expected_sects)
 
+def test_set_section_saturation_levels(sample_vestafile):
+    # Change both
+    sample_vestafile.set_section_saturation_levels(0.1, 0.9)
+    expected_sectp = """SECTP
+  1  1.00000E-01  9.00000E-01  0.00000E+00  0.00000E+00  0.00000E+00  0.00000E+00"""
+    assert compare_vesta_strings(
+        str(sample_vestafile["SECTP"]), expected_sectp), \
+        "Error when setting section saturation levels."
+    # Change one at a time
+    sample_vestafile.set_section_saturation_levels(minimum=0.2)
+    expected_sectp = """SECTP
+  1  2.00000E-01  9.00000E-01  0.00000E+00  0.00000E+00  0.00000E+00  0.00000E+00"""
+    assert compare_vesta_strings(
+        str(sample_vestafile["SECTP"]), expected_sectp), \
+        "Error when setting minimum section saturation level."
+    sample_vestafile.set_section_saturation_levels(maximum=12)
+    expected_sectp = """SECTP
+  1  2.00000E-01  1.20000E+01  0.00000E+00  0.00000E+00  0.00000E+00  0.00000E+00"""
+    assert compare_vesta_strings(
+        str(sample_vestafile["SECTP"]), expected_sectp), \
+        "Error when setting maximum section saturation level."
 
 def test_set_boundary(sample_vestafile):
     # Test setting all 6 parameters

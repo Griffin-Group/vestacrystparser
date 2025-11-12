@@ -49,8 +49,11 @@ def vesta_from_poscar(fname: str) -> VestaFile:
     return vfile
 
 # Volumetric data
-def vesta_from_volumetric(volu: VolumetricData, fname: str, n: float = 2) -> VestaFile:
+def vesta_from_volumetric(volu: VolumetricData, fname: str, n: float = 2,
+                          chgcar_like: bool = True) -> VestaFile:
     """Return a VestaFile from pymatgen VolumetricData
+
+    Assumes the Volumetric data is in units of Angstrom, not Bohr.
     
     Args:
         volu: VolumetricData object, with structure and volumetric data
@@ -58,21 +61,34 @@ def vesta_from_volumetric(volu: VolumetricData, fname: str, n: float = 2) -> Ves
         n: Parameter for setting the default isosurface level.
             From VESTA Manual,
             $d(iso) = \\langle \\vert \\rho \\vert \\rangle + n \\times \\sigma(\\vert \\rho \\vert)$
+        chgcar_like: If True, divides out the volume.
     """
     # Get the structural component
     vfile = vesta_from_structure(volu.structure)
     # Determine the isosurface level
     # See Section 16.7 of the VESTA Manual
-    absrho = np.abs(volu.data["total"]) / volu.structure.volume
+    # Convert to Bohr and divide out volume: Section 17.4.3
+    a2b = 0.148185 # Angstom^3 to Bohr^3
+    if chgcar_like:
+        data = volu.data["total"] / volu.structure.volume * a2b
+    else:
+        data = volu.data["total"] * a2b
+    absrho = np.abs(data)
     level = absrho.mean() + n * absrho.std()
     # Set volumetric data
     vfile.add_volumetric_data(fname)
     vfile.add_isosurface(level)
+    vfile.set_section_saturation_levels(data.min(), data.max())
     return vfile
 
 
 def vesta_from_chgcar(fname: str, n: float = 2) -> VestaFile:
     """Return a VestaFile from VASP CHGCAR.
+
+    A caution, though. It would appear that VESTA uses a slightly strange
+    method of calculating the standard deviation.
+    As such, the isosurface level set by this method may be off by an amount
+    (e.g. 5%).
     
     Args:
         fname: Filename of the CHGCAR

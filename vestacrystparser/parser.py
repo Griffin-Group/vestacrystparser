@@ -1126,6 +1126,23 @@ class VestaFile:
                 # Set the Manual bit
                 section.inline[0] |= 128
 
+    def set_section_saturation_levels(self,
+                                      minimum: float = None,
+                                      maximum: float = None):
+        """Sets saturation levels for volumetric sections
+
+        Mimics Properties > Sections > Saturation levels
+
+        Unset keyword arguments are left unchanged.
+
+        Related sections: :ref:`SECTP`
+        """
+        section = self["SECTP"]
+        if minimum is not None:
+            section.data[0][1] = minimum
+        if maximum is not None:
+            section.data[0][2] = maximum
+
     def unhide_atoms(self):
         """Unhides all hidden atoms (DLATM)"""
         self["DLATM"].data = [[-1]]
