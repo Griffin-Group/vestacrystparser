@@ -78,7 +78,6 @@ def compare_matrices(M1, M2, prec: int = None) -> bool:
     return True
 
 
-# TODO: test case with volumetric data (so IMPORT_DENISTY is called)
 def test_load(sample_vestafile, sample_vesta_filename):
     # Implicitly by the Fixture, we're testing the Load function.
     # Test that it has expected number of fields
