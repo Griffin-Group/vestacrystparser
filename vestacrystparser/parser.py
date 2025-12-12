@@ -450,15 +450,14 @@ class VestaFile:
     """Representation of a VESTA file, with methods to manipulate it.
 
     Attributes:
-        sections (dict): Maps section headers to VestaSection objects.
-        order (list): The order in which sections appear in the file.
+        current_phase: index of currently selected phase (1-based).
     """
 
     def __init__(self, filename: Union[str, None] = None):
         """Initialize a VESTA file instance."""
         self._phases = []
         self._globalsections = VestaPhase()
-        self.current_phase = 0
+        self.current_phase = 1
         self._vesta_format_version = None
         if filename:
             self.load(filename)
@@ -536,7 +535,7 @@ class VestaFile:
 
         Args:
             name: Either the section name (str), or a tuple of the name (str)
-                and the phase (int) (0-based).
+                and the phase (int) (1-based).
                 Some sections are global rather than tied to a phase. In such
                 cases, the phase is ignored.
 
@@ -547,6 +546,10 @@ class VestaFile:
         # Parse a multi-argument call, because getitem is special.
         if isinstance(name, tuple):
             phase = name[1]
+            if phase == 0:
+                raise IndexError("Phases are 1-indexed")
+            if phase > 0:
+                phase -= 1
             name = name[0]
         else:
             phase = None
@@ -556,7 +559,7 @@ class VestaFile:
         elif name in sections_that_are_global:
             return self._globalsections[name]
         elif phase is None:
-            return self._phases[self.current_phase][name]
+            return self._phases[self.current_phase - 1][name]
         else:
             return self._phases[phase][name]
 
@@ -612,7 +615,7 @@ class VestaFile:
         return mystr
 
     def set_current_phase(self, phase: int):
-        """Sets the currently active phase by 0-based index.
+        """Sets the currently active phase by 1-based index.
 
         :meth:`__getitem__` calls, along with all set and get functions, will
         default to this phase.
@@ -628,9 +631,11 @@ class VestaFile:
         """
         if not isinstance(phase, int):
             raise TypeError(f"phase must be an integer, not {type(phase)}.")
+        if phase == 0:
+            raise IndexError("Phases are 1-indexed, not 0.")
         if phase < 0:
-            phase += len(self._phases)
-        if phase < 0 or phase >= len(self._phases):
+            phase += len(self._phases) + 1
+        if phase < 0 or phase >= len(self._phases) + 1:
             raise IndexError(
                 f"Index {phase} is out of range of a list of length {len(self._phases)}")
         self.current_phase = phase
@@ -678,10 +683,12 @@ class VestaFile:
 
         Args:
             name: Name of the section.
-            phase: Phase (0-indexed). Defaults to current phase.
+            phase: Phase (1-indexed). Defaults to current phase.
         """
         if phase is None:
             phase = self.current_phase
+        if phase == 0:
+            raise IndexError("Phases are 1-indexed, not 0.")
         if (name, phase) not in self:
             raise KeyError(f"{name} is not in phase {phase}! Cannot remove.")
         if name in sections_that_are_global:
@@ -689,6 +696,9 @@ class VestaFile:
         elif name == "#VESTA_FORMAT_VERSION":
             raise RuntimeError(f"Cannot delete {name}.")
         else:
+            if phase > 0:
+                # Convert to 0-based index
+                phase -= 1
             self._phases[phase].remove(name)
 
     def new_phase(self):
@@ -698,24 +708,34 @@ class VestaFile:
 
     def delete_phase(self, index: int):
         """
-        Deletes the specified phase (0-based index).
+        Deletes the specified phase (1-based index).
         
         Cannot delete last phase.
-        If current phase is deleted, set self.current_phase = 0.
+        If current phase is deleted, set self.current_phase = 1.
         Supports negative indexing.
         """
         if self.nphases <= 1:
             raise IndexError("Cannot delete the only phase.")
+        if index == 0:
+            raise IndexError("Phases are 1-indexed, not 0.")
+        if index > 0:
+            # Convert to 0-based index for Python
+            index -= 1
         del self._phases[index]
-        if index == self.current_phase or \
-                self.nphases + 1 + index == self.current_phase:
-            logger.debug("Current phase was deleted. Changing current phase to 0.")
-            self.current_phase = 0
+        if index == self.current_phase - 1 or \
+                self.nphases + 1 + index == self.current_phase - 1:
+            logger.debug("Current phase was deleted. Changing current phase to 1.")
+            self.current_phase = 1
 
     def copy_phase(self, index: int):
         """
-        Copies the specified phase (0-based index) and appends at end.
+        Copies the specified phase (1-based index) and appends at end.
         """
+        if index == 0:
+            raise IndexError("Phases are 1-indexed, not 0.")
+        if index > 0:
+            # Convert to 0-based index for Python
+            index -= 1
         self._phases.append(self._phases[index].copy())
 
     def import_phases(self, vestafile: Union["VestaFile", str]):
@@ -738,20 +758,20 @@ class VestaFile:
         Also updates current_phase.
 
         Args:
-            new_order: List of unique integers from 0 to nphases-1.
+            new_order: List of unique integers from 1 to nphases.
                 The current phase with index in new_order will be placed
                 in the position in new_order.
         """
         # Confirm that the given new_order is valid
         if len(new_order) != self.nphases:
             raise IndexError(f"new_order needs to be length {self.nphases}, not {len(new_order)}.")
-        if sorted(new_order) != list(range(self.nphases)):
+        if sorted(new_order) != list(range(1, self.nphases+1)):
             raise IndexError(f"new_order needs to contain unique integers from 0 to {self.nphases - 1}.")
         # Rearrange _phases.
-        new_phases = [self._phases[i] for i in new_order]
+        new_phases = [self._phases[i-1] for i in new_order]
         self._phases = new_phases
         # Update current_phase
-        self.current_phase = new_order.index(self.current_phase)
+        self.current_phase = new_order.index(self.current_phase) + 1
 
     # Methods for modifying the system.
     def set_site_color(self, index: Union[int, list[int]],
@@ -1048,7 +1068,7 @@ class VestaFile:
             raise ValueError(f"Unrecognised volumetric data mode: {mode}")
         # If the section doesn't exist, add it.
         if "IMPORT_DENSITY" not in self:
-            self._phases[self.current_phase].append(
+            self._phases[self.current_phase - 1].append(
                 VestaSection(f"IMPORT_DENSITY {interpolation_factor}"),
                 before="GROUP")
         # Specify the line
