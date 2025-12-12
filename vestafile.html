@@ -42,25 +42,9 @@ It is a complete representation of a VESTA file.</p>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">vestacrystparser.</span></span><span class="sig-name descname"><span class="pre">VestaFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.VestaFile" title="Link to this definition">¶</a></dt>
 <dd><p>Representation of a VESTA file, with methods to manipulate it.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="vestacrystparser.VestaFile.sections">
-<span class="sig-name descname"><span class="pre">sections</span></span><a class="headerlink" href="#vestacrystparser.VestaFile.sections" title="Link to this definition">¶</a></dt>
-<dd><p>Maps section headers to VestaSection objects.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="vestacrystparser.VestaFile.order">
-<span class="sig-name descname"><span class="pre">order</span></span><a class="headerlink" href="#vestacrystparser.VestaFile.order" title="Link to this definition">¶</a></dt>
-<dd><p>The order in which sections appear in the file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list</p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="vestacrystparser.VestaFile.current_phase">
+<span class="sig-name descname"><span class="pre">current_phase</span></span><a class="headerlink" href="#vestacrystparser.VestaFile.current_phase" title="Link to this definition">¶</a></dt>
+<dd><p>index of currently selected phase (1-based).</p>
 </dd></dl>
 
 <dl class="py method">
@@ -87,7 +71,7 @@ phase defaults to <cite>self.current_phase</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>name</strong> – Either the section name (str), or a tuple of the name (str)
-and the phase (int) (0-based).
+and the phase (int) (1-based).
 Some sections are global rather than tied to a phase. In such
 cases, the phase is ignored.</p>
 </dd>
@@ -104,6 +88,13 @@ cases, the phase is ignored.</p>
 <dt class="sig sig-object py" id="vestacrystparser.VestaFile.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.VestaFile.__init__" title="Link to this definition">¶</a></dt>
 <dd><p>Initialize a VESTA file instance.</p>
+<p>If filename is provided, it is parsed.
+Otherwise, the default empty file is provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<em>str</em>) – Path to the VESTA file.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -318,6 +309,12 @@ Bohr^3 to Angstrom^3 is 6.748334.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="vestacrystparser.VestaFile.copy_phase">
+<span class="sig-name descname"><span class="pre">copy_phase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.VestaFile.copy_phase" title="Link to this definition">¶</a></dt>
+<dd><p>Copies the specified phase (1-based index) and appends at end.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="vestacrystparser.VestaFile.delete_bond">
 <span class="sig-name descname"><span class="pre">delete_bond</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.VestaFile.delete_bond" title="Link to this definition">¶</a></dt>
 <dd><p>Deletes the specified bond type.</p>
@@ -354,6 +351,15 @@ end.</p>
 </dd>
 </dl>
 <p>Related sections: <a class="reference internal" href="file_format.html#splan"><span class="std std-ref">SPLAN</span></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vestacrystparser.VestaFile.delete_phase">
+<span class="sig-name descname"><span class="pre">delete_phase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.VestaFile.delete_phase" title="Link to this definition">¶</a></dt>
+<dd><p>Deletes the specified phase (1-based index).</p>
+<p>Cannot delete last phase.
+If current phase is deleted, set self.current_phase = 1.
+Supports negative indexing.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -591,14 +597,16 @@ x (float), y (float), z (float).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="vestacrystparser.VestaFile.load">
-<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.VestaFile.load" title="Link to this definition">¶</a></dt>
-<dd><p>Load and parse a VESTA file into this instance.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>filename</strong> (<em>str</em>) – Path to the VESTA file.</p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="vestacrystparser.VestaFile.import_phases">
+<span class="sig-name descname"><span class="pre">import_phases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vestafile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#vestacrystparser.VestaFile" title="vestacrystparser.parser.VestaFile"><span class="pre">VestaFile</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.VestaFile.import_phases" title="Link to this definition">¶</a></dt>
+<dd><p>Copies the phase(s) from another Vesta file (loaded or as a file).</p>
+<p>If vestafile is not a VestaFile, it will be passed to VestaFile(vestafile).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vestacrystparser.VestaFile.new_phase">
+<span class="sig-name descname"><span class="pre">new_phase</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.VestaFile.new_phase" title="Link to this definition">¶</a></dt>
+<dd><p>Inserts a new, empty phase at the end.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -620,6 +628,20 @@ x (float), y (float), z (float).</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="vestacrystparser.VestaFile.rearrange_phases">
+<span class="sig-name descname"><span class="pre">rearrange_phases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.VestaFile.rearrange_phases" title="Link to this definition">¶</a></dt>
+<dd><p>Re-orders phases to match the order given by new_order.</p>
+<p>Also updates current_phase.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>new_order</strong> – List of unique integers from 1 to nphases.
+The current phase with index in new_order will be placed
+in the position in new_order.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="vestacrystparser.VestaFile.remove">
 <span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.VestaFile.remove" title="Link to this definition">¶</a></dt>
 <dd><p>Deletes a section. Use with caution to avoid malformed data!</p>
@@ -629,7 +651,7 @@ when they become empty.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> – Name of the section.</p></li>
-<li><p><strong>phase</strong> – Phase (0-indexed). Defaults to current phase.</p></li>
+<li><p><strong>phase</strong> – Phase (1-indexed). Defaults to current phase.</p></li>
 </ul>
 </dd>
 </dl>
@@ -767,7 +789,7 @@ colour (otherwise, only changes sites added later).</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="vestacrystparser.VestaFile.set_current_phase">
 <span class="sig-name descname"><span class="pre">set_current_phase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.VestaFile.set_current_phase" title="Link to this definition">¶</a></dt>
-<dd><p>Sets the currently active phase by 0-based index.</p>
+<dd><p>Sets the currently active phase by 1-based index.</p>
 <p><a class="reference internal" href="#vestacrystparser.VestaFile.__getitem__" title="vestacrystparser.VestaFile.__getitem__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getitem__()</span></code></a> calls, along with all set and get functions, will
 default to this phase.</p>
 <p>Accepts negative indices in the Pythonic manner, but it is recorded as a
