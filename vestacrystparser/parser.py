@@ -454,20 +454,27 @@ class VestaFile:
     """
 
     def __init__(self, filename: Union[str, None] = None):
-        """Initialize a VESTA file instance."""
+        """Initialize a VESTA file instance.
+
+        If filename is provided, it is parsed.
+        Otherwise, the default empty file is provided.
+        
+        Args:
+            filename (str): Path to the VESTA file.
+        """
         self._phases = []
         self._globalsections = VestaPhase()
         self.current_phase = 1
         self._vesta_format_version = None
         if filename:
-            self.load(filename)
+            self._load(filename)
         else:
             # Initialise the empty VESTA file.
             filename = importlib.resources.files(
                 vestacrystparser.resources) / "default.vesta"
-            self.load(filename)
+            self._load(filename)
 
-    def load(self, filename):
+    def _load(self, filename):
         """Load and parse a VESTA file into this instance.
 
         Args:
@@ -742,7 +749,7 @@ class VestaFile:
         """
         Copies the phase(s) from another Vesta file (loaded or as a file).
 
-        If vestafile is not a VestaFile, it will be passed to VestaFile.load().
+        If vestafile is not a VestaFile, it will be passed to VestaFile(vestafile).
         """
         if not isinstance(vestafile, VestaFile):
             vestafile = VestaFile(vestafile)
