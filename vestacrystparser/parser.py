@@ -691,6 +691,68 @@ class VestaFile:
         else:
             self._phases[phase].remove(name)
 
+    def new_phase(self):
+        """Inserts a new, empty phase at the end."""
+        # Copy the empty Phase from the default VestaFile.
+        self.import_phases(VestaFile())
+
+    def delete_phase(self, index: int):
+        """
+        Deletes the specified phase (0-based index).
+        
+        Cannot delete last phase.
+        If current phase is deleted, set self.current_phase = 0.
+        Supports negative indexing.
+        """
+        if self.nphases <= 1:
+            raise IndexError("Cannot delete the only phase.")
+        del self._phases[index]
+        if index == self.current_phase or \
+                self.nphases + 1 + index == self.current_phase:
+            logger.debug("Current phase was deleted. Changing current phase to 0.")
+            self.current_phase = 0
+
+    def copy_phase(self, index: int):
+        """
+        Copies the specified phase (0-based index) and appends at end.
+        """
+        self._phases.append(self._phases[index].copy())
+
+    def import_phases(self, vestafile: Union["VestaFile", str]):
+        """
+        Copies the phase(s) from another Vesta file (loaded or as a file).
+
+        If vestafile is not a VestaFile, it will be passed to VestaFile.load().
+        """
+        if not isinstance(vestafile, VestaFile):
+            vestafile = VestaFile(vestafile)
+        # Restricting the range ensures we don't get memory leaks if we
+        # copy from self.
+        for phase in vestafile._phases[0:self.nphases]:
+            self._phases.append(phase.copy())
+
+    def rearrange_phases(self, new_order: list[int]):
+        """
+        Re-orders phases to match the order given by new_order.
+
+        Also updates current_phase.
+
+        Args:
+            new_order: List of unique integers from 0 to nphases-1.
+                The current phase with index in new_order will be placed
+                in the position in new_order.
+        """
+        # Confirm that the given new_order is valid
+        if len(new_order) != self.nphases:
+            raise IndexError(f"new_order needs to be length {self.nphases}, not {len(new_order)}.")
+        if sorted(new_order) != list(range(self.nphases)):
+            raise IndexError(f"new_order needs to contain unique integers from 0 to {self.nphases - 1}.")
+        # Rearrange _phases.
+        new_phases = [self._phases[i] for i in new_order]
+        self._phases = new_phases
+        # Update current_phase
+        self.current_phase = new_order.index(self.current_phase)
+
     # Methods for modifying the system.
     def set_site_color(self, index: Union[int, list[int]],
                        r: int, g: int, b: int):

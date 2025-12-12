@@ -20,6 +20,10 @@ def sample_vestafile(sample_vesta_filename) -> VestaFile:
     return VestaFile(sample_vesta_filename)
 
 
+@pytest.fixture
+def sample_vestafile_onephase() -> VestaFile:
+    return VestaFile(os.path.join(DATA_DIR, "Cu_primitive_plain.vesta"))
+
 def test_load(sample_vestafile, sample_vesta_filename):
     # Implicitly by the Fixture, we're testing the Load function.
     # Test that it has expected number of fields
@@ -119,3 +123,149 @@ def test_nsites(sample_vestafile):
     sample_vestafile.set_current_phase(1)
     assert sample_vestafile.nsites == 0, \
         "Second phase nsites doesn't match."
+
+
+def test_new_phase(sample_vestafile, sample_vestafile_onephase):
+    # Add the new empty phase
+    sample_vestafile_onephase.new_phase()
+    # Update the title
+    sample_vestafile_onephase.set_current_phase(1)
+    sample_vestafile_onephase.title = "Phase Two"
+    # Compare strings.
+    # (Can compare directly because both are VestaFiles)
+    assert str(sample_vestafile) == str(sample_vestafile_onephase), \
+        "Adding a new phase didn't work as expected."
+
+
+def test_delete_phase(sample_vestafile, sample_vestafile_onephase):
+    # Delete the second phase
+    # And also check if current_phase gets updated
+    sample_vestafile.set_current_phase(1)
+    sample_vestafile.delete_phase(1)
+    assert str(sample_vestafile) == str(sample_vestafile_onephase), \
+        "Deleting a phase didn't work as expected."
+    assert sample_vestafile.current_phase == 0, \
+        "Deleting the current phase didn't change current_phase."
+    # Deleting again should fail
+    with pytest.raises(IndexError):
+        sample_vestafile.delete_phase(0)
+    assert str(sample_vestafile) == str(sample_vestafile_onephase), \
+        "Failing to delete a phase changed the file!"
+
+
+def test_delete_phase2(sample_vestafile, sample_vestafile_onephase):
+    original_str = str(sample_vestafile)
+    # Fail to delete out-of-bounds index
+    with pytest.raises(IndexError):
+        sample_vestafile.delete_phase(2)
+    with pytest.raises(IndexError):
+        sample_vestafile.delete_phase(-3)
+    assert str(sample_vestafile) == original_str, \
+        "Failing to delete a phase changed the file!"
+    # Delete the second phase, but with negative indexing
+    # And also check if current_phase gets updated
+    sample_vestafile.set_current_phase(1)
+    sample_vestafile.delete_phase(-1)
+    assert str(sample_vestafile) == str(sample_vestafile_onephase), \
+        "Deleting a phase didn't work as expected."
+    assert sample_vestafile.current_phase == 0, \
+        "Deleting the current phase didn't change current_phase."
+
+
+def test_copy_phase(sample_vestafile):
+    original_str = str(sample_vestafile)
+    # Test invalid indices
+    with pytest.raises(IndexError):
+        sample_vestafile.copy_phase(2)
+    with pytest.raises(IndexError):
+        sample_vestafile.copy_phase(-3)
+    assert str(sample_vestafile) == original_str, \
+        "Failing to delete a phase changed the file!"
+    # Copy phase 2
+    sample_vestafile.copy_phase(1)
+    assert sample_vestafile.nphases == 3, \
+        "Copying a phase didn't add a new phase!"
+    assert str(sample_vestafile["TITLE", 2]) == str(sample_vestafile["TITLE", 1]), \
+        "Copying a phase didn't copy over the data."
+    assert len(sample_vestafile) == 89 + 24, \
+        "Didn't copy over the right number of fields."
+    # Confirm that the copied data is, indeed, a copy.
+    sample_vestafile.set_current_phase(2)
+    sample_vestafile.title = "Phase Three"
+    sample_vestafile.set_current_phase(1)
+    assert sample_vestafile.title == "Phase Two", \
+        "Copying a phase incorrectly linked the data rather than copying."
+    # Test negative indexing.
+    sample_vestafile.copy_phase(-3) # The first phase.
+    assert sample_vestafile.nphases == 4, \
+        "Copying a phase with negative index didn't add a new phase!"
+    assert str(sample_vestafile["TITLE", 0]) == str(sample_vestafile["TITLE", 3]), \
+        "Copying a phase with negative index didn't copy over the data!"
+    assert len(sample_vestafile) == 89 + 24 + 24, \
+        "Didn't copy over the right number of fields."
+
+
+def test_import_phases_from_file(sample_vestafile, sample_vesta_filename):
+    sample_vestafile.import_phases(sample_vesta_filename)
+    assert sample_vestafile.nphases == 4, \
+        "Failed to import the correct number of phases."
+    assert sample_vestafile["TITLE", 3].data[0][0] == "Phase Two", \
+        "Failed to import the correct number of phases."
+    assert len(sample_vestafile) == 89 + 48, \
+        "Didn't import the right number of fields."
+
+
+def test_import_phases(sample_vestafile):
+    # For simplicity, we'll import from self.
+    sample_vestafile.import_phases(sample_vestafile)
+    assert sample_vestafile.nphases == 4, \
+        "Failed to import the correct number of phases."
+    assert sample_vestafile["TITLE", 3].data[0][0] == "Phase Two", \
+        "Failed to import the correct number of phases."
+    assert len(sample_vestafile) == 89 + 48, \
+        "Didn't import the right number of fields."
+    # Check that we copied.
+    sample_vestafile.title = "Foo bar"
+    assert sample_vestafile["TITLE", 2].data[0][0] == "New structure", \
+        "import_phases incorrectly linked data instead of copying."
+
+
+def test_rearrange_phases(sample_vestafile):
+    # Test invalid rearrangements
+    original_str = str(sample_vestafile)
+    with pytest.raises(IndexError):
+        # Too short
+        sample_vestafile.rearrange_phases([])
+    with pytest.raises(IndexError):
+        # Too long
+        sample_vestafile.rearrange_phases([0, 1, 2])
+    with pytest.raises(IndexError):
+        # Wrong values (duplicate if accept negative indexing)
+        # (We don't currently accept negative indexing, but we might later)
+        sample_vestafile.rearrange_phases([-1, 1])
+    with pytest.raises(IndexError):
+        # Wrong values
+        sample_vestafile.rearrange_phases([3, 4])
+    with pytest.raises(IndexError):
+        # Duplicate values
+        sample_vestafile.rearrange_phases([0, 0])
+    assert str(sample_vestafile) == original_str, \
+        "Failing to rearrange phases changed the file!"
+    assert sample_vestafile.current_phase == 0, \
+        "Failing to rearrange phases changed the current phase!"
+    # Test null rearrangement
+    sample_vestafile.rearrange_phases([0, 1])
+    assert str(sample_vestafile) == original_str, \
+        "Identity rearrangement changed the file."
+    assert sample_vestafile.current_phase == 0, \
+        "Identity rearranegement changed the current phase."
+    # Test an actual swap
+    sample_vestafile.rearrange_phases([1, 0])
+    assert sample_vestafile.nphases == 2, \
+        "Rearrangeing phases changed number of phases."
+    assert sample_vestafile.current_phase == 1, \
+        "Rearrangeing phases didn't change the current phase."
+    assert str(sample_vestafile) != original_str, \
+        "Rearranging phases failed to change the files."
+    assert sample_vestafile.title == "New structure"
+    assert sample_vestafile["TITLE", 0].data[0][0] == "Phase Two"
