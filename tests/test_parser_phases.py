@@ -72,6 +72,10 @@ def test_set_current_phase(sample_vestafile):
         sample_vestafile.set_current_phase(-5)
     assert sample_vestafile.current_phase == 2, \
         "Active phase changed when it shouldn't have."
+    with pytest.raises(IndexError):
+        sample_vestafile.set_current_phase(0)
+    assert sample_vestafile.current_phase == 2, \
+        "Active phase changed when it shouldn't have."
     # Check negative indexing.
     sample_vestafile.set_current_phase(-2)
     assert sample_vestafile.current_phase == 1, \
@@ -100,6 +104,8 @@ def test_getitem(sample_vestafile):
         sample_vestafile["SITET", 5]
     with pytest.raises(IndexError):
         sample_vestafile["SITET", -5]
+    with pytest.raises(IndexError):
+        sample_vestafile["SITET", 0]
     # Check that negative indexing works
     sample_vestafile.set_current_phase(1)
     assert compare_vesta_strings(
@@ -160,6 +166,8 @@ def test_delete_phase2(sample_vestafile, sample_vestafile_onephase):
         sample_vestafile.delete_phase(3)
     with pytest.raises(IndexError):
         sample_vestafile.delete_phase(-3)
+    with pytest.raises(IndexError):
+        sample_vestafile.delete_phase(0)
     assert str(sample_vestafile) == original_str, \
         "Failing to delete a phase changed the file!"
     # Delete the second phase, but with negative indexing
@@ -179,6 +187,8 @@ def test_copy_phase(sample_vestafile):
         sample_vestafile.copy_phase(3)
     with pytest.raises(IndexError):
         sample_vestafile.copy_phase(-3)
+    with pytest.raises(IndexError):
+        sample_vestafile.copy_phase(0)
     assert str(sample_vestafile) == original_str, \
         "Failing to delete a phase changed the file!"
     # Copy phase 2
@@ -247,7 +257,7 @@ def test_rearrange_phases(sample_vestafile):
         # Wrong values
         sample_vestafile.rearrange_phases([3, 4])
     with pytest.raises(IndexError):
-        # Wrong values
+        # Wrong values (including 0).
         sample_vestafile.rearrange_phases([0, 1])
     with pytest.raises(IndexError):
         # Duplicate values

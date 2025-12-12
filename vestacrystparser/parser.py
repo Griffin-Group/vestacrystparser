@@ -547,7 +547,7 @@ class VestaFile:
         if isinstance(name, tuple):
             phase = name[1]
             if phase == 0:
-                raise IndexError("Phases are 1-indexed")
+                raise IndexError("Phases are 1-indexed, not 0.")
             if phase > 0:
                 phase -= 1
             name = name[0]
