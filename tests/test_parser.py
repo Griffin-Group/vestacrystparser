@@ -98,6 +98,16 @@ def test_load(sample_vestafile, sample_vesta_filename):
             "Full file comparison failed."
 
 
+def test_copy(sample_vestafile):
+    sample2 = sample_vestafile.copy()
+    assert compare_vesta_strings(str(sample_vestafile), str(sample2)), \
+        "Failed to copy VestaFile."
+    # Check that we have copied things and not merely linked them.
+    sample_vestafile["SITET"].data[0][1] = "Au"
+    assert not compare_vesta_strings(str(sample_vestafile["SITET"]), str(sample2["SITET"])), \
+        "Modifying the original changed the copy!"
+
+
 def test_empty(default_vesta_filename):
     sample = VestaFile()
     with open(default_vesta_filename, 'r') as f:

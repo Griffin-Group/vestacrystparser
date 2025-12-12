@@ -291,10 +291,6 @@ class VestaSection:
     def __init__(self, header_line: str):
         """Initialize a VESTA section from a header line.
 
-        For the TITLE section:
-          - Inline data is not preserved on the header, but moved to the
-            multi-line data.
-        For other sections:
           - If inline data is present on the header, it is stored (parsed) in
             self.inline.
           - Subsequent lines are stored in self.data.
@@ -362,6 +358,14 @@ class VestaSection:
     def __len__(self) -> int:
         """Return number of lines (besides the header line)"""
         return len(self.data)
+    
+    def copy(self) -> "VestaSection":
+        """Creates a copy of the VestaSection"""
+        new = VestaSection(self.header)
+        new.raw_header = self.raw_header
+        new.inline = self.inline.copy()
+        new.data = [x.copy() for x in self.data]
+        return new
 
 
 class VestaPhase:
@@ -433,6 +437,13 @@ class VestaPhase:
     def nsites(self) -> int:
         """Number of sites (read-only)"""
         return len(self["SITET"].data) - 1
+    
+    def copy(self) -> "VestaPhase":
+        """Creates a copy of the VestaPhase"""
+        new = VestaPhase()
+        new._order = self._order.copy()
+        new._sections = {k: self[k].copy() for k in self._order}
+        return new
 
 
 class VestaFile:
@@ -505,6 +516,15 @@ class VestaFile:
                     raise ValueError(
                         "Data without section header found! Line:\n"+line)
                 section.add_line(line)
+
+    def copy(self) -> "VestaFile":
+        """Creates a copy of the VestaFile"""
+        new = VestaFile.__new__(VestaFile)
+        new._phases = [x.copy() for x in self._phases]
+        new._globalsections = self._globalsections.copy()
+        new.current_phase = self.current_phase
+        new._vesta_format_version = self._vesta_format_version
+        return new
 
     def __getitem__(self, name: Union[str, tuple[str, int]]) \
             -> VestaSection:
