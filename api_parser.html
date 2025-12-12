@@ -103,6 +103,12 @@ of the same name. Otherwise, insert at end.</p></li>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="vestacrystparser.parser.VestaPhase.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#vestacrystparser.parser.VestaPhase" title="vestacrystparser.parser.VestaPhase"><span class="pre">VestaPhase</span></a></span></span><a class="headerlink" href="#vestacrystparser.parser.VestaPhase.copy" title="Link to this definition">¶</a></dt>
+<dd><p>Creates a copy of the VestaPhase</p>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="vestacrystparser.parser.VestaPhase.nsites">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nsites</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#vestacrystparser.parser.VestaPhase.nsites" title="Link to this definition">¶</a></dt>
@@ -182,19 +188,13 @@ need it.</p>
 <dt class="sig sig-object py" id="vestacrystparser.parser.VestaSection.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header_line</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.parser.VestaSection.__init__" title="Link to this definition">¶</a></dt>
 <dd><p>Initialize a VESTA section from a header line.</p>
-<dl class="simple">
-<dt>For the TITLE section:</dt><dd><ul class="simple">
-<li><p>Inline data is not preserved on the header, but moved to the
-multi-line data.</p></li>
-</ul>
-</dd>
-<dt>For other sections:</dt><dd><ul class="simple">
+<blockquote>
+<div><ul class="simple">
 <li><p>If inline data is present on the header, it is stored (parsed) in
 self.inline.</p></li>
 <li><p>Subsequent lines are stored in self.data.</p></li>
 </ul>
-</dd>
-</dl>
+</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>header_line</strong> (<em>str</em>) – The complete header line (with any inline data).</p>
@@ -235,6 +235,12 @@ For other sections, split the line into tokens and convert them.</p>
 <dd class="field-odd"><p><strong>line</strong> – raw string of the line.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vestacrystparser.parser.VestaSection.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#vestacrystparser.parser.VestaSection" title="vestacrystparser.parser.VestaSection"><span class="pre">VestaSection</span></a></span></span><a class="headerlink" href="#vestacrystparser.parser.VestaSection.copy" title="Link to this definition">¶</a></dt>
+<dd><p>Creates a copy of the VestaSection</p>
 </dd></dl>
 
 </dd></dl>
