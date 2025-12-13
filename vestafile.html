@@ -576,7 +576,11 @@ style:int.</p>
 <span class="sig-name descname"><span class="pre">get_cell_matrix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#vestacrystparser.VestaFile.get_cell_matrix" title="Link to this definition">¶</a></dt>
 <dd><p>Return the lattice vectors as a 3x3 matrix.</p>
 <p>VESTA aligns the 1st lattice vectors with the x axis, and the 2nd in
-the x-y plane.</p>
+the x-y plane.
+The cell matrix is given in this local orientation. However,
+sometimes an extra global rotation from <a class="reference internal" href="file_format.html#lmatrix"><span class="std std-ref">LMATRIX</span></a> may be relevant,
+depending on your application.</p>
+<p>TODO: Allow get_cell_matrix to request global instead of local.</p>
 <p>Related sections: <a class="reference internal" href="file_format.html#cellp"><span class="std std-ref">CELLP</span></a>.</p>
 </dd></dl>
 
@@ -847,6 +851,10 @@ positive index.</p>
 <dt class="sig sig-object py" id="vestacrystparser.VestaFile.set_scene_view_direction">
 <span class="sig-name descname"><span class="pre">set_scene_view_direction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#vestacrystparser.VestaFile.set_scene_view_direction" title="Link to this definition">¶</a></dt>
 <dd><p>Set view direction to a preset viewing direction.</p>
+<p>TODO: Account for non-trivial orientation of phase 1.
+(Vector-based view directions are calculated relative to phase 1.)</p>
+<p>TODO: Account for multiple phases.
+VESTA defaults to phase 1, but we don’t have to be restricted that way.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>view</strong> – Preset viewing direction.

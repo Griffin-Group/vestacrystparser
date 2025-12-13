@@ -126,9 +126,12 @@ If it is prefixed by <code class="docutils literal notranslate"><span class="pre
 <span id="id8"></span><h2>LTRANSL<a class="headerlink" href="#ltransl" title="Link to this heading">¶</a></h2>
 <p>Translation of this phase with respect to another.</p>
 <p>Edit Data &gt; Phase &gt; Positioning</p>
+<p>Vesta Manual Section 7.1.</p>
 <ul class="simple">
-<li><p>1st row: Reference phase (0-indexed). The number in “Place (x,y,z) of this layer at (x,y,z) of layer…” minus 1. If <code class="docutils literal notranslate"><span class="pre">-1</span></code>, is the global coordinate system.</p></li>
-<li><p>2nd row: x,y,z of this layer; x,y,z of reference layer.</p></li>
+<li><p>1st row: Reference phase (0-indexed). The number in “Place (x,y,z) of this layer at (x,y,z) of layer…” minus 1. If <code class="docutils literal notranslate"><span class="pre">-1</span></code>, is the global coordinate system.
+The reference phase must be lower than the current phase.</p></li>
+<li><p>2nd row: x,y,z of this layer; x,y,z of reference layer.
+For layers (not global coordinates), the coordinates are in fractional coordinates.</p></li>
 </ul>
 <p>e.g.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">LTRANSL</span>
@@ -139,6 +142,38 @@ If it is prefixed by <code class="docutils literal notranslate"><span class="pre
 </section>
 <section id="lorient">
 <span id="id9"></span><h2>LORIENT<a class="headerlink" href="#lorient" title="Link to this heading">¶</a></h2>
+<p>Relative orientation of this phase with respect to another.</p>
+<p>Edit Data &gt; Phase &gt; Orientation</p>
+<p>Vesta Manual Section 7.2 (although it’s not very clear).</p>
+<ul class="simple">
+<li><p>1st row:</p></li>
+<li><ul>
+<li><p>1st element: Reference phase (0-indexed). If <code class="docutils literal notranslate"><span class="pre">-1</span></code>, is the global coordinate system.</p></li>
+</ul>
+</li>
+<li><ul>
+<li><p>2nd element: This layer’s first vector is 0: <code class="docutils literal notranslate"><span class="pre">[u</span> <span class="pre">v</span> <span class="pre">w]</span></code>, 1: <code class="docutils literal notranslate"><span class="pre">(h</span> <span class="pre">k</span> <span class="pre">l)</span></code>.</p></li>
+</ul>
+</li>
+<li><ul>
+<li><p>3rd element: Reference layer’s first vector is 0: <code class="docutils literal notranslate"><span class="pre">[u</span> <span class="pre">v</span> <span class="pre">w]</span></code>, 1: <code class="docutils literal notranslate"><span class="pre">(h</span> <span class="pre">k</span> <span class="pre">l)</span></code>.</p></li>
+</ul>
+</li>
+<li><ul>
+<li><p>4th and 5th element: ??? Maybe parallel vs perpendicular?</p></li>
+</ul>
+</li>
+<li><p>2nd row: Value of 1st vectors of this and reference layer.</p></li>
+<li><p>3rd row: Value of 2nd vectors of this and reference layer.</p></li>
+</ul>
+<p>If the 2nd vector is not perpendicular to the 1st vector, as given by
+<code class="docutils literal notranslate"><span class="pre">hu</span> <span class="pre">+</span> <span class="pre">kv</span> <span class="pre">+</span> <span class="pre">lw</span> <span class="pre">=</span> <span class="pre">0</span></code>, then the 2nd vector is altered to be perpendicular
+before being passed to LMATRIX.
+The precise procedure for this is unclear and does not appear to be uniform.
+For non-equal vectors, I believe we first normalise the sign then subtract off
+the component parallel to the 1st vector.
+For parallel vectors, I haven’t figured out any consistent pattern.</p>
+<p>If a zero vector is provided, then LMATRIX become <code class="docutils literal notranslate"><span class="pre">nan</span></code> in the first 3 columns of all rows.</p>
 <p>e.g.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">LORIENT</span>
  <span class="o">-</span><span class="mi">1</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>
@@ -151,8 +186,16 @@ If it is prefixed by <code class="docutils literal notranslate"><span class="pre
 <span id="id10"></span><h2>LMATRIX<a class="headerlink" href="#lmatrix" title="Link to this heading">¶</a></h2>
 <p>Transformation matrix of this phase’s coordinate system.</p>
 <ul class="simple">
-<li><p>5th row: 3 floats, translation. Is the (x,y,z) of the global coordinates minus the (x,y,z) of this phase, as specified in <code class="docutils literal notranslate"><span class="pre">LSTRANSL</span></code>. Actually, that’s only true in orthorhombic coordinates. Reality is actually rather complicated.</p></li>
+<li><p>1st-4th rows: Affine transformation matrix for the orientation of the phase.
+Only the linear component is used.</p></li>
+<li><p>5th row: 3 floats, translation. Is the (x,y,z) of the global coordinates minus the (x,y,z) of this phase, as specified in <code class="docutils literal notranslate"><span class="pre">LTRANSL</span></code>, in global Cartesian coordinates.
+The default orientation of a phase is set so that [1 0 0] axis is parallel to x and the [0 1 0] axis is in the x-y plane.</p></li>
 </ul>
+<p>For orientation, transform to Cartesian (?), normalise all vectors, construct the third vector from the cross product of 1st and 2nd, then
+<code class="docutils literal notranslate"><span class="pre">LMATRIX</span> <span class="pre">=</span> <span class="pre">{v1,</span> <span class="pre">v2,</span> <span class="pre">v1xv2}_global</span> <span class="pre">&#64;</span> <span class="pre">{v1,</span> <span class="pre">v2,</span> <span class="pre">v1xv2}_local^-1</span></code>
+(TODO: Test with non-cubic cell.)</p>
+<p>For translation, (x,y,z)_global - CELL &#64; (x,y,z)_local.
+(TODO: Check with non-trivial orientation.)</p>
 <p>e.g.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">LMATRIX</span>
  <span class="mf">1.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>  <span class="mf">0.000000</span>

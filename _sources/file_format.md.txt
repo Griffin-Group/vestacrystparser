@@ -121,8 +121,12 @@ Translation of this phase with respect to another.
 
 Edit Data > Phase > Positioning
 
+Vesta Manual Section 7.1.
+
 - 1st row: Reference phase (0-indexed). The number in "Place (x,y,z) of this layer at (x,y,z) of layer..." minus 1. If `-1`, is the global coordinate system.
+The reference phase must be lower than the current phase.
 - 2nd row: x,y,z of this layer; x,y,z of reference layer.
+For layers (not global coordinates), the coordinates are in fractional coordinates.
 
 e.g.
 ```
@@ -133,6 +137,30 @@ LTRANSL
 
 (LORIENT)=
 ## LORIENT
+
+Relative orientation of this phase with respect to another.
+
+Edit Data > Phase > Orientation
+
+Vesta Manual Section 7.2 (although it's not very clear).
+
+- 1st row:
+- - 1st element: Reference phase (0-indexed). If `-1`, is the global coordinate system.
+- - 2nd element: This layer's first vector is 0: `[u v w]`, 1: `(h k l)`.
+- - 3rd element: Reference layer's first vector is 0: `[u v w]`, 1: `(h k l)`.
+- - 4th and 5th element: ??? Maybe parallel vs perpendicular?
+- 2nd row: Value of 1st vectors of this and reference layer.
+- 3rd row: Value of 2nd vectors of this and reference layer.
+
+If the 2nd vector is not perpendicular to the 1st vector, as given by
+`hu + kv + lw = 0`, then the 2nd vector is altered to be perpendicular
+before being passed to LMATRIX.
+The precise procedure for this is unclear and does not appear to be uniform.
+For non-equal vectors, I believe we first normalise the sign then subtract off
+the component parallel to the 1st vector.
+For parallel vectors, I haven't figured out any consistent pattern.
+
+If a zero vector is provided, then LMATRIX become `nan` in the first 3 columns of all rows.
 
 e.g.
 ```
@@ -147,7 +175,17 @@ LORIENT
 
 Transformation matrix of this phase's coordinate system.
 
-- 5th row: 3 floats, translation. Is the (x,y,z) of the global coordinates minus the (x,y,z) of this phase, as specified in `LSTRANSL`. Actually, that's only true in orthorhombic coordinates. Reality is actually rather complicated.
+- 1st-4th rows: Affine transformation matrix for the orientation of the phase.
+Only the linear component is used.
+- 5th row: 3 floats, translation. Is the (x,y,z) of the global coordinates minus the (x,y,z) of this phase, as specified in `LTRANSL`, in global Cartesian coordinates.
+The default orientation of a phase is set so that [1 0 0] axis is parallel to x and the [0 1 0] axis is in the x-y plane.
+
+For orientation, transform to Cartesian (?), normalise all vectors, construct the third vector from the cross product of 1st and 2nd, then
+`LMATRIX = {v1, v2, v1xv2}_global @ {v1, v2, v1xv2}_local^-1`
+(TODO: Test with non-cubic cell.)
+
+For translation, (x,y,z)_global - CELL @ (x,y,z)_local.
+(TODO: Check with non-trivial orientation.)
 
 e.g.
 ```
