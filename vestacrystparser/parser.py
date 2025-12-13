@@ -1380,6 +1380,12 @@ class VestaFile:
     def set_scene_view_direction(self, view: str) -> list[list[float]]:
         """Set view direction to a preset viewing direction.
 
+        TODO: Account for non-trivial orientation of phase 1.
+        (Vector-based view directions are calculated relative to phase 1.)
+
+        TODO: Account for multiple phases.
+        VESTA defaults to phase 1, but we don't have to be restricted that way.
+
         Args:
             view: Preset viewing direction.
                 Valid presets: "c".
@@ -1963,6 +1969,11 @@ class VestaFile:
 
         VESTA aligns the 1st lattice vectors with the x axis, and the 2nd in
         the x-y plane.
+        The cell matrix is given in this local orientation. However,
+        sometimes an extra global rotation from :ref:`LMATRIX` may be relevant,
+        depending on your application.
+
+        TODO: Allow get_cell_matrix to request global instead of local.
 
         Related sections: :ref:`CELLP`.
         """
