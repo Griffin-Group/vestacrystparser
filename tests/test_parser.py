@@ -3,11 +3,10 @@ import math
 
 import pytest
 
-from vestacrystparser.parser import VestaFile, parse_line, invert_matrix
+from vestacrystparser.parser import VestaFile
 import vestacrystparser.parser
 
-TEST_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(TEST_DIR, 'data')
+from utils import compare_vesta_strings, compare_matrices, DATA_DIR, TEST_DIR
 
 
 @pytest.fixture
@@ -25,57 +24,6 @@ def default_vesta_filename() -> str:
     ROOT_DIR = os.path.dirname(TEST_DIR)
     return os.path.join(ROOT_DIR, 'vestacrystparser', 'resources',
                         'default.vesta')
-
-
-def compare_vesta_strings(str1: str, str2: str, prec: int = None) -> bool:
-    """
-    Takes two VESTA strings, does basic parsing so no formatting,
-    then checks if they are equivalent.
-
-    If provided, prec means floats are compared to prec digits of precision.
-    """
-    data1 = [parse_line(x) for x in str1.strip().split('\n')]
-    data2 = [parse_line(x) for x in str2.strip().split('\n')]
-    # Compare
-    if not len(data1) == len(data2):
-        return False
-    for line1, line2 in zip(data1, data2):
-        if not line1 == line2:
-            if prec is not None:
-                for x1, x2 in zip(line1, line2):
-                    if isinstance(x1, str) or isinstance(x2, str):
-                        if x1 != x2:
-                            return False
-                    else:
-                        if abs(x1-x2) >= 10**(-prec):
-                            return False
-            else:
-                return False
-    return True
-
-
-def compare_matrices(M1, M2, prec: int = None) -> bool:
-    """
-    Takes two matrix-like objects and compares them.
-
-    If provided, prec means floats are compared to prec digits of precision.
-    """
-    # Check first dimension is the same length.
-    if not len(M1) == len(M2):
-        return False
-    for i in range(len(M1)):
-        # Check second dimension is the same length
-        if not len(M1[i]) == len(M2[i]):
-            return False
-        for j in range(len(M1[i])):
-            # Compare elements
-            if prec is None:
-                if not M1[i][j] == M2[i][j]:
-                    return False
-            else:
-                if not abs(M1[i][j] - M2[i][j]) <= 10**(-prec):
-                    return False
-    return True
 
 
 def test_load(sample_vestafile, sample_vesta_filename):
@@ -948,21 +896,6 @@ def test_get_cell_matrix(sample_vestafile):
                     [1.2649999857, 2.1910442468, 0.0000000000],
                     [1.2649999857, 0.7303480823, 2.0657363264]]
     assert compare_matrices(mat, expected_mat, prec=6)
-
-
-def test_invert_matrix():
-    M = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-    assert compare_matrices(invert_matrix(
-        M), M, prec=12), "Identity matrix not matched"
-    # Get a more complex inversion
-    M = [[2.53, 0, 0],
-         [1.2650000000000001, 2.1910442715746297, 0],
-         [1.2650000000000001, 0.7303480905248766, 2.0657363497471466]]
-    # Inverse from numpy.linalg.inv(M)
-    Mi = [[0.39525692,  0.,  0.],
-          [-0.22820169,  0.45640337,  0.],
-          [-0.16136296, -0.16136296,  0.48408888]]
-    assert compare_matrices(invert_matrix(M), Mi, prec=7)
 
 
 def test_add_vector_type(sample_vestafile):

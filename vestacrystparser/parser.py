@@ -16,79 +16,9 @@ from typing import Union, Iterator
 import importlib.resources
 
 import vestacrystparser.resources
+from vestacrystparser.utilities import parse_token, parse_line, invert_matrix
 
 logger = logging.getLogger(__name__)
-
-
-def parse_token(token: str) -> Union[int, float, str]:
-    """Convert a token to int or float if possible (or leave as a string).
-
-    Args:
-        token: A string.
-
-    Returns:
-        `token` converted to :type:`int` if possible,
-        or else :type:`float` if possible, or else returned
-        as-is.
-    """
-    try:
-        return int(token)
-    except ValueError:
-        try:
-            return float(token)
-        except ValueError:
-            return token
-
-
-def parse_line(line: str) -> list[Union[int, float, str]]:
-    """Split a line into tokens and convert each token.
-
-    Args:
-        line: String with data separated by spaces.
-
-    Returns:
-        A list of tokens (int, float, or string, as appropriate).
-    """
-    tokens = line.split()
-    return [parse_token(tok) for tok in tokens]
-
-
-def invert_matrix(mat: list[list[float]]) -> list[list[float]]:
-    """Inverts a 3x3 matrix."""
-    # Implementation using raw Python; importing numpy is overkill.
-    # https://mathworld.wolfram.com/MatrixInverse.html
-    assert len(mat) == 3, "mat must be 3x3"
-    assert len(mat[0]) == 3, "mat must be 3x3"
-    # Determinant of full matrix
-    detfull = mat[0][0] * (mat[1][1]*mat[2][2] - mat[2][1]*mat[1][2]) \
-        - mat[0][1] * (mat[1][0]*mat[2][2] - mat[1][2]*mat[2][0]) \
-        + mat[0][2] * (mat[1][0]*mat[2][1] - mat[1][1]*mat[2][0])
-    if detfull == 0:
-        raise ValueError("Singular matrix")
-    # Make determinants for each element.
-    # Initialise
-    inverse = [[None, None, None] for _ in range(3)]
-    for i in range(3):
-        # Grab the co-factor coordinates
-        if i == 0:
-            x1, x2 = 1, 2
-        elif i == 1:
-            x1, x2 = 2, 0
-        else:
-            x1, x2 = 0, 1
-        for j in range(3):
-            if j == 0:
-                y1, y2 = 1, 2
-            elif j == 1:
-                y1, y2 = 2, 0
-            else:
-                y1, y2 = 0, 1
-            # Each term is built from the co-factor, i.e. determinant of the
-            # rest of the matrix.
-            # But also, transpose the terms
-            inverse[j][i] = (mat[x1][y1] * mat[x2][y2] -
-                             mat[x1][y2] * mat[x2][y1]) / detfull
-    return inverse
 
 
 def load_elements_data(element: Union[int, str]) -> \
@@ -2445,6 +2375,32 @@ class VestaFile:
     def set_vector_scale(self, scale: float):
         """Sets global vector scale factor (VECTS)"""
         self["VECTS"].inline = [scale]
+
+    def set_phase_orientation(self, v1: list, v2: list,
+                              refv1: list, refv2: list,
+                              v1_is_hkl: bool,
+                              refv1_is_hkl: bool,
+                              reference_phase: int = 0,
+                              ):
+        """Sets the relative orientation of the current phase.
+
+        v1 is aligned to refv1, v2 is aligned to refv2.
+        
+        Args:
+            v1: 3-vector, first vector of current phase.
+            v2: 3-vector, second vector of current phase.
+            refv1: 3-vector, first vector of reference phase.
+            refv2: 3-vector, second vector of reference phase.
+            v1_is_hkl: True: v1 is (hkl) and v2 is [uvw]. False is other way.
+            refv1_is_hkl: True: refv1 is (hkl) and refv2 is [uvw]. False is
+                other way.
+            reference_phase: Phase to orient relative to. Must be lower than
+                the current phase (1-indexed) to avoid circular references.
+                `0` refers to the global Cartesian coordinate system.
+        
+        Related sections: :ref:`LORIENT`, :ref:`LMATRIX`
+        """
+        pass
 
     # This function is incomplete. I'm setting it aside for future me to deal
     # with, as it turns out to require some fairly advanced computation to
