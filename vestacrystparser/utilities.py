@@ -3,6 +3,7 @@
 Miscellaneous utility functions, such as string parsing and matrix algebra.
 """
 
+import math
 from typing import Union
 
 def parse_token(token: str) -> Union[int, float, str]:
@@ -75,6 +76,7 @@ def invert_matrix(mat: list[list[float]]) -> list[list[float]]:
                              mat[x1][y2] * mat[x2][y1]) / detfull
     return inverse
 
+
 def matmul(mat1: list[list[float]], mat2: list[list[float]]) -> list[list[float]]:
     """Multiplies two matrices (NxM) x (MxL) -> (NxL)"""
     answer = []
@@ -87,4 +89,38 @@ def matmul(mat1: list[list[float]], mat2: list[list[float]]) -> list[list[float]
             for k in range(len(mat1[i])):
                 elem += mat1[i][k] * mat2[k][j]
             answer[i].append(elem)
+    return answer
+
+
+def vector_dot(v1: list[float], v2: list[float]) -> float:
+    """Takes the dot product of two vectors."""
+    assert len(v1) == len(v2), "Dot product vectors must have equal length."
+    return sum(a * b for a, b in zip(v1, v2))
+
+
+def vector_cross(v1: list[float], v2: list[float]) -> list[float]:
+    """Takes the cross product of two 3-vectors"""
+    assert len(v1) == 3, "Cross product vectors must be length 3."
+    assert len(v2) == 3, "Cross product vectors must be length 3."
+    return [v1[1] * v2[2] - v1[2] * v2[1],
+            v1[2] * v2[0] - v1[0] * v2[2],
+            v1[0] * v2[1] - v1[1] * v2[0]]
+
+
+def parallel_vectors(v1: list[float], v2: list[float]) -> bool:
+    """Tests if two vectors are parallel or antiparellel."""
+    return vector_dot(v1, v2)**2 == vector_dot(v1, v1) * vector_dot(v2, v2)
+
+
+def unit_vector(v: list[float]) -> list[float]:
+    """Normalises vector v to unit length."""
+    norm = math.sqrt(vector_dot(v, v))
+    return [x / norm for x in v]
+
+
+def transpose(mat: list[list]) -> list[list]:
+    """Transposes a matrix."""
+    answer = []
+    for j in range(len(mat[0])):
+        answer.append([mat[i][j] for i in range(len(mat))])
     return answer

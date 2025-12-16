@@ -1,6 +1,7 @@
 import pytest
 
-from vestacrystparser.utilities import invert_matrix, matmul
+from vestacrystparser.utilities import invert_matrix, matmul, transpose, \
+    vector_dot, vector_cross, unit_vector, parallel_vectors
 
 from utils import compare_matrices
 
@@ -18,6 +19,7 @@ def test_invert_matrix():
           [-0.22820169,  0.45640337,  0.],
           [-0.16136296, -0.16136296,  0.48408888]]
     assert compare_matrices(invert_matrix(M), Mi, prec=7)
+
 
 def test_matmul():
     # Integer rectangular matrices
@@ -41,3 +43,18 @@ def test_matmul():
     I = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
     assert compare_matrices(matmul(M, Mi), I, prec=7), \
         "Failed to mutliply two (3x3) float matrices."
+
+
+def test_transpose():
+    M = [[4, 6, 7],
+         [0, -3, 1]]
+    M2 = [[4, 0],
+          [6, -3],
+          [7, 1]]
+    assert transpose(M) == M2
+
+
+def test_parallel_vectors():
+    assert parallel_vectors([1, 1, 0], [2, 2, 0]) is True
+    assert parallel_vectors([0, 0, 1], [0, 0, -1]) is True
+    assert parallel_vectors([1, 0, 1], [1, 1, 0]) is False
