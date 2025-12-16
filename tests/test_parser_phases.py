@@ -282,3 +282,109 @@ def test_rearrange_phases(sample_vestafile):
         "Rearranging phases failed to change the files."
     assert sample_vestafile.title == "New structure"
     assert sample_vestafile["TITLE", 1].data[0][0] == "Phase Two"
+
+
+def test_set_phase_orientation_basic(sample_vestafile):
+    # Simple case of testing on the basic cubic cell.
+    sample_vestafile.set_current_phase(2)
+    expected_lorient = """LORIENT
+ -1   0   0   0   0
+ 1.000000  0.000000  0.000000  1.000000  0.000000  0.000000
+ 0.000000  0.000000  1.000000  0.000000  0.000000  1.000000"""
+    expected_lmatrix = """LMATRIX
+ 1.000000  0.000000  0.000000  0.000000
+ 0.000000  1.000000  0.000000  0.000000
+ 0.000000  0.000000  1.000000  0.000000
+ 0.000000  0.000000  0.000000  1.000000
+ 0.000000  0.000000  0.000000"""
+    # Null result
+    sample_vestafile.set_phase_orientation([1, 0, 0], [0, 0, 1],
+                                           [1, 0, 0], [0, 0, 1],
+                                           False, False, 0)
+    assert compare_vesta_strings(str(sample_vestafile["LORIENT"]), expected_lorient), \
+        "LORIENT changed when I gave boring inputs!"
+    assert compare_vesta_strings(str(sample_vestafile["LMATRIX"]), expected_lmatrix), \
+        "LMATRIX changed when I gave boring inputs!"
+    # For cubic cell, hkl and uvw are equivalent.
+    sample_vestafile.set_phase_orientation([1, 0, 0], [0, 0, 1],
+                                           [1, 0, 0], [0, 0, 1],
+                                           True, True, 0)
+    expected_lorient = """LORIENT
+ -1   1   1   0   0
+ 1.000000  0.000000  0.000000  1.000000  0.000000  0.000000
+ 0.000000  0.000000  1.000000  0.000000  0.000000  1.000000"""
+    assert compare_vesta_strings(str(sample_vestafile["LORIENT"]), expected_lorient), \
+        "LORIENT didn't handle hkl in simple cubic setting properly."
+    assert compare_vesta_strings(str(sample_vestafile["LMATRIX"]), expected_lmatrix), \
+        "LMATRIX didn't handle hkl in simple cubic setting properly."
+    # Test some simple, pre-computed cases
+    sample_vestafile.set_phase_orientation([1, 0, 0], [0, 0, 1],
+                                           [0, 1, 0], [0, 0, 1],
+                                           False, False, 0)
+    expected_lorient = """LORIENT
+ -1   0   0   0   0
+ 1.000000  0.000000  0.000000  0.000000  1.000000  0.000000
+ 0.000000  0.000000  1.000000  0.000000  0.000000  1.000000"""
+    expected_lmatrix = """LMATRIX
+ 0.000000 -1.000000  0.000000  0.000000
+ 1.000000  0.000000  0.000000  0.000000
+ 0.000000  0.000000  1.000000  0.000000
+ 0.000000  0.000000  0.000000  1.000000
+ 0.000000  0.000000  0.000000"""
+    assert compare_vesta_strings(str(sample_vestafile["LORIENT"]), expected_lorient, prec=6), \
+        "LORIENT didn't handle simple orientation change."
+    assert compare_vesta_strings(str(sample_vestafile["LMATRIX"]), expected_lmatrix, prec=6), \
+        "LMATRIX didn't handle simple orientation change."
+    sample_vestafile.set_phase_orientation([1, 0, 0], [0, 0, 1],
+                                           [1, 0, 0], [0, 1, 0],
+                                           False, False, 0)
+    expected_lorient = """LORIENT
+ -1   0   0   0   0
+ 1.000000  0.000000  0.000000  1.000000  0.000000  0.000000
+ 0.000000  0.000000  1.000000  0.000000  1.000000  0.000000"""
+    expected_lmatrix = """LMATRIX
+ 1.000000  0.000000  0.000000  0.000000
+ 0.000000  0.000000  1.000000  0.000000
+ 0.000000 -1.000000  0.000000  0.000000
+ 0.000000  0.000000  0.000000  1.000000
+ 0.000000  0.000000  0.000000"""
+    assert compare_vesta_strings(str(sample_vestafile["LORIENT"]), expected_lorient, prec=6), \
+        "LORIENT didn't handle simple orientation change."
+    assert compare_vesta_strings(str(sample_vestafile["LMATRIX"]), expected_lmatrix, prec=6), \
+        "LMATRIX didn't handle simple orientation change."
+    sample_vestafile.set_phase_orientation([1, 0, 0], [0, 0, 1],
+                                           [0, 1, 0], [1, 0, 0],
+                                           False, False, 0)
+    expected_lorient = """LORIENT
+ -1   0   0   0   0
+ 1.000000  0.000000  0.000000  0.000000  1.000000  0.000000
+ 0.000000  0.000000  1.000000  1.000000  0.000000  0.000000"""
+    expected_lmatrix = """LMATRIX
+ 0.000000  0.000000  1.000000  0.000000
+ 1.000000  0.000000  0.000000  0.000000
+ 0.000000  1.000000  0.000000  0.000000
+ 0.000000  0.000000  0.000000  1.000000
+ 0.000000  0.000000  0.000000"""
+    assert compare_vesta_strings(str(sample_vestafile["LORIENT"]), expected_lorient, prec=6), \
+        "LORIENT didn't handle simple orientation change."
+    assert compare_vesta_strings(str(sample_vestafile["LMATRIX"]), expected_lmatrix, prec=6), \
+        "LMATRIX didn't handle simple orientation change."
+    # Try a slightly trickier orientation change
+    sample_vestafile.set_phase_orientation([1, 0, 0], [0, 0, 1],
+                                           [1, 1, 0], [0, 0, 1],
+                                           False, False, 0)
+    expected_lorient = """LORIENT
+ -1   0   0   0   0
+ 1.000000  0.000000  0.000000  1.000000  1.000000  0.000000
+ 0.000000  0.000000  1.000000  0.000000  0.000000  1.000000"""
+    expected_lmatrix = """LMATRIX
+ 0.707107 -0.707107  0.000000  0.000000
+ 0.707107  0.707107  0.000000  0.000000
+ 0.000000  0.000000  1.000000  0.000000
+ 0.000000  0.000000  0.000000  1.000000
+ 0.000000  0.000000  0.000000"""
+    assert compare_vesta_strings(str(sample_vestafile["LORIENT"]), expected_lorient, prec=6), \
+        "LORIENT didn't handle [110] orientation."
+    assert compare_vesta_strings(str(sample_vestafile["LMATRIX"]), expected_lmatrix, prec=6), \
+        "LMATRIX didn't handle [110] orientation."
+    

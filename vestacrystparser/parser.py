@@ -16,7 +16,8 @@ from typing import Union, Iterator
 import importlib.resources
 
 import vestacrystparser.resources
-from vestacrystparser.utilities import parse_token, parse_line, invert_matrix
+from vestacrystparser.utilities import parse_token, parse_line, invert_matrix, \
+    matmul, vector_dot, vector_cross, parallel_vectors, unit_vector, transpose
 
 logger = logging.getLogger(__name__)
 
@@ -2400,7 +2401,102 @@ class VestaFile:
         
         Related sections: :ref:`LORIENT`, :ref:`LMATRIX`
         """
-        pass
+        # Validate inputs
+        if reference_phase >= self.current_phase:
+            raise ValueError(f"Cannot have reference phase ({reference_phase}) higher than current phase ({self.current_phase}).")
+        for v, name in zip([v1, v2, refv1, refv2], ["v1", "v2", "refv1", "refv2"]):
+            if len(v) != 3:
+                raise ValueError(f"Vector {name} must be length 3, not {len(v)}.")
+        # Write LORIENT.
+        section = self["LORIENT"]
+        section.data[0][0] = reference_phase - 1
+        section.data[0][1] = int(v1_is_hkl)
+        section.data[0][2] = int(refv1_is_hkl)
+        # Explicitly convert to list just in case we leaked in numpy arrays,
+        # because I use + as concatenation here.
+        section.data[1] = list(v1) + list(refv1)
+        section.data[2] = list(v2) + list(refv2)
+        # Throw some warnings if v1 and v2 are wierd.
+        if vector_dot(v1, v2) != 0:
+            if parallel_vectors(v1, v2):
+                logger.warning("v1 and v2 are parallel! Behaviour is very poorly defined!")
+            else:
+                logger.warning("v1 and v2 are meant to be orthogonal. Behaviour is poorly defined.")
+        if vector_dot(refv1, refv2) != 0:
+            if parallel_vectors(refv1, refv2):
+                logger.warning("refv1 and refv2 are parallel! Behaviour is very poorly defined!")
+            else:
+                logger.warning("refv1 and refv2 are meant to be orthogonal. Behaviour is poorly defined.")
+        # Pop _evaluate_lmatrix into its own helper function,
+        # because I think it'll be called in several places. And it fixes the updating problem.
+        self._evaluate_lmatrix(self.current_phase)
+
+    def _evaluate_lmatrix(self, phase: int = 1):
+        """Re-computes the LMATRIX entry of this and following phases based on LORIENT and LTRANSL."""
+        # Pop data
+        section = self["LORIENT", phase]
+        reference_phase = section.data[0][0] + 1
+        v1_is_hkl = bool(section.data[0][1])
+        refv1_is_hkl = bool(section.data[0][2])
+        v1 = section.data[1][0:3].copy()
+        refv1 = section.data[1][3:6].copy()
+        v2 = section.data[2][0:3].copy()
+        refv2 = section.data[2][3:6].copy()
+        # Process any potential nonorthogonality.
+        # Also normalise the vectors.
+        has_zero_length = False
+        try:
+            v1, v2 = _handle_maybe_nonorthogonal_vectors(v1, v2)
+            refv1, refv2 = _handle_maybe_nonorthogonal_vectors(refv1, refv2)
+        except ZeroDivisionError:
+            # One of the vectors has 0 length, so unit_vector fails.
+            # It's not a fatal error; VESTA handles this fine in its UI.
+            # It gives bad results, but it doesn't crash.
+            logger.error("Vector of magnitude 0 in LORIENT." \
+                "VESTA will be unable to visualise.")
+            # Set a flag so we can do special handling later.
+            has_zero_length = True
+        # Process LMATRIX, transformation matrix.
+        section = self["LMATRIX", phase]
+        # Get reference frame
+        if reference_phase == 0:
+            reference_matrix = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+        else:
+            reference_section = self["LMATRIX", reference_phase]
+            reference_matrix = [row[0:3].copy() for row in reference_section.data[0:3]]
+            # Propagate NaNs.
+            if reference_matrix[0][0] == "nan":
+                has_zero_length = True
+        if has_zero_length:
+            # Special processing of LMATRIX
+            # Is a bunch on nan's.
+            for i in range(5):
+                for j in range(3):
+                    section.data[i][j] = "nan"
+        else:
+            # LMAT @ v1(column) = v1ref
+            LMAT = transpose(matmul(invert_matrix([v1, v2, unit_vector(vector_cross(v1, v2))]),
+                                    [refv1, refv2, unit_vector(vector_cross(refv1, refv2))]))
+            LMAT = matmul(invert_matrix(reference_matrix), LMAT)
+            for i in range(3):
+                for j in range(3):
+                    # int to float
+                    section.data[i][j] = float(LMAT[i][j])
+            # Correct for prior nan's
+            if section.data[3][0] == "nan":
+                section.data[3] = [0.0, 0.0, 0.0]
+            # TODO: Call set_phase_position to recalculate data[4].
+            # section = self["LTRANSL"]
+            # self.set_phase_position(...)
+        # Update all LMATRIX entries up the stack
+        if phase < self.nphases:
+            self._evaluate_lmatrix(phase + 1)
+
+        
+            
+
+        
+                
 
     # This function is incomplete. I'm setting it aside for future me to deal
     # with, as it turns out to require some fairly advanced computation to
@@ -2474,3 +2570,25 @@ class VestaFile:
     #         # Finally, count the atoms of this site outside the boundary which
     #         # would be bonded to atoms within the boundary.
     #         pass
+
+
+def _handle_maybe_nonorthogonal_vectors(v1: list[float], v2: list[float]) \
+                                            -> tuple[list[float], list[float]]:
+    """Helper function for VestaFile.set_phase_orientation."""
+    assert len(v1) == 3, "v1 is not length 3."
+    assert len(v2) == 3, "v2 is not length 3."
+    if vector_dot(v1, v2) != 0:
+        # Check for the pathological case of v1 = v2 (up to magnitude)
+        if parallel_vectors(v1, v2):
+            # Heuristically get a new vector.
+            if parallel_vectors(v2, [1, 0, 0]):
+                v2 = [0, 1, 0]
+            else:
+                v2 = vector_cross([1, 0, 0], v2)
+        else:
+            # We don't actually need to modify the vector,
+            # because we get a cross product later.
+            # VESTA does some kind of sign normalisation.
+            if v2[0] < 0:
+                v2 = [-x for x in v2]
+    return unit_vector(v1), unit_vector(v2)
