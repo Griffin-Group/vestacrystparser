@@ -848,6 +848,30 @@ positive index.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="vestacrystparser.VestaFile.set_phase_orientation">
+<span class="sig-name descname"><span class="pre">set_phase_orientation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refv1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refv2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v1_is_hkl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refv1_is_hkl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vestacrystparser.VestaFile.set_phase_orientation" title="Link to this definition">¶</a></dt>
+<dd><p>Sets the relative orientation of the current phase.</p>
+<p>v1 is aligned to refv1, v2 is aligned to refv2.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>v1</strong> – 3-vector, first vector of current phase.</p></li>
+<li><p><strong>v2</strong> – 3-vector, second vector of current phase.</p></li>
+<li><p><strong>refv1</strong> – 3-vector, first vector of reference phase.</p></li>
+<li><p><strong>refv2</strong> – 3-vector, second vector of reference phase.</p></li>
+<li><p><strong>v1_is_hkl</strong> – True: v1 is (hkl) and v2 is [uvw]. False is other way.</p></li>
+<li><p><strong>refv1_is_hkl</strong> – True: refv1 is (hkl) and refv2 is [uvw]. False is
+other way.</p></li>
+<li><p><strong>reference_phase</strong> – Phase to orient relative to. Must be lower than
+the current phase (1-indexed) to avoid circular references.
+<cite>0</cite> refers to the global Cartesian coordinate system.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Related sections: <a class="reference internal" href="file_format.html#lorient"><span class="std std-ref">LORIENT</span></a>, <a class="reference internal" href="file_format.html#lmatrix"><span class="std std-ref">LMATRIX</span></a></p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="vestacrystparser.VestaFile.set_scene_view_direction">
 <span class="sig-name descname"><span class="pre">set_scene_view_direction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#vestacrystparser.VestaFile.set_scene_view_direction" title="Link to this definition">¶</a></dt>
 <dd><p>Set view direction to a preset viewing direction.</p>

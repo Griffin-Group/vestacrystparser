@@ -246,12 +246,6 @@ For other sections, split the line into tokens and convert them.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="vestacrystparser.parser.invert_matrix">
-<span class="sig-prename descclassname"><span class="pre">vestacrystparser.parser.</span></span><span class="sig-name descname"><span class="pre">invert_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#vestacrystparser.parser.invert_matrix" title="Link to this definition">¶</a></dt>
-<dd><p>Inverts a 3x3 matrix.</p>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="vestacrystparser.parser.load_default_bond_length">
 <span class="sig-prename descclassname"><span class="pre">vestacrystparser.parser.</span></span><span class="sig-name descname"><span class="pre">load_default_bond_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#vestacrystparser.parser.load_default_bond_length" title="Link to this definition">¶</a></dt>
 <dd><p>Returns default maximum bond length for a pair of elements (if present).</p>
@@ -331,36 +325,6 @@ level).</p>
 <li><p>Blue colour value (int, 0-255).</p></li>
 </ul>
 </p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="vestacrystparser.parser.parse_line">
-<span class="sig-prename descclassname"><span class="pre">vestacrystparser.parser.</span></span><span class="sig-name descname"><span class="pre">parse_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#vestacrystparser.parser.parse_line" title="Link to this definition">¶</a></dt>
-<dd><p>Split a line into tokens and convert each token.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>line</strong> – String with data separated by spaces.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A list of tokens (int, float, or string, as appropriate).</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="vestacrystparser.parser.parse_token">
-<span class="sig-prename descclassname"><span class="pre">vestacrystparser.parser.</span></span><span class="sig-name descname"><span class="pre">parse_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></span><a class="headerlink" href="#vestacrystparser.parser.parse_token" title="Link to this definition">¶</a></dt>
-<dd><p>Convert a token to int or float if possible (or leave as a string).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>token</strong> – A string.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><cite>token</cite> converted to <code class="xref py py-type docutils literal notranslate"><span class="pre">int</span></code> if possible,
-or else <code class="xref py py-type docutils literal notranslate"><span class="pre">float</span></code> if possible, or else returned
-as-is.</p>
 </dd>
 </dl>
 </dd></dl>
