@@ -6,6 +6,7 @@ Miscellaneous utility functions, such as string parsing and matrix algebra.
 import math
 from typing import Union
 
+
 def parse_token(token: str) -> Union[int, float, str]:
     """Convert a token to int or float if possible (or leave as a string).
 

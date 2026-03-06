@@ -289,7 +289,7 @@ class VestaSection:
     def __len__(self) -> int:
         """Return number of lines (besides the header line)"""
         return len(self.data)
-    
+
     def copy(self) -> "VestaSection":
         """Creates a copy of the VestaSection"""
         new = VestaSection(self.header)
@@ -368,7 +368,7 @@ class VestaPhase:
     def nsites(self) -> int:
         """Number of sites (read-only)"""
         return len(self["SITET"].data) - 1
-    
+
     def copy(self) -> "VestaPhase":
         """Creates a copy of the VestaPhase"""
         new = VestaPhase()
@@ -389,7 +389,7 @@ class VestaFile:
 
         If filename is provided, it is parsed.
         Otherwise, the default empty file is provided.
-        
+
         Args:
             filename (str): Path to the VESTA file.
         """
@@ -647,7 +647,7 @@ class VestaFile:
     def delete_phase(self, index: int):
         """
         Deletes the specified phase (1-based index).
-        
+
         Cannot delete last phase.
         If current phase is deleted, set self.current_phase = 1.
         Supports negative indexing.
@@ -662,7 +662,8 @@ class VestaFile:
         del self._phases[index]
         if index == self.current_phase - 1 or \
                 self.nphases + 1 + index == self.current_phase - 1:
-            logger.debug("Current phase was deleted. Changing current phase to 1.")
+            logger.debug(
+                "Current phase was deleted. Changing current phase to 1.")
             self.current_phase = 1
 
     def copy_phase(self, index: int):
@@ -702,9 +703,11 @@ class VestaFile:
         """
         # Confirm that the given new_order is valid
         if len(new_order) != self.nphases:
-            raise IndexError(f"new_order needs to be length {self.nphases}, not {len(new_order)}.")
+            raise IndexError(
+                f"new_order needs to be length {self.nphases}, not {len(new_order)}.")
         if sorted(new_order) != list(range(1, self.nphases+1)):
-            raise IndexError(f"new_order needs to contain unique integers from 0 to {self.nphases - 1}.")
+            raise IndexError(
+                f"new_order needs to contain unique integers from 0 to {self.nphases - 1}.")
         # Rearrange _phases.
         new_phases = [self._phases[i-1] for i in new_order]
         self._phases = new_phases
@@ -2388,7 +2391,7 @@ class VestaFile:
         and is only currently guaranteed to work for simple cases.
 
         v1 is aligned to refv1, v2 is aligned to refv2.
-        
+
         Args:
             v1: 3-vector, first vector of current phase.
             v2: 3-vector, second vector of current phase.
@@ -2400,15 +2403,17 @@ class VestaFile:
             reference_phase: Phase to orient relative to. Must be lower than
                 the current phase (1-indexed) to avoid circular references.
                 `0` refers to the global Cartesian coordinate system.
-        
+
         Related sections: :ref:`LORIENT`, :ref:`LMATRIX`
         """
         # Validate inputs
         if reference_phase >= self.current_phase:
-            raise ValueError(f"Cannot have reference phase ({reference_phase}) higher than current phase ({self.current_phase}).")
+            raise ValueError(
+                f"Cannot have reference phase ({reference_phase}) higher than current phase ({self.current_phase}).")
         for v, name in zip([v1, v2, refv1, refv2], ["v1", "v2", "refv1", "refv2"]):
             if len(v) != 3:
-                raise ValueError(f"Vector {name} must be length 3, not {len(v)}.")
+                raise ValueError(
+                    f"Vector {name} must be length 3, not {len(v)}.")
         # Write LORIENT.
         section = self["LORIENT"]
         section.data[0][0] = reference_phase - 1
@@ -2421,14 +2426,18 @@ class VestaFile:
         # Throw some warnings if v1 and v2 are wierd.
         if vector_dot(v1, v2) != 0:
             if parallel_vectors(v1, v2):
-                logger.warning("v1 and v2 are parallel! Behaviour is very poorly defined!")
+                logger.warning(
+                    "v1 and v2 are parallel! Behaviour is very poorly defined!")
             else:
-                logger.warning("v1 and v2 are meant to be orthogonal. Behaviour is poorly defined.")
+                logger.warning(
+                    "v1 and v2 are meant to be orthogonal. Behaviour is poorly defined.")
         if vector_dot(refv1, refv2) != 0:
             if parallel_vectors(refv1, refv2):
-                logger.warning("refv1 and refv2 are parallel! Behaviour is very poorly defined!")
+                logger.warning(
+                    "refv1 and refv2 are parallel! Behaviour is very poorly defined!")
             else:
-                logger.warning("refv1 and refv2 are meant to be orthogonal. Behaviour is poorly defined.")
+                logger.warning(
+                    "refv1 and refv2 are meant to be orthogonal. Behaviour is poorly defined.")
         # Pop _evaluate_lmatrix into its own helper function,
         # because I think it'll be called in several places. And it fixes the updating problem.
         self._evaluate_lmatrix(self.current_phase)
@@ -2454,8 +2463,8 @@ class VestaFile:
             # One of the vectors has 0 length, so unit_vector fails.
             # It's not a fatal error; VESTA handles this fine in its UI.
             # It gives bad results, but it doesn't crash.
-            logger.error("Vector of magnitude 0 in LORIENT." \
-                "VESTA will be unable to visualise.")
+            logger.error("Vector of magnitude 0 in LORIENT."
+                         "VESTA will be unable to visualise.")
             # Set a flag so we can do special handling later.
             has_zero_length = True
         # Process LMATRIX, transformation matrix.
@@ -2465,7 +2474,8 @@ class VestaFile:
             reference_matrix = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
         else:
             reference_section = self["LMATRIX", reference_phase]
-            reference_matrix = [row[0:3].copy() for row in reference_section.data[0:3]]
+            reference_matrix = [row[0:3].copy()
+                                for row in reference_section.data[0:3]]
             # Propagate NaNs.
             if reference_matrix[0][0] == "nan":
                 has_zero_length = True
@@ -2493,12 +2503,6 @@ class VestaFile:
         # Update all LMATRIX entries up the stack
         if phase < self.nphases:
             self._evaluate_lmatrix(phase + 1)
-
-        
-            
-
-        
-                
 
     # This function is incomplete. I'm setting it aside for future me to deal
     # with, as it turns out to require some fairly advanced computation to
@@ -2575,7 +2579,7 @@ class VestaFile:
 
 
 def _handle_maybe_nonorthogonal_vectors(v1: list[float], v2: list[float]) \
-                                            -> tuple[list[float], list[float]]:
+        -> tuple[list[float], list[float]]:
     """Helper function for VestaFile.set_phase_orientation."""
     assert len(v1) == 3, "v1 is not length 3."
     assert len(v2) == 3, "v2 is not length 3."
