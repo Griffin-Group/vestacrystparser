@@ -2384,6 +2384,8 @@ class VestaFile:
                               reference_phase: int = 0,
                               ):
         """Sets the relative orientation of the current phase.
+        FUNCTIONALITY INCOMPLETE. This operation is complicated,
+        and is only currently guaranteed to work for simple cases.
 
         v1 is aligned to refv1, v2 is aligned to refv2.
         
