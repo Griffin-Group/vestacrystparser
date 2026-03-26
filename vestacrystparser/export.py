@@ -48,9 +48,10 @@ def export_image_from_file(input: str, output: str, scale: int = 1,
     https://groups.google.com/g/vesta-discuss/c/xePcwJ3Mdgw/m/GyC8_UZbAwAJ
 
     Args:
-        input: Path to file readable by VESTA.
+        input: Path to file readable by VESTA. Resolved relative to the
+            current working directory.
         output: Path to write image to. Should include a recognisable image
-            file extension.
+            file extension. Resolved relative to the current working directory.
         scale: Amount to scale raster image by.
         close: Whether to close the VESTA tab afterward.
         block: Whether to block the main process until the file is written.
@@ -90,24 +91,24 @@ def export_image_from_file(input: str, output: str, scale: int = 1,
     # Sanitise scale
     if not isinstance(scale, int):
         scale = int(scale)
+    # Convert output to an absolute path so that VESTA does not interpret it
+    # as relative to the input file's directory (observed on macOS).
+    abs_output = os.path.abspath(output)
     # Validate that output directory exists.
-    output_dir = os.path.dirname(output)
-    if output_dir and not os.path.isdir(output_dir):
-        # output_dir may be an empty string if output has no path.
-        # That is acceptable, but isdir would say False.
-        # So only check if the directory doesn't exist if non-empty.
+    output_dir = os.path.dirname(abs_output)
+    if not os.path.isdir(output_dir):
         raise FileNotFoundError(f"Cannot find directory {output_dir}.")
     # Prepare current state for blocking.
     if block:
         # If the file exists, we'll check when it gets overwritten.
-        if os.path.exists(output):
-            old_time = os.path.getmtime(output)
+        if os.path.exists(abs_output):
+            old_time = os.path.getmtime(abs_output)
         else:
             # Otherwise, we'll check when it gets written.
             old_time = None
     # Form the command to execute.
     cmd = vesta_cmd + ["-open", abs_input,
-                       "-export_img", f"scale={scale}", str(output)]
+                       "-export_img", f"scale={scale}", abs_output]
     if close:
         cmd += ["-close"]
     # Run
@@ -128,13 +129,13 @@ def export_image_from_file(input: str, output: str, scale: int = 1,
         increment = 0.02
         if old_time is None:
             # Check if the file has been created.
-            while not os.path.exists(output) and \
+            while not os.path.exists(abs_output) and \
                     (timeout is None or elapsed < timeout):
                 time.sleep(increment)
                 elapsed += increment
         else:
             # Check if the file has been overwritten.
-            while os.path.getmtime(output) == old_time and \
+            while os.path.getmtime(abs_output) == old_time and \
                     (timeout is None or elapsed < timeout):
                 time.sleep(increment)
                 elapsed += increment
