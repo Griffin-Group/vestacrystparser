@@ -13,6 +13,7 @@ import platform
 import os
 import subprocess
 import time
+import argparse
 
 
 class NoVestaError(OSError):
@@ -142,3 +143,18 @@ def export_image_from_file(input: str, output: str, scale: int = 1,
         if timeout is not None and elapsed >= timeout:
             raise TimeoutError(
                 f"export_image_from_file timed out after {elapsed} seconds.")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("input", help="Input .vesta file.")
+    parser.add_argument("output", help="Output image file.")
+    parser.add_argument("-s", "--scale", type=int, default=1,
+                        help="Image scale factor (default 1).")
+    parser.add_argument("-t", "--timeout", type=float,
+                        help="Automatic time-out (seconds). Default: infinite.")
+    args = parser.parse_args()
+
+    export_image_from_file(args.input, args.output,
+                           scale=args.scale,
+                           timeout=args.timeout)
