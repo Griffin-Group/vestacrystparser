@@ -7,6 +7,12 @@ which directly opens a VESTA file then exports an image file
 using VESTA's (rather sparse) command line interface.
 
 This requires a working VESTA installation on your system.
+
+:func:`export_image_from_file` can also be called from the command line,
+with 
+```
+python -m vestacrystparser.export <input> <output> [--scale <N>] [--timeout <t>]
+```
 """
 
 import platform
