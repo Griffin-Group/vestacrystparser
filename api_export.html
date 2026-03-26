@@ -69,9 +69,10 @@ tries to open too many files simultaneously.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>input</strong> – Path to file readable by VESTA.</p></li>
+<li><p><strong>input</strong> – Path to file readable by VESTA. Resolved relative to the
+current working directory.</p></li>
 <li><p><strong>output</strong> – Path to write image to. Should include a recognisable image
-file extension.</p></li>
+file extension. Resolved relative to the current working directory.</p></li>
 <li><p><strong>scale</strong> – Amount to scale raster image by.</p></li>
 <li><p><strong>close</strong> – Whether to close the VESTA tab afterward.</p></li>
 <li><p><strong>block</strong> – Whether to block the main process until the file is written.
