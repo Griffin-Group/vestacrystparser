@@ -15,6 +15,7 @@ import os
 import shutil
 import tempfile
 import time
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -123,3 +124,77 @@ def test_export_image_subdirectory():
 # Without close tag.
 
 # Also, the proper way to handle temporary files is probably with pytest fixtures.
+
+
+# ---------------------------------------------------------------------------
+# CLI tests
+# These tests do NOT require VESTA to be installed. They verify that main()
+# parses arguments correctly and passes them through to
+# export_image_from_file. export_image_from_file is mocked out entirely.
+# ---------------------------------------------------------------------------
+
+def _run_cli(argv):
+    """Run the export CLI main() with the given argv.
+
+    Patches sys.argv and replaces export_image_from_file with a MagicMock so
+    that no real VESTA call is made. Returns the mock so callers can inspect
+    how it was called.
+    """
+    mock_fn = MagicMock()
+    with patch("sys.argv", argv), \
+         patch("vestacrystparser.export.export_image_from_file", mock_fn):
+        vestacrystparser.export.main()
+    return mock_fn
+
+
+def test_cli_basic():
+    """Positional args only: scale defaults to 1, timeout defaults to None."""
+    mock_fn = _run_cli(["vestacrystparser.export", "in.vesta", "out.png"])
+    mock_fn.assert_called_once_with("in.vesta", "out.png",
+                                    scale=1, timeout=None)
+
+
+def test_cli_scale_long():
+    """--scale long form is parsed as an int and forwarded."""
+    mock_fn = _run_cli(["vestacrystparser.export", "in.vesta", "out.png",
+                        "--scale", "4"])
+    mock_fn.assert_called_once_with("in.vesta", "out.png",
+                                    scale=4, timeout=None)
+
+
+def test_cli_scale_short():
+    """-s short form is equivalent to --scale."""
+    mock_fn = _run_cli(["vestacrystparser.export", "in.vesta", "out.png",
+                        "-s", "4"])
+    mock_fn.assert_called_once_with("in.vesta", "out.png",
+                                    scale=4, timeout=None)
+
+
+def test_cli_timeout_long():
+    """--timeout long form is parsed as a float and forwarded."""
+    mock_fn = _run_cli(["vestacrystparser.export", "in.vesta", "out.png",
+                        "--timeout", "30.5"])
+    mock_fn.assert_called_once_with("in.vesta", "out.png",
+                                    scale=1, timeout=30.5)
+
+
+def test_cli_timeout_short():
+    """-t short form is equivalent to --timeout."""
+    mock_fn = _run_cli(["vestacrystparser.export", "in.vesta", "out.png",
+                        "-t", "30.5"])
+    mock_fn.assert_called_once_with("in.vesta", "out.png",
+                                    scale=1, timeout=30.5)
+
+
+def test_cli_all_args():
+    """All optional arguments together are forwarded correctly."""
+    mock_fn = _run_cli(["vestacrystparser.export", "in.vesta", "out.png",
+                        "-s", "2", "-t", "10.0"])
+    mock_fn.assert_called_once_with("in.vesta", "out.png",
+                                    scale=2, timeout=10.0)
+
+
+def test_cli_missing_args():
+    """Omitting required positional arguments causes argparse to exit."""
+    with pytest.raises(SystemExit):
+        _run_cli(["vestacrystparser.export"])

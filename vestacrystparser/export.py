@@ -151,7 +151,9 @@ def export_image_from_file(input: str, output: str, scale: int = 1,
                 f"export_image_from_file timed out after {elapsed} seconds.")
 
 
-if __name__ == "__main__":
+def main():
+    """Command-line entry point for exporting VESTA images."""
+    # We separate into main() for ease of unit testing.
     parser = argparse.ArgumentParser()
     parser.add_argument("input", help="Input .vesta file.")
     parser.add_argument("output", help="Output image file.")
@@ -164,3 +166,7 @@ if __name__ == "__main__":
     export_image_from_file(args.input, args.output,
                            scale=args.scale,
                            timeout=args.timeout)
+
+
+if __name__ == "__main__":
+    main()
